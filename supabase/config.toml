@@ -1,0 +1,16 @@
+project_id = "nestmate"
+
+[functions.assistant]
+verify_jwt = true
+
+[functions.smart-search]
+verify_jwt = true
+
+[functions.generate-description]
+verify_jwt = true
+
+[functions.review-summary]
+verify_jwt = true
+
+[functions.translate-message]
+verify_jwt = true

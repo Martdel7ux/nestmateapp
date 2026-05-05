@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 205 42% 97%;
+  --foreground: 222 45% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 45% 11%;
+  --primary: 199 89% 48%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 31 92% 92%;
+  --secondary-foreground: 222 45% 16%;
+  --muted: 210 34% 94%;
+  --muted-foreground: 217 16% 40%;
+  --accent: 145 63% 42%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --success: 145 63% 42%;
+  --success-foreground: 210 40% 98%;
+  --border: 213 30% 88%;
+  --input: 213 30% 88%;
+  --ring: 199 89% 48%;
+}
+
+.dark {
+  --background: 222 47% 7%;
+  --foreground: 210 40% 98%;
+  --card: 223 40% 12%;
+  --card-foreground: 210 40% 98%;
+  --primary: 191 91% 61%;
+  --primary-foreground: 222 47% 8%;
+  --secondary: 215 28% 19%;
+  --secondary-foreground: 210 40% 96%;
+  --muted: 217 24% 16%;
+  --muted-foreground: 215 20% 70%;
+  --accent: 152 63% 38%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 210 40% 98%;
+  --success: 152 63% 38%;
+  --success-foreground: 210 40% 98%;
+  --border: 215 26% 20%;
+  --input: 215 26% 20%;
+  --ring: 191 91% 61%;
+}
+
+* {
+  @apply border-border;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply min-h-screen bg-background font-sans text-foreground antialiased;
+  background-image: theme("backgroundImage.mesh-light");
+}
+
+.dark body {
+  background-image: theme("backgroundImage.mesh-dark");
+}
+
+#root {
+  @apply min-h-screen;
+}
+
+.glass {
+  @apply border border-white/20 bg-white/70 shadow-card backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
