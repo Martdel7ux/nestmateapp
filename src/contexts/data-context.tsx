@@ -417,12 +417,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
             const { error: uploadErr } = await supabase.storage
               .from("property-images")
               .upload(path, file, { upsert: false });
-            if (!uploadErr) {
+            if (uploadErr) {
+              console.error("Image upload failed:", uploadErr.message);
+            } else {
               const { data: urlData } = supabase.storage
                 .from("property-images")
                 .getPublicUrl(path);
               uploadedUrls.push(urlData.publicUrl);
             }
+          }
+
+          if (data.imageFiles.length > 0 && uploadedUrls.length === 0) {
+            toast.error("Images could not be uploaded. Make sure the 'property-images' storage bucket exists in Supabase and is set to public.");
+            setSnapshot((current) => ({
+              ...current,
+              featuredProperties: current.featuredProperties.filter((p) => p.id !== optimistic.id)
+            }));
+            return;
           }
 
           const { data: inserted, error } = await supabase
@@ -451,8 +462,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
           if (error) {
             console.error("createProperty error:", error);
+            toast.error("Could not save property. Please try again.");
+            setSnapshot((current) => ({
+              ...current,
+              featuredProperties: current.featuredProperties.filter((p) => p.id !== optimistic.id)
+            }));
+            return;
           } else if (inserted) {
-            // Replace optimistic entry with real DB record (has correct id + public image URLs)
             setSnapshot((current) => ({
               ...current,
               featuredProperties: current.featuredProperties.map((p) =>
@@ -683,8 +699,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       },
 
       createFlatmateListing(data) {
-        // Seekers (no flat) are approved automatically — only those offering a flat need admin review
-        const autoApproved = data.housingStatus === "seeking_flat";
+        const autoApproved = true;
         const newListing: FlatmateListing = {
           id: `flatmate-${crypto.randomUUID()}`,
           user_id: snapshot.profile.id,

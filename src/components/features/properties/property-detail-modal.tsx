@@ -1,4 +1,4 @@
-import { Mail, MapPinned, MessageCircleMore, Phone, ShieldCheck, Star } from "lucide-react";
+import { Building2, Mail, MapPinned, MessageCircleMore, Phone, ShieldCheck, Star } from "lucide-react";
 import { universityCoordinates } from "@/lib/constants";
 import { currency } from "@/lib/utils";
 import { Avatar } from "@/components/ui/avatar";
@@ -51,14 +51,28 @@ export function PropertyDetailModal({
           </div>
 
           <div className="grid gap-3 md:grid-cols-3">
-            {property.image_urls.map((image) => (
-              <img
-                key={image}
-                src={image}
-                alt={property.title}
-                className="h-60 w-full rounded-[1.75rem] object-cover"
-              />
-            ))}
+            {property.image_urls.length > 0 ? (
+              property.image_urls.map((image) => (
+                <div key={image} className="relative h-60 w-full overflow-hidden rounded-[1.75rem] bg-muted">
+                  <img
+                    src={image}
+                    alt={property.title}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                      (e.currentTarget.nextSibling as HTMLElement | null)?.style.setProperty("display", "flex");
+                    }}
+                  />
+                  <div className="absolute inset-0 hidden items-center justify-center">
+                    <Building2 size={40} className="text-muted-foreground/40" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 flex h-60 w-full items-center justify-center rounded-[1.75rem] bg-muted">
+                <Building2 size={48} className="text-muted-foreground/30" />
+              </div>
+            )}
           </div>
 
           <div className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">

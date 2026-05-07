@@ -1,4 +1,4 @@
-import { Heart, MapPinned, ShieldCheck, Star } from "lucide-react";
+import { Building2, Heart, MapPinned, ShieldCheck, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,11 +19,24 @@ export function PropertyCard({
   return (
     <Card className="overflow-hidden p-0">
       <div className="relative h-60 overflow-hidden">
-        <img
-          src={property.image_urls[0]}
-          alt={property.title}
-          className="h-full w-full object-cover transition duration-500 hover:scale-105"
-        />
+        {property.image_urls[0] ? (
+          <img
+            src={property.image_urls[0]}
+            alt={property.title}
+            className="h-full w-full object-cover transition duration-500 hover:scale-105"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+              const placeholder = e.currentTarget.parentElement?.querySelector(".img-placeholder") as HTMLElement | null;
+              if (placeholder) placeholder.style.display = "flex";
+            }}
+          />
+        ) : null}
+        <div
+          className="img-placeholder absolute inset-0 items-center justify-center bg-muted"
+          style={{ display: property.image_urls[0] ? "none" : "flex" }}
+        >
+          <Building2 size={40} className="text-muted-foreground/40" />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
         <div className="absolute left-4 top-4 flex gap-2">
           <Badge>{property.city}</Badge>
