@@ -196,14 +196,29 @@ function AddPropertySheet({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       />
       <motion.div
-        className="fixed inset-x-0 bottom-0 z-50 max-h-[92dvh] overflow-y-auto rounded-t-[2rem] bg-background shadow-card"
+        className="fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col rounded-t-[2rem] bg-background shadow-card"
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 300 }}
+        drag="y"
+        dragConstraints={{ top: 0 }}
+        dragElastic={{ top: 0, bottom: 0.4 }}
+        onDragEnd={(_, info) => {
+          if (info.offset.y > 80 || info.velocity.y > 400) onClose();
+        }}
       >
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1 w-10 rounded-full bg-border" />
+        <div className="shrink-0">
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="mx-auto mt-3 mb-1 block h-1 w-10 rounded-full bg-border cursor-pointer hover:bg-muted-foreground/40 transition-colors"
+          />
         </div>
 
+        <div
+          className="flex-1 overflow-y-auto"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
         <div className="space-y-5 px-5 pb-10 pt-2">
           <div className="flex items-center justify-between">
             <div>
@@ -328,6 +343,7 @@ function AddPropertySheet({ onClose }: { onClose: () => void }) {
           </div>
 
           <Button className="w-full" size="lg" onClick={handleSubmit}>Submit for Review</Button>
+        </div>
         </div>
       </motion.div>
     </>

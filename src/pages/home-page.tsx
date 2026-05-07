@@ -393,10 +393,21 @@ export function HomePage() {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
+            drag="y"
+            dragConstraints={{ top: 0 }}
+            dragElastic={{ top: 0, bottom: 0.4 }}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 80 || info.velocity.y > 400) setShowFilters(false);
+            }}
           >
             {/* Sticky header — always visible */}
             <div className="shrink-0 px-6 pt-6 pb-4">
-              <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
+              <button
+                type="button"
+                aria-label="Close filters"
+                onClick={() => setShowFilters(false)}
+                className="mx-auto mb-4 block h-1 w-10 rounded-full bg-border cursor-pointer hover:bg-muted-foreground/40 transition-colors"
+              />
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-xl font-bold">{t("filterTitle")}</h2>
                 <button
@@ -409,8 +420,11 @@ export function HomePage() {
               </div>
             </div>
 
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-6 pb-4">
+            {/* Scrollable content — stopPropagation prevents scroll from triggering the drag-dismiss */}
+            <div
+              className="flex-1 overflow-y-auto px-6 pb-4"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
               <div className="space-y-6">
                 {/* City */}
                 <div className="space-y-3">
@@ -538,7 +552,7 @@ export function HomePage() {
             </div>
 
             {/* Sticky footer button */}
-            <div className="shrink-0 px-6 pb-10 pt-4">
+            <div className="shrink-0 px-6 pb-10 pt-4" onPointerDown={(e) => e.stopPropagation()}>
               <button
                 type="button"
                 onClick={applyFilters}
