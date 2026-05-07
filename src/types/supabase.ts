@@ -72,6 +72,8 @@ export interface FlatmateListing {
   housing_status: "has_flat" | "seeking_flat";
   flat_price?: number | null;
   flat_features?: string[] | null;
+  flat_area?: string | null;
+  flat_postal_code?: string | null;
   apartment_images: string[];
   apartment_description?: string | null;
   is_approved: boolean;
@@ -84,6 +86,14 @@ export interface Match {
   user_b: string;
   created_at: string;
   other_profile?: FlatmateListing;
+}
+
+export interface Swipe {
+  id: string;
+  swiper_id: string;
+  swiped_id: string;
+  direction: "left" | "right";
+  created_at: string;
 }
 
 export interface Message {

@@ -18,7 +18,7 @@ export const seedSnapshot: AppSnapshot = {
   featuredProperties: [
     {
       id: "property-1",
-      owner_id: "landlord-1",
+      owner_id: "user-1",
       title: "Sunlit studio near campus",
       description:
         "Walkable to lectures, fully furnished, with a shaded balcony and all bills bundled into one easy payment.",
@@ -140,6 +140,37 @@ export const seedSnapshot: AppSnapshot = {
   ],
   flatmates: [
     {
+      id: "flatmate-0",
+      user_id: "user-1",
+      bio: "Economics student who loves calm spaces, sea swims, and well-organized kitchens. Looking for a quiet, respectful flatmate.",
+      profile_image_url:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80",
+      min_budget: 350,
+      max_budget: 600,
+      preferred_city: "Nicosia",
+      student_type: "full_time",
+      pet_preference: "okay",
+      interests: ["Swimming", "Cooking", "Economics"],
+      country_of_origin: "Cyprus",
+      language: "English",
+      housing_status: "seeking_flat",
+      flat_price: null,
+      flat_features: [],
+      apartment_images: [],
+      apartment_description: null,
+      is_approved: true,
+      profile: {
+        id: "user-1",
+        full_name: "Maya Demetriou",
+        avatar_url:
+          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
+        city: "Nicosia",
+        user_type: "student",
+        university: "University of Cyprus",
+        is_verified_landlord: false
+      }
+    },
+    {
       id: "flatmate-1",
       user_id: "user-3",
       bio: "Architecture student, clean routine, likes dinners with friends and quiet mornings.",
@@ -163,6 +194,37 @@ export const seedSnapshot: AppSnapshot = {
         city: "Nicosia",
         user_type: "student",
         university: "University of Cyprus",
+        is_verified_landlord: false
+      }
+    },
+    {
+      id: "flatmate-3",
+      user_id: "user-5",
+      bio: "Third-year Business student with a spacious two-bedroom flat near UCLan Cyprus. Looking for a tidy, respectful flatmate to share bills and good vibes.",
+      profile_image_url:
+        "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80",
+      min_budget: 300,
+      max_budget: 500,
+      preferred_city: "Larnaca",
+      student_type: "full_time",
+      pet_preference: "no",
+      interests: ["Football", "Gaming", "Business"],
+      country_of_origin: "Nigeria",
+      language: "English",
+      housing_status: "has_flat",
+      flat_price: 450,
+      flat_features: ["WiFi", "Furnished", "Bills Included", "Washing Machine"],
+      apartment_images: [
+        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80"
+      ],
+      apartment_description: "Modern furnished room in a quiet building, 10 minutes walk from campus. All bills included.",
+      is_approved: true,
+      profile: {
+        id: "user-5",
+        full_name: "Chidi Okafor",
+        city: "Larnaca",
+        user_type: "student",
+        university: "UCLan Cyprus",
         is_verified_landlord: false
       }
     },
@@ -196,12 +258,34 @@ export const seedSnapshot: AppSnapshot = {
       }
     }
   ],
+  swipes: [
+    {
+      id: "swipe-seed-1",
+      swiper_id: "user-4",
+      swiped_id: "user-1",
+      direction: "right" as const,
+      created_at: "2026-04-12T10:00:00.000Z"
+    },
+    {
+      id: "swipe-seed-2",
+      swiper_id: "user-5",
+      swiped_id: "user-1",
+      direction: "right" as const,
+      created_at: "2026-04-12T11:00:00.000Z"
+    }
+  ],
   matches: [
     {
       id: "match-1",
       user_a: "user-1",
       user_b: "user-4",
       created_at: "2026-04-12T13:00:00.000Z"
+    },
+    {
+      id: "match-2",
+      user_a: "user-1",
+      user_b: "user-5",
+      created_at: "2026-04-13T09:00:00.000Z"
     }
   ],
   messages: [
@@ -220,6 +304,14 @@ export const seedSnapshot: AppSnapshot = {
       content: "That sounds great. Could we do 7pm Cyprus time?",
       read: true,
       created_at: "2026-04-12T13:15:00.000Z"
+    },
+    {
+      id: "msg-3",
+      match_id: "match-2",
+      sender_id: "user-5",
+      content: "Hey! Saw your profile, I think we'd be a great match. The room is still available.",
+      read: false,
+      created_at: "2026-04-13T09:30:00.000Z"
     }
   ],
   notifications: [
@@ -228,20 +320,50 @@ export const seedSnapshot: AppSnapshot = {
       recipient_id: "user-1",
       sender_id: "user-4",
       type: "match",
-      title: "It's a match",
-      body: "Nefeli liked you back. Start the conversation now.",
+      title: "New match request! 🎉",
+      body: "Nefeli Papadaki wants to match with you. Check out her profile and start chatting.",
       is_read: false,
-      created_at: "2026-04-12T13:00:00.000Z"
+      created_at: new Date(Date.now() - 1000 * 60 * 18).toISOString()
+    },
+    {
+      id: "notif-3",
+      recipient_id: "user-1",
+      sender_id: "user-3",
+      type: "match",
+      title: "Someone liked your listing 👀",
+      body: "Marco Bellini swiped right on your flatmate profile. Like him back to connect!",
+      is_read: false,
+      created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString()
+    },
+    {
+      id: "notif-4",
+      recipient_id: "user-1",
+      sender_id: "user-4",
+      type: "message",
+      title: "New message from Nefeli",
+      body: "Hey! I saw your profile and I think we'd be great flatmates. Are you still looking?",
+      is_read: false,
+      created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString()
+    },
+    {
+      id: "notif-5",
+      recipient_id: "user-1",
+      sender_id: null,
+      type: "system",
+      title: "Profile approved ✅",
+      body: "Your flatmate listing has been reviewed and is now visible to other users.",
+      is_read: true,
+      created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString()
     },
     {
       id: "notif-2",
       recipient_id: "user-1",
       sender_id: null,
       type: "system",
-      title: "Landlord tips updated",
-      body: "The assistant now includes visa and neighborhood guidance for Cyprus.",
+      title: "Welcome to NestMate 🏠",
+      body: "Your account is ready. Complete your flatmate profile to start matching with compatible roommates.",
       is_read: true,
-      created_at: "2026-04-11T08:30:00.000Z"
+      created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString()
     }
   ],
   verifications: [

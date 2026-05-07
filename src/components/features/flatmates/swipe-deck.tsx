@@ -1,112 +1,371 @@
-import { useMemo, useState } from "react";
-import { Heart, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { currency } from "@/lib/utils";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { BedDouble, Heart, Home, MapPin, MessageCircle, Search, X } from "lucide-react";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useData } from "@/contexts/data-context";
+import type { FlatmateListing } from "@/types/supabase";
 
-export function SwipeDeck() {
-  const { filteredFlatmates, swipeFlatmate } = useData();
-  const [index, setIndex] = useState(0);
-  const [matchName, setMatchName] = useState<string | null>(null);
-  const current = filteredFlatmates[index];
+// ── Tag pill ─────────────────────────────────────────────────────────────────
+function Tag({ label }: { label: string }) {
+  return (
+    <span className="rounded-full border border-white/25 bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+      {label}
+    </span>
+  );
+}
 
-  const budget = useMemo(() => {
-    if (!current) return "";
-    return `${currency(current.min_budget)} - ${currency(current.max_budget)}`;
-  }, [current]);
+// ── Full-screen match overlay ─────────────────────────────────────────────────
+function MatchOverlay({
+  matched,
+  myPhoto,
+  onClose,
+  onMessage,
+}: {
+  matched: FlatmateListing;
+  myPhoto: string;
+  onClose: () => void;
+  onMessage: () => void;
+}) {
+  const matchedPhoto =
+    matched.profile_image_url ??
+    matched.apartment_images?.[0] ??
+    `https://api.dicebear.com/9.x/adventurer/svg?seed=${matched.profile?.full_name ?? matched.id}`;
+  const matchedName = matched.profile?.full_name ?? "Your flatmate";
 
-  if (!current) {
-    return (
-      <Card className="p-8 text-center">
-        <p className="font-display text-2xl">No more flatmates in this stack</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Adjust your filters or add more listing data through Supabase.
+  return (
+    <motion.div
+      className="match-overlay-bg fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.2 } }}
+    >
+      {/* Close button */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute left-5 top-12 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 shadow backdrop-blur-sm dark:bg-slate-800/80"
+      >
+        <X size={18} className="text-gray-600 dark:text-gray-300" />
+      </button>
+
+      {/* Two overlapping photo cards */}
+      <div className="relative mb-8" style={{ width: 290, height: 210 }}>
+        {/* Matched person — left, tilted CCW */}
+        <motion.div
+          className="absolute left-0 top-0 overflow-hidden rounded-3xl border-4 border-white shadow-2xl dark:border-slate-700"
+          style={{ width: 145, height: 190, rotate: -8, zIndex: 1 } as React.CSSProperties}
+          initial={{ x: -40, opacity: 0, rotate: -20 }}
+          animate={{ x: 0, opacity: 1, rotate: -8 }}
+          transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.1 }}
+        >
+          <img src={matchedPhoto} alt={matchedName} className="h-full w-full object-cover" />
+        </motion.div>
+
+        {/* Current user — right, tilted CW */}
+        <motion.div
+          className="absolute right-0 top-4 overflow-hidden rounded-3xl border-4 border-white shadow-2xl dark:border-slate-700"
+          style={{ width: 145, height: 190, rotate: 8, zIndex: 1 } as React.CSSProperties}
+          initial={{ x: 40, opacity: 0, rotate: 20 }}
+          animate={{ x: 0, opacity: 1, rotate: 8 }}
+          transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.15 }}
+        >
+          <img src={myPhoto} alt="You" className="h-full w-full object-cover" />
+        </motion.div>
+
+        {/* Center icon */}
+        <motion.div
+          className="absolute left-1/2 top-1/2 z-10 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl dark:bg-slate-800"
+          initial={{ scale: 0 }}
+          animate={{ scale: [0, 1.25, 1] }}
+          transition={{ duration: 0.45, delay: 0.3 }}
+        >
+          <BedDouble size={24} className="text-sky-500 dark:text-sky-400" />
+        </motion.div>
+      </div>
+
+      {/* Text */}
+      <motion.div
+        className="flex flex-col items-center gap-2 px-8 text-center"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.35 }}
+      >
+        <h2 className="font-display text-4xl font-black text-gray-900 dark:text-white">
+          You matched!
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          You and {matchedName} are a great fit — start a conversation!
         </p>
-      </Card>
+      </motion.div>
+
+      {/* Message button */}
+      <motion.button
+        type="button"
+        onClick={onMessage}
+        className="mt-10 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-xl dark:bg-slate-800"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.45, type: "spring", stiffness: 260, damping: 20 }}
+        whileTap={{ scale: 0.92 }}
+      >
+        <MessageCircle size={28} className="text-gray-700 dark:text-gray-200" />
+      </motion.button>
+    </motion.div>
+  );
+}
+
+// ── Single swipeable card ─────────────────────────────────────────────────────
+function ProfileCard({
+  flatmate,
+  onSwipe,
+  isTop,
+  stackIndex,
+}: {
+  flatmate: FlatmateListing;
+  onSwipe: (direction: "left" | "right") => void;
+  isTop: boolean;
+  stackIndex: number;
+}) {
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-18, 18]);
+  const likeOpacity = useTransform(x, [20, 100], [0, 1]);
+  const nopeOpacity = useTransform(x, [-100, -20], [1, 0]);
+
+  const imageUrl =
+    flatmate.profile_image_url ??
+    flatmate.apartment_images?.[0] ??
+    `https://api.dicebear.com/9.x/adventurer/svg?seed=${flatmate.profile?.full_name ?? flatmate.id}&backgroundColor=b6e3f4&backgroundType=solid`;
+
+  const name = flatmate.profile?.full_name ?? "Student";
+  const city = flatmate.preferred_city ?? "Cyprus";
+  const hasFlat = flatmate.housing_status === "has_flat";
+
+  const tags = [
+    flatmate.country_of_origin,
+    flatmate.language,
+    flatmate.student_type === "erasmus" ? "Erasmus" : "Full-time",
+    flatmate.pet_preference === "love"
+      ? "Loves pets 🐾"
+      : flatmate.pet_preference === "no"
+      ? "No pets"
+      : "Okay with pets",
+  ].filter(Boolean) as string[];
+
+  if (!isTop) {
+    return (
+      <div
+        className="absolute inset-0 overflow-hidden rounded-[2.5rem] bg-slate-900"
+        style={{
+          transform: `scale(${1 - stackIndex * 0.04}) translateY(${stackIndex * 14}px)`,
+          zIndex: 10 - stackIndex,
+        }}
+      >
+        <img src={imageUrl} alt={name} className="h-full w-full object-cover opacity-70" />
+      </div>
     );
   }
 
-  const handleSwipe = (direction: "left" | "right") => {
-    const result = swipeFlatmate(current.id, direction);
-    if (direction === "right" && result?.profile?.full_name) {
-      setMatchName(result.profile.full_name);
-      window.setTimeout(() => setMatchName(null), 1800);
-    }
-    setIndex((currentIndex) => currentIndex + 1);
-  };
-
   return (
-    <div className="relative space-y-4">
-      <AnimatePresence>
-        {matchName ? (
-          <motion.div
-            className="absolute inset-0 z-20 flex items-center justify-center rounded-[2rem] bg-slate-950/75 text-white backdrop-blur"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="text-center">
-              <p className="font-display text-4xl">It&apos;s a Match!</p>
-              <p className="mt-2 text-sm text-slate-200">
-                You and {matchName} can now start chatting.
-              </p>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+    <motion.div
+      className="absolute inset-0 cursor-grab overflow-hidden rounded-[2.5rem] shadow-2xl active:cursor-grabbing"
+      style={{ x, rotate, zIndex: 20 } as React.CSSProperties}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.9}
+      onDragEnd={(_, info) => {
+        if (info.offset.x > 100) onSwipe("right");
+        else if (info.offset.x < -100) onSwipe("left");
+      }}
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.15 } }}
+      transition={{ type: "spring", stiffness: 300, damping: 28 }}
+    >
+      {/* Photo */}
+      <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
 
+      {/* Bottom gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+
+      {/* LIKE stamp */}
       <motion.div
-        key={current.id}
-        className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-card"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
+        className="absolute left-5 top-10 rotate-[-20deg] rounded-xl border-4 border-emerald-400 px-4 py-1.5"
+        style={{ opacity: likeOpacity } as React.CSSProperties}
       >
-        <div className="relative h-[28rem]">
-          <img
-            src={current.profile_image_url ?? current.apartment_images[0]}
-            alt={current.profile?.full_name ?? "Flatmate"}
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/10 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 space-y-4 p-6">
-            <div className="flex flex-wrap gap-2">
-              <Badge className="bg-white/15 text-white">{current.preferred_city}</Badge>
-              <Badge className="bg-white/15 text-white">{budget}</Badge>
-              <Badge className="bg-white/15 text-white">
-                {current.housing_status === "has_flat" ? "Has a flat" : "Seeking a flat"}
-              </Badge>
-            </div>
-            <div>
-              <h3 className="font-display text-3xl">
-                {current.profile?.full_name ?? "Flatmate"}
-              </h3>
-              <p className="mt-2 text-sm text-slate-200">{current.bio}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {current.interests.map((interest) => (
-                <span
-                  key={interest}
-                  className="rounded-full border border-white/15 px-3 py-1 text-xs text-slate-100"
-                >
-                  {interest}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
+        <span className="text-2xl font-black tracking-widest text-emerald-400">LIKE</span>
       </motion.div>
 
-      <div className="flex justify-center gap-4">
-        <Button size="icon" variant="outline" onClick={() => handleSwipe("left")}>
-          <X size={18} />
-        </Button>
-        <Button size="icon" onClick={() => handleSwipe("right")}>
-          <Heart size={18} />
-        </Button>
+      {/* NOPE stamp */}
+      <motion.div
+        className="absolute right-5 top-10 rotate-[20deg] rounded-xl border-4 border-rose-500 px-4 py-1.5"
+        style={{ opacity: nopeOpacity } as React.CSSProperties}
+      >
+        <span className="text-2xl font-black tracking-widest text-rose-500">NOPE</span>
+      </motion.div>
+
+      {/* Housing status badge — top */}
+      <div className="absolute left-4 top-4">
+        <div className="flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-sm">
+          {hasFlat ? (
+            <Home size={12} className="text-sky-400" />
+          ) : (
+            <Search size={12} className="text-amber-400" />
+          )}
+          <span className="text-xs font-semibold text-white">
+            {hasFlat ? "Has a flat" : "Seeking a flat"}
+          </span>
+        </div>
       </div>
-    </div>
+
+      {/* Bottom content */}
+      <div className="absolute inset-x-0 bottom-0 space-y-3 p-6">
+        {/* Location */}
+        <div className="flex items-center gap-1.5">
+          <MapPin size={13} className="text-white/70" />
+          <span className="text-sm font-medium text-white/80">{city}</span>
+        </div>
+
+        {/* Name */}
+        <h2 className="font-display text-4xl font-bold leading-tight text-white drop-shadow">
+          {name}
+        </h2>
+
+        {/* Bio */}
+        {flatmate.bio && (
+          <p className="line-clamp-2 text-sm leading-snug text-white/80">
+            {flatmate.bio}
+          </p>
+        )}
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2 pt-1">
+          {tags.map((tag) => (
+            <Tag key={tag} label={tag} />
+          ))}
+          {hasFlat && flatmate.flat_price && (
+            <Tag label={`€${flatmate.flat_price}/mo`} />
+          )}
+          {!hasFlat && flatmate.min_budget && flatmate.max_budget && (
+            <Tag label={`€${flatmate.min_budget}–€${flatmate.max_budget}`} />
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Deck ──────────────────────────────────────────────────────────────────────
+export function SwipeDeck() {
+  const navigate = useNavigate();
+  const { filteredFlatmates, swipeFlatmate, snapshot } = useData();
+  const [index, setIndex] = useState(0);
+  const [matchedFlatmate, setMatchedFlatmate] = useState<FlatmateListing | null>(null);
+
+  const myPhoto =
+    snapshot.profile.avatar_url ??
+    `https://api.dicebear.com/9.x/adventurer/svg?seed=${snapshot.profile.id}`;
+
+  const visible = filteredFlatmates.slice(index, index + 3);
+  const current = filteredFlatmates[index];
+
+  const handleSwipe = (direction: "left" | "right") => {
+    if (!current) return;
+    const result = swipeFlatmate(current.id, direction);
+    if (result) {
+      setMatchedFlatmate(result);
+    }
+    setIndex((i) => i + 1);
+  };
+
+  if (filteredFlatmates.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-20 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+          <Heart size={28} className="text-muted-foreground" />
+        </div>
+        <p className="font-semibold">No profiles yet</p>
+        <p className="text-sm text-muted-foreground">
+          Check back soon — more students are joining every day.
+        </p>
+      </div>
+    );
+  }
+
+  if (index >= filteredFlatmates.length) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-20 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+          <Heart size={28} className="text-muted-foreground" />
+        </div>
+        <p className="font-semibold">You've seen everyone!</p>
+        <p className="text-sm text-muted-foreground">Come back later for new profiles.</p>
+        <button
+          type="button"
+          onClick={() => setIndex(0)}
+          className="mt-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
+        >
+          Start over
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Full-screen match overlay — rendered outside the card stack */}
+      <AnimatePresence>
+        {matchedFlatmate && (
+          <MatchOverlay
+            key="match-overlay"
+            matched={matchedFlatmate}
+            myPhoto={myPhoto}
+            onClose={() => setMatchedFlatmate(null)}
+            onMessage={() => {
+              setMatchedFlatmate(null);
+              navigate("/messages");
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-col items-center gap-6">
+        {/* Card stack */}
+        <div className="relative w-full" style={{ height: "72vmax", maxHeight: 560 }}>
+          <AnimatePresence>
+            {[...visible].reverse().map((flatmate, reversedIdx) => {
+              const stackIndex = visible.length - 1 - reversedIdx;
+              const isTop = stackIndex === 0;
+              return (
+                <ProfileCard
+                  key={flatmate.id}
+                  flatmate={flatmate}
+                  isTop={isTop}
+                  stackIndex={stackIndex}
+                  onSwipe={handleSwipe}
+                />
+              );
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-6">
+          <button
+            type="button"
+            onClick={() => handleSwipe("left")}
+            className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-rose-300 bg-white shadow-md transition active:scale-95 dark:bg-card"
+          >
+            <X size={26} className="text-rose-500" />
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSwipe("right")}
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-sky-400 shadow-glow transition active:scale-95"
+          >
+            <Heart size={26} className="fill-white text-white" />
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

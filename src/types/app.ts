@@ -6,7 +6,8 @@ import type {
   NotificationItem,
   Profile,
   Property,
-  PropertyReview
+  PropertyReview,
+  Swipe
 } from "@/types/supabase";
 
 export interface DashboardStats {
@@ -22,6 +23,7 @@ export interface AppSnapshot {
   savedProperties: Property[];
   reviews: PropertyReview[];
   flatmates: FlatmateListing[];
+  swipes: Swipe[];
   matches: Match[];
   messages: Message[];
   notifications: NotificationItem[];

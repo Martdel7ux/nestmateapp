@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LandlordProfileView } from "@/components/features/landlord/landlord-profile-view";
+import { useI18n } from "@/contexts/i18n-context";
 import {
   Camera, Check, ChevronRight, Eye, EyeOff,
   Heart, Key, LogOut, MapPin, Pencil, ShieldCheck,
@@ -14,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
+import { NotificationSettings } from "@/components/features/notifications/notification-settings";
 import { cities } from "@/lib/constants";
 import type { City } from "@/types/supabase";
 import { currency } from "@/lib/utils";
@@ -44,6 +47,7 @@ const PRESET_AVATARS = [
 export function ProfilePage() {
   const { snapshot, updateProfile, toggleSavedProperty } = useData();
   const { signOut, updatePassword, deleteAccount } = useAuth();
+  const { t, language, setLanguage } = useI18n();
   const navigate = useNavigate();
   const profile = snapshot.profile;
   const isLandlord = profile.user_type === "landlord";
@@ -130,6 +134,9 @@ export function ProfilePage() {
 
   const displayAvatar = selectedAvatar ?? profile.avatar_url;
 
+  // Landlords get a dedicated CRM profile view
+  if (isLandlord) return <LandlordProfileView />;
+
   return (
     <div className="space-y-5 px-5 pt-2">
 
@@ -161,7 +168,7 @@ export function ProfilePage() {
           </p>
           {profile.is_verified_landlord && (
             <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-600">
-              <ShieldCheck size={12} /> Verified Landlord
+              <ShieldCheck size={12} /> {t("profileVerifiedLandlord")}
             </div>
           )}
         </div>
@@ -172,7 +179,7 @@ export function ProfilePage() {
           className="flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-2 text-sm font-medium transition hover:border-primary/50"
         >
           <Pencil size={13} />
-          {editing ? "Cancel editing" : "Edit profile"}
+          {editing ? t("profileCancelBtn") : t("profileEditBtn")}
         </button>
       </div>
 
@@ -191,7 +198,7 @@ export function ProfilePage() {
               className="fixed inset-x-0 bottom-0 z-50 rounded-t-[2rem] bg-background p-6 shadow-card"
             >
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-display text-xl font-bold">Choose your avatar</h3>
+                <h3 className="font-display text-xl font-bold">{t("profileChooseAvatar")}</h3>
                 <button onClick={() => setAvatarOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                   <X size={16} />
                 </button>
@@ -223,7 +230,7 @@ export function ProfilePage() {
                 onClick={() => photoRef.current?.click()}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border py-3 text-sm font-medium text-muted-foreground transition hover:border-primary hover:text-foreground"
               >
-                <Camera size={16} /> Upload your own photo
+                <Camera size={16} /> {t("profileUploadPhoto")}
               </button>
               <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
             </motion.div>
@@ -240,23 +247,23 @@ export function ProfilePage() {
             className="overflow-hidden"
           >
             <Card className="space-y-4">
-              <h3 className="font-display text-lg font-bold">Edit Profile</h3>
+              <h3 className="font-display text-lg font-bold">{t("profileEditTitle")}</h3>
 
               <div className="space-y-1.5">
                 <label className="flex items-center gap-2 text-sm font-medium">
-                  <User size={14} /> Full name
+                  <User size={14} /> {t("profileFullName")}
                 </label>
-                <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Your full name" />
+                <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder={t("profileFullNamePh")} />
               </div>
 
               <div className="space-y-1.5">
                 <label className="flex items-center gap-2 text-sm font-medium">
-                  <Pencil size={14} /> Bio
+                  <Pencil size={14} /> {t("profileBio")}
                 </label>
                 <textarea
                   value={editBio}
                   onChange={(e) => setEditBio(e.target.value)}
-                  placeholder="Tell others about yourself…"
+                  placeholder={t("profileBioPh")}
                   rows={3}
                   className="w-full rounded-2xl border border-border bg-card/80 px-4 py-3 text-sm shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
@@ -264,14 +271,14 @@ export function ProfilePage() {
 
               <div className="space-y-1.5">
                 <label className="flex items-center gap-2 text-sm font-medium">
-                  <University size={14} /> University
+                  <University size={14} /> {t("profileUniversity")}
                 </label>
-                <Input value={editUniversity} onChange={(e) => setEditUniversity(e.target.value)} placeholder="Your university" />
+                <Input value={editUniversity} onChange={(e) => setEditUniversity(e.target.value)} placeholder={t("profileUniversityPh")} />
               </div>
 
               <div className="space-y-1.5">
                 <label className="flex items-center gap-2 text-sm font-medium">
-                  <MapPin size={14} /> City
+                  <MapPin size={14} /> {t("profileCity")}
                 </label>
                 <Select value={editCity} onChange={(e) => setEditCity(e.target.value)}>
                   {cities.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -280,11 +287,11 @@ export function ProfilePage() {
 
               <div className="flex items-center gap-2 rounded-2xl bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
                 <ShieldCheck size={14} />
-                Account type: <span className="font-semibold capitalize text-foreground">{profile.user_type}</span>
+                {t("profileAccountType")}: <span className="font-semibold capitalize text-foreground">{profile.user_type}</span>
               </div>
 
               <Button onClick={handleSaveProfile} disabled={savingProfile} className="w-full">
-                {savingProfile ? "Saving…" : "Save changes"}
+                {savingProfile ? t("profileSaving") : t("profileSaveChanges")}
               </Button>
             </Card>
           </motion.div>
@@ -295,9 +302,9 @@ export function ProfilePage() {
       {!editing && (
         <Card className="space-y-3">
           {[
-            { icon: University, label: "University", value: profile.university || "Not set" },
-            { icon: MapPin, label: "City", value: profile.city || "Not set" },
-            { icon: User, label: "Account type", value: profile.user_type, capitalize: true },
+            { icon: University, label: t("profileUniversity"), value: profile.university || t("profileNotSet") },
+            { icon: MapPin, label: t("profileCity"), value: profile.city || t("profileNotSet") },
+            { icon: User, label: t("profileAccountType"), value: profile.user_type, capitalize: true },
           ].map((row) => (
             <div key={row.label} className="flex items-center justify-between py-1">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -320,7 +327,7 @@ export function ProfilePage() {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Heart size={16} className="text-rose-500" />
-            <h3 className="font-semibold">Saved Properties</h3>
+            <h3 className="font-semibold">{t("profileSavedProperties")}</h3>
             <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
               {snapshot.savedProperties.length}
             </span>
@@ -350,6 +357,37 @@ export function ProfilePage() {
       {/* ── Landlord verification ── */}
       {isLandlord && <VerificationUpload />}
 
+      {/* ── Notification settings ── */}
+      <NotificationSettings />
+
+      {/* ── Language settings ── */}
+      <Card className="space-y-3">
+        <h3 className="font-display text-base font-bold">{t("settingsLanguage")}</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {(["en", "el"] as const).map((code) => (
+            <button
+              key={code}
+              type="button"
+              onClick={() => setLanguage(code)}
+              className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 text-center transition-all duration-200 ${
+                language === code
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/40"
+              }`}
+            >
+              <span className="text-3xl leading-none">{code === "en" ? "🇬🇧" : "🇬🇷"}</span>
+              <div>
+                <p className="text-sm font-bold">{code === "en" ? "English" : "Ελληνικά"}</p>
+                <p className="text-xs text-muted-foreground">{code === "en" ? "English" : "Greek"}</p>
+              </div>
+              <div className={`h-4 w-4 rounded-full border-2 transition-all ${
+                language === code ? "border-primary bg-primary" : "border-border"
+              }`} />
+            </button>
+          ))}
+        </div>
+      </Card>
+
       {/* ── Security ── */}
       <Card className="space-y-1 p-0 overflow-hidden">
         <button
@@ -361,7 +399,7 @@ export function ProfilePage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Key size={16} />
             </div>
-            <span className="font-medium">Change Password</span>
+            <span className="font-medium">{t("profileChangePassword")}</span>
           </div>
           <ChevronRight size={16} className={`text-muted-foreground transition-transform ${pwOpen ? "rotate-90" : ""}`} />
         </button>
@@ -377,7 +415,7 @@ export function ProfilePage() {
                 <div className="relative">
                   <Input
                     type={showPw ? "text" : "password"}
-                    placeholder="New password (min 6 chars)"
+                    placeholder={t("profileNewPwPh")}
                     value={newPw}
                     onChange={(e) => setNewPw(e.target.value)}
                   />
@@ -387,12 +425,12 @@ export function ProfilePage() {
                 </div>
                 <Input
                   type={showPw ? "text" : "password"}
-                  placeholder="Confirm new password"
+                  placeholder={t("profileConfirmPwPh")}
                   value={confirmPw}
                   onChange={(e) => setConfirmPw(e.target.value)}
                 />
                 <Button onClick={handleChangePassword} disabled={savingPw} className="w-full">
-                  {savingPw ? "Saving…" : "Update password"}
+                  {savingPw ? t("profileSaving") : t("profileUpdatePw")}
                 </Button>
               </div>
             </motion.div>
@@ -410,7 +448,7 @@ export function ProfilePage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-muted text-foreground">
             <LogOut size={16} />
           </div>
-          <span className="font-medium">Sign Out</span>
+          <span className="font-medium">{t("profileSignOut")}</span>
         </button>
 
         <div className="border-t border-border" />
@@ -423,7 +461,7 @@ export function ProfilePage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
             <Trash2 size={16} />
           </div>
-          <span className="font-medium text-destructive">Delete Account</span>
+          <span className="font-medium text-destructive">{t("profileDeleteAccount")}</span>
         </button>
       </Card>
 
@@ -444,16 +482,16 @@ export function ProfilePage() {
               <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 mx-auto">
                 <Trash2 size={22} className="text-destructive" />
               </div>
-              <h3 className="mt-3 text-center font-display text-xl font-bold">Delete account?</h3>
+              <h3 className="mt-3 text-center font-display text-xl font-bold">{t("profileDeleteTitle")}</h3>
               <p className="mt-2 text-center text-sm text-muted-foreground">
-                This will permanently delete your profile, listings, and all data. This cannot be undone.
+                {t("profileDeleteDesc")}
               </p>
               <div className="mt-5 flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => setDeleteConfirm(false)}>
-                  Cancel
+                  {t("profileCancel")}
                 </Button>
                 <Button className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={handleDelete}>
-                  Yes, delete
+                  {t("profileYesDelete")}
                 </Button>
               </div>
             </motion.div>

@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { AppShell } from "@/components/layout/app-shell";
-import { GdprGate } from "@/components/features/auth/gdpr-gate";
 import { OnboardingTour } from "@/components/features/profile/onboarding-tour";
-import { SplashScreen } from "@/components/features/profile/splash-screen";
+import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
 import { AdminPage } from "@/pages/admin-page";
@@ -23,27 +21,15 @@ import { SearchPage } from "@/pages/search-page";
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
-  const [showSplash, setShowSplash] = useState(() => !window.sessionStorage.getItem("nestmate-splash"));
-
-  useEffect(() => {
-    if (!showSplash) return;
-    const timeout = window.setTimeout(() => {
-      window.sessionStorage.setItem("nestmate-splash", "true");
-      setShowSplash(false);
-    }, 1200);
-    return () => window.clearTimeout(timeout);
-  }, [showSplash]);
 
   if (loading) return null;
   if (supabase && !user) return <Navigate to="/auth" replace />;
 
   return (
     <>
-      <SplashScreen visible={showSplash} />
       <AppShell>
         <Outlet />
       </AppShell>
-      <GdprGate />
       <OnboardingTour />
     </>
   );
@@ -52,6 +38,7 @@ function ProtectedLayout() {
 export function AppRouter() {
   return (
     <BrowserRouter>
+      <OnboardingFlow>
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
@@ -70,6 +57,7 @@ export function AppRouter() {
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </OnboardingFlow>
     </BrowserRouter>
   );
 }

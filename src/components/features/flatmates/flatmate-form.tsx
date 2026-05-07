@@ -1,8 +1,5 @@
 import { useRef, useState } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Camera, CheckCircle2, Home, Plus, Search, Trash2, X } from "lucide-react";
+import { Camera, Home, Loader2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +7,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useData } from "@/contexts/data-context";
 import { cities } from "@/lib/constants";
+import type { City, StudentType } from "@/types/supabase";
 
 const COUNTRIES = [
   "Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia",
@@ -45,81 +43,58 @@ const FLAT_FEATURES = [
   "Near University", "City Centre", "Gym Access", "Swimming Pool"
 ];
 
-const flatmateSchema = z.object({
-  bio: z.string().min(12, "Write at least 12 characters about yourself"),
-  countryOfOrigin: z.string().min(1, "Please select your country"),
-  language: z.string().min(1, "Please select your language"),
-  studentType: z.enum(["erasmus", "full_time"]),
-  petPreference: z.enum(["love", "okay", "neutral", "no"]),
-  housingStatus: z.enum(["has_flat", "seeking_flat"]),
-  minBudget: z.coerce.number().min(0).optional(),
-  maxBudget: z.coerce.number().min(0).optional(),
-  preferredCity: z.enum(cities).optional(),
-  flatPrice: z.coerce.number().min(0).optional(),
-  flatCity: z.enum(cities).optional(),
-  apartmentDescription: z.string().optional()
-});
-
-type FlatmateValues = z.infer<typeof flatmateSchema>;
+function FieldError({ msg }: { msg?: string }) {
+  if (!msg) return null;
+  return <p className="text-xs text-destructive">{msg}</p>;
+}
 
 export function FlatmateForm() {
   const { createFlatmateListing } = useData();
-  const [submitted, setSubmitted] = useState(false);
 
   // Profile photo
-  const [profileFile, setProfileFile] = useState<File | null>(null);
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const profileRef = useRef<HTMLInputElement>(null);
 
   // Flat images
-  const [flatFiles, setFlatFiles] = useState<File[]>([]);
   const [flatPreviews, setFlatPreviews] = useState<string[]>([]);
   const flatImgRef = useRef<HTMLInputElement>(null);
 
   // Flat features
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
 
-  // Country/language search filter
-  const [countrySearch, setCountrySearch] = useState("");
-  const [langSearch, setLangSearch] = useState("");
+  // Form fields
+  const [bio, setBio] = useState("");
+  const [countryOfOrigin, setCountryOfOrigin] = useState("");
+  const [language, setLanguage] = useState("");
+  const [studentType, setStudentType] = useState<StudentType>("full_time");
+  const [petPreference, setPetPreference] = useState<"love" | "okay" | "neutral" | "no">("okay");
+  const [hasFlat, setHasFlat] = useState(false);
+  const [minBudget, setMinBudget] = useState("");
+  const [maxBudget, setMaxBudget] = useState("");
+  const [preferredCity, setPreferredCity] = useState<City>("Nicosia");
+  const [flatPrice, setFlatPrice] = useState("");
+  const [flatCity, setFlatCity] = useState<City>("Nicosia");
+  const [flatArea, setFlatArea] = useState("");
+  const [flatPostalCode, setFlatPostalCode] = useState("");
+  const [apartmentDescription, setApartmentDescription] = useState("");
 
-  const form = useForm<FlatmateValues>({
-    resolver: zodResolver(flatmateSchema),
-    defaultValues: {
-      bio: "",
-      countryOfOrigin: "",
-      language: "",
-      studentType: "full_time",
-      petPreference: "okay",
-      housingStatus: "seeking_flat",
-      minBudget: 350,
-      maxBudget: 650,
-      preferredCity: "Nicosia",
-      flatPrice: 0,
-      flatCity: "Nicosia",
-      apartmentDescription: ""
-    }
-  });
-
-  const housingStatus = form.watch("housingStatus");
+  // Validation errors
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const formTopRef = useRef<HTMLDivElement>(null);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setProfileFile(file);
-      setProfilePreview(URL.createObjectURL(file));
-    }
+    if (file) setProfilePreview(URL.createObjectURL(file));
   };
 
   const handleFlatImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
-    setFlatFiles((prev) => [...prev, ...files]);
     setFlatPreviews((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
   };
 
   const removeFlatImage = (index: number) => {
-    setFlatFiles((prev) => prev.filter((_, i) => i !== index));
     setFlatPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -129,37 +104,54 @@ export function FlatmateForm() {
     );
   };
 
-  const onSubmit = (values: FlatmateValues) => {
+  const handleSubmit = () => {
+    const errs: Record<string, string> = {};
+    if (bio.trim().length < 12) errs.bio = "Write at least 12 characters about yourself";
+    if (!countryOfOrigin) errs.countryOfOrigin = "Please select your country";
+    if (!language) errs.language = "Please select your language";
+    if (!hasFlat) {
+      if (!minBudget) errs.minBudget = "Please enter your minimum budget";
+      if (!maxBudget) errs.maxBudget = "Please enter your maximum budget";
+      if (minBudget && maxBudget && Number(minBudget) > Number(maxBudget))
+        errs.maxBudget = "Max budget must be greater than min";
+    } else {
+      if (!flatArea.trim()) errs.flatArea = "Please enter the area / neighbourhood";
+      if (!flatPostalCode.trim()) errs.flatPostalCode = "Please enter the postal code";
+    }
+
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      // Scroll to top so user sees the error messages
+      formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    setErrors({});
+    setSubmitting(true);
     createFlatmateListing({
-      ...values,
-      profileImageUrl: profilePreview ?? undefined,
+      bio: bio.trim(),
+      countryOfOrigin,
+      language,
+      studentType,
+      petPreference,
+      housingStatus: hasFlat ? "has_flat" : "seeking_flat",
+      minBudget: hasFlat ? undefined : Number(minBudget),
+      maxBudget: hasFlat ? undefined : Number(maxBudget),
+      preferredCity: hasFlat ? flatCity : preferredCity,
+      flatPrice: hasFlat ? Number(flatPrice) : undefined,
+      flatCity: hasFlat ? flatCity : undefined,
+      flatArea: hasFlat ? flatArea.trim() : undefined,
+      flatPostalCode: hasFlat ? flatPostalCode.trim() : undefined,
       flatFeatures: selectedFeatures,
-      apartmentImages: flatPreviews
+      apartmentDescription: apartmentDescription.trim() || undefined,
+      profileImageUrl: profilePreview ?? undefined,
+      apartmentImages: flatPreviews,
     });
-    setSubmitted(true);
   };
 
-  if (submitted) {
-    return (
-      <Card className="space-y-3 py-10 text-center">
-        <CheckCircle2 className="mx-auto text-primary" size={36} />
-        <h3 className="font-display text-2xl">Listing Submitted!</h3>
-        <p className="mx-auto max-w-xs text-sm text-muted-foreground">
-          Your flatmate listing is pending admin approval. You'll be able to start swiping once it's reviewed.
-        </p>
-      </Card>
-    );
-  }
-
-  const filteredCountries = COUNTRIES.filter((c) =>
-    c.toLowerCase().includes(countrySearch.toLowerCase())
-  );
-  const filteredLanguages = LANGUAGES.filter((l) =>
-    l.toLowerCase().includes(langSearch.toLowerCase())
-  );
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <div ref={formTopRef} className="space-y-6">
 
       {/* ── Profile Photo ── */}
       <Card className="space-y-4">
@@ -205,67 +197,40 @@ export function FlatmateForm() {
           <Textarea
             placeholder="E.g. I'm a second-year Computer Science student. I'm tidy, quiet during weekdays, and love cooking. Looking for a chill, respectful flatmate..."
             rows={4}
-            {...form.register("bio")}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
           />
-          {form.formState.errors.bio && (
-            <p className="text-xs text-destructive">{form.formState.errors.bio.message}</p>
-          )}
+          <FieldError msg={errors.bio} />
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {/* Country dropdown */}
+          {/* Country */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Country of origin</label>
-            <div className="space-y-1">
-              <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  value={countrySearch}
-                  onChange={(e) => setCountrySearch(e.target.value)}
-                  placeholder="Search country…"
-                  className="w-full rounded-xl border border-input bg-background py-2 pl-8 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <Select {...form.register("countryOfOrigin")} className="max-h-40">
-                <option value="">Select your country</option>
-                {filteredCountries.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </Select>
-            </div>
-            {form.formState.errors.countryOfOrigin && (
-              <p className="text-xs text-destructive">{form.formState.errors.countryOfOrigin.message}</p>
-            )}
+            <Select value={countryOfOrigin} onChange={(e) => setCountryOfOrigin(e.target.value)}>
+              <option value="">Select your country</option>
+              {COUNTRIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </Select>
+            <FieldError msg={errors.countryOfOrigin} />
           </div>
 
-          {/* Language dropdown */}
+          {/* Language */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Primary language</label>
-            <div className="space-y-1">
-              <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  value={langSearch}
-                  onChange={(e) => setLangSearch(e.target.value)}
-                  placeholder="Search language…"
-                  className="w-full rounded-xl border border-input bg-background py-2 pl-8 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <Select {...form.register("language")} className="max-h-40">
-                <option value="">Select your language</option>
-                {filteredLanguages.map((l) => (
-                  <option key={l} value={l}>{l}</option>
-                ))}
-              </Select>
-            </div>
-            {form.formState.errors.language && (
-              <p className="text-xs text-destructive">{form.formState.errors.language.message}</p>
-            )}
+            <Select value={language} onChange={(e) => setLanguage(e.target.value)}>
+              <option value="">Select your language</option>
+              {LANGUAGES.map((l) => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </Select>
+            <FieldError msg={errors.language} />
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Student type</label>
-            <Select {...form.register("studentType")}>
+            <Select value={studentType} onChange={(e) => setStudentType(e.target.value as StudentType)}>
               <option value="full_time">Full-time student</option>
               <option value="erasmus">Erasmus / short-term</option>
             </Select>
@@ -273,7 +238,7 @@ export function FlatmateForm() {
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Pets</label>
-            <Select {...form.register("petPreference")}>
+            <Select value={petPreference} onChange={(e) => setPetPreference(e.target.value as "love" | "okay" | "neutral" | "no")}>
               <option value="love">Love pets 🐾</option>
               <option value="okay">Okay with pets</option>
               <option value="neutral">Neutral</option>
@@ -286,24 +251,17 @@ export function FlatmateForm() {
       {/* ── Housing Status ── */}
       <button
         type="button"
-        onClick={() =>
-          form.setValue("housingStatus", housingStatus === "has_flat" ? "seeking_flat" : "has_flat")
-        }
+        onClick={() => setHasFlat((v) => !v)}
         className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
-          housingStatus === "has_flat"
-            ? "border-primary bg-primary/5"
-            : "border-border bg-card/60 hover:border-primary/40"
+          hasFlat ? "border-primary bg-primary/5" : "border-border bg-card/60 hover:border-primary/40"
         }`}
       >
-        {/* Custom checkbox */}
         <div
           className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200 ${
-            housingStatus === "has_flat"
-              ? "border-primary bg-primary"
-              : "border-border bg-background"
+            hasFlat ? "border-primary bg-primary" : "border-border bg-background"
           }`}
         >
-          {housingStatus === "has_flat" && (
+          {hasFlat && (
             <svg viewBox="0 0 12 10" className="h-3 w-3 fill-none stroke-primary-foreground stroke-2">
               <polyline points="1,5 4,8 11,1" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -312,7 +270,7 @@ export function FlatmateForm() {
         <div>
           <p className="font-semibold">I already have a flat and I'm looking for a flatmate</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {housingStatus === "has_flat"
+            {hasFlat
               ? "You'll be asked to share your flat details, photos and rent price below"
               : "Leave unticked if you're looking for a flat to move into"}
           </p>
@@ -320,21 +278,33 @@ export function FlatmateForm() {
       </button>
 
       {/* ── Seeking flat: budget + city ── */}
-      {housingStatus === "seeking_flat" && (
+      {!hasFlat && (
         <Card className="space-y-4">
           <h3 className="font-display text-xl">Budget &amp; Preferences</h3>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Min budget (€/mo)</label>
-              <Input type="number" placeholder="350" {...form.register("minBudget")} />
+              <Input
+                type="number"
+                placeholder="350"
+                value={minBudget}
+                onChange={(e) => setMinBudget(e.target.value)}
+              />
+              <FieldError msg={errors.minBudget} />
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Max budget (€/mo)</label>
-              <Input type="number" placeholder="650" {...form.register("maxBudget")} />
+              <Input
+                type="number"
+                placeholder="650"
+                value={maxBudget}
+                onChange={(e) => setMaxBudget(e.target.value)}
+              />
+              <FieldError msg={errors.maxBudget} />
             </div>
             <div className="space-y-1.5 md:col-span-2">
               <label className="text-sm font-medium">Preferred city</label>
-              <Select {...form.register("preferredCity")}>
+              <Select value={preferredCity} onChange={(e) => setPreferredCity(e.target.value as City)}>
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </Select>
             </div>
@@ -343,7 +313,7 @@ export function FlatmateForm() {
       )}
 
       {/* ── Has flat: details ── */}
-      {housingStatus === "has_flat" && (
+      {hasFlat && (
         <Card className="space-y-5">
           <div>
             <h3 className="font-display text-xl">Your Flat Details</h3>
@@ -388,13 +358,38 @@ export function FlatmateForm() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Monthly rent (€/mo)</label>
-              <Input type="number" placeholder="500" {...form.register("flatPrice")} />
+              <Input
+                type="number"
+                placeholder="500"
+                value={flatPrice}
+                onChange={(e) => setFlatPrice(e.target.value)}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium">City</label>
-              <Select {...form.register("flatCity")}>
+              <Select value={flatCity} onChange={(e) => setFlatCity(e.target.value as City)}>
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Area / Neighbourhood</label>
+              <Input
+                type="text"
+                placeholder="e.g. Aglantzia, Strovolos"
+                value={flatArea}
+                onChange={(e) => setFlatArea(e.target.value)}
+              />
+              <FieldError msg={errors.flatArea} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Postal code</label>
+              <Input
+                type="text"
+                placeholder="e.g. 2109"
+                value={flatPostalCode}
+                onChange={(e) => setFlatPostalCode(e.target.value)}
+              />
+              <FieldError msg={errors.flatPostalCode} />
             </div>
           </div>
 
@@ -427,16 +422,21 @@ export function FlatmateForm() {
             <Textarea
               placeholder="Tell potential flatmates about the flat — size, vibe, location, house rules, etc."
               rows={4}
-              {...form.register("apartmentDescription")}
+              value={apartmentDescription}
+              onChange={(e) => setApartmentDescription(e.target.value)}
             />
           </div>
         </Card>
       )}
 
-      <Button type="submit" className="w-full" size="lg">
-        <Home size={16} />
-        Submit Flatmate Listing
+      <Button type="button" className="w-full" size="lg" onClick={handleSubmit} disabled={submitting}>
+        {submitting ? (
+          <Loader2 size={16} className="animate-spin" />
+        ) : (
+          <Home size={16} />
+        )}
+        {submitting ? "Submitting…" : "Submit Flatmate Listing"}
       </Button>
-    </form>
+    </div>
   );
 }

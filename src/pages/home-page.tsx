@@ -3,18 +3,49 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, Bell, Bot, Building2, Grid2X2, Heart, HeartHandshake, Landmark, MapPin, Search, SlidersHorizontal, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useData } from "@/contexts/data-context";
+import { useI18n } from "@/contexts/i18n-context";
+import { LandlordHome } from "@/components/features/landlord/landlord-home";
 import { currency } from "@/lib/utils";
+import { cities } from "@/lib/constants";
 import type { Property } from "@/types/supabase";
 
-const categories = [
-  { label: "All", icon: Grid2X2 },
-  { label: "Nicosia", icon: Building2 },
-  { label: "Limassol", icon: Building2 },
-  { label: "Larnaca", icon: Landmark },
-  { label: "Paphos", icon: Building2 },
+const CITY_AREAS: Record<string, string[]> = {
+  Nicosia: [
+    "Engomi", "Agios Dometios", "Makedonitissa", "Strovolos", "Latsia",
+    "Aglantzia", "Lakatamia", "Pallouriotissa", "Kaimakli", "Acropolis",
+    "Lycavittos", "Agios Andreas", "Anthoupolis", "Tseri", "Dasoupolis",
+  ],
+  Limassol: [
+    "Mesa Geitonia", "Agios Athanasios", "Germasogeia", "Potamos Germasogeia",
+    "Polemidia", "Zakaki", "Omonia", "Agios Nikolaos", "Columbia",
+    "Ypsonas", "Pyrgos", "Kolossi", "Episkopi", "Mouttagiaka", "Parekklisia",
+  ],
+  Larnaca: [
+    "Skala", "Finikoudes", "Drosia", "Vergina", "Aradippou",
+    "Livadia", "Tersefanou", "Perivolia", "Kiti", "Oroklini", "Dhekelia",
+  ],
+  Paphos: [
+    "Kato Paphos", "Pano Paphos", "Chloraka", "Emba", "Tala",
+    "Peyia", "Yeroskipou", "Mesogi", "Kissonerga", "Mandria",
+  ],
+  Famagusta: [
+    "Paralimni", "Protaras", "Ayia Napa", "Deryneia",
+    "Sotira", "Frenaros", "Liopetri", "Acheritou",
+  ],
+  Kyrenia: [
+    "Kyrenia Town", "Lapithos", "Bellapais", "Karavas", "Kyrenia Hills",
+  ],
+};
+
+const categoryDefs = [
+  { value: "All",      icon: Grid2X2  },
+  { value: "Nicosia",  icon: Building2 },
+  { value: "Limassol", icon: Building2 },
+  { value: "Larnaca",  icon: Landmark  },
+  { value: "Paphos",   icon: Building2 },
 ] as const;
 
-type Category = (typeof categories)[number]["label"];
+type Category = (typeof categoryDefs)[number]["value"];
 
 function PropertyCard({
   property,
@@ -25,6 +56,7 @@ function PropertyCard({
   saved: boolean;
   onToggleSave: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -59,17 +91,17 @@ function PropertyCard({
         <h3 className="text-lg font-bold leading-tight text-white">{property.title}</h3>
         <div className="mt-1 mb-4 flex items-center justify-between">
           <span className="text-sm font-semibold text-white">
-            {currency(property.rent_price)}<span className="text-white/60">/mo</span>
+            {currency(property.rent_price)}<span className="text-white/60">{t("homePerMonth")}</span>
           </span>
           <span className="flex items-center gap-1 text-xs text-white/80">
             <Star size={12} className="fill-amber-400 text-amber-400" />
-            {property.average_rating != null ? property.average_rating.toFixed(1) : "New"} reviews
+            {property.average_rating != null ? property.average_rating.toFixed(1) : "New"} {t("homeReviews")}
           </span>
         </div>
 
         {/* Details pill */}
         <div className="flex items-center justify-between rounded-full bg-white/15 px-5 py-3 backdrop-blur-sm">
-          <span className="text-sm font-medium text-white">See Property Details</span>
+          <span className="text-sm font-medium text-white">{t("homeSeeDetails")}</span>
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/30">
             <span className="text-white text-sm">›</span>
           </div>
@@ -81,11 +113,90 @@ function PropertyCard({
 
 export function HomePage() {
   const { snapshot, toggleSavedProperty } = useData();
+  const { t } = useI18n();
   const [category, setCategory] = useState<Category>("All");
   const [query, setQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Applied filter values
+  const [filterBedrooms, setFilterBedrooms] = useState<number | null>(null);
+  const [filterBathrooms, setFilterBathrooms] = useState<number | null>(null);
+  const [filterMinPrice, setFilterMinPrice] = useState("");
+  const [filterMaxPrice, setFilterMaxPrice] = useState("");
+  const [filterCity, setFilterCity] = useState<string | null>(null);
+  const [filterAreas, setFilterAreas] = useState<string[]>([]);
+
+  // Draft values while panel is open
+  const [draftBedrooms, setDraftBedrooms] = useState<number | null>(null);
+  const [draftBathrooms, setDraftBathrooms] = useState<number | null>(null);
+  const [draftMinPrice, setDraftMinPrice] = useState("");
+  const [draftMaxPrice, setDraftMaxPrice] = useState("");
+  const [draftCity, setDraftCity] = useState<string | null>(null);
+  const [draftAreas, setDraftAreas] = useState<string[]>([]);
+
+  const selectDraftCity = (city: string) => {
+    if (draftCity === city) {
+      setDraftCity(null);
+      setDraftAreas([]);
+    } else {
+      setDraftCity(city);
+      setDraftAreas([]);
+    }
+  };
+
+  const toggleDraftArea = (area: string) =>
+    setDraftAreas((prev) =>
+      prev.includes(area) ? prev.filter((a) => a !== area) : [...prev, area]
+    );
+
+  const openFilters = () => {
+    setDraftBedrooms(filterBedrooms);
+    setDraftBathrooms(filterBathrooms);
+    setDraftMinPrice(filterMinPrice);
+    setDraftMaxPrice(filterMaxPrice);
+    setDraftCity(filterCity);
+    setDraftAreas(filterAreas);
+    setShowFilters(true);
+  };
+
+  const applyFilters = () => {
+    setFilterBedrooms(draftBedrooms);
+    setFilterBathrooms(draftBathrooms);
+    setFilterMinPrice(draftMinPrice);
+    setFilterMaxPrice(draftMaxPrice);
+    setFilterCity(draftCity);
+    setFilterAreas(draftAreas);
+    setShowFilters(false);
+  };
+
+  const clearFilters = () => {
+    setDraftBedrooms(null);
+    setDraftBathrooms(null);
+    setDraftMinPrice("");
+    setDraftMaxPrice("");
+    setDraftCity(null);
+    setDraftAreas([]);
+  };
+
+  const hasActiveFilters =
+    filterBedrooms !== null ||
+    filterBathrooms !== null ||
+    filterMinPrice !== "" ||
+    filterMaxPrice !== "" ||
+    filterCity !== null;
+
+  if (snapshot.profile.user_type === "landlord") return <LandlordHome />;
 
   const firstName = snapshot.profile.full_name?.split(" ")[0] ?? "there";
-  const userCity = snapshot.profile.city ?? "Cyprus";
+
+  const hour = new Date().getHours();
+  const greetingKey =
+    hour >= 5 && hour < 12
+      ? "homeGoodMorning"
+      : hour >= 12 && hour < 18
+      ? "homeGoodAfternoon"
+      : "homeGoodEvening";
+  const userCity = snapshot.profile.city;
   const unread = snapshot.notifications.filter((n) => !n.is_read).length;
 
   const filtered = snapshot.featuredProperties.filter((p) => {
@@ -94,7 +205,13 @@ export function HomePage() {
       p.title.toLowerCase().includes(query.toLowerCase()) ||
       p.city.toLowerCase().includes(query.toLowerCase());
     const matchesCategory = category === "All" || p.city === category;
-    return matchesQuery && matchesCategory;
+    const matchesBedrooms = filterBedrooms === null || (filterBedrooms >= 4 ? p.bedrooms >= 4 : p.bedrooms === filterBedrooms);
+    const matchesBathrooms = filterBathrooms === null || (filterBathrooms >= 3 ? p.bathrooms >= 3 : p.bathrooms === filterBathrooms);
+    const matchesMin = !filterMinPrice || p.rent_price >= Number(filterMinPrice);
+    const matchesMax = !filterMaxPrice || p.rent_price <= Number(filterMaxPrice);
+    const matchesCity = !filterCity || p.city === filterCity;
+    const matchesArea = filterAreas.length === 0 || filterAreas.some((a) => p.address.toLowerCase().includes(a.toLowerCase()));
+    return matchesQuery && matchesCategory && matchesBedrooms && matchesBathrooms && matchesMin && matchesMax && matchesCity && matchesArea;
   });
 
   return (
@@ -102,11 +219,10 @@ export function HomePage() {
       {/* ── Header ── */}
       <div className="flex items-start justify-between px-5 pt-5">
         <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.35 }}>
-          <p className="text-xs text-muted-foreground">Good day</p>
-          <p className="text-lg font-bold">Hello, {firstName}</p>
+          <p className="text-lg font-bold">{t(greetingKey)}, {firstName}.</p>
           <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin size={11} />
-            <span>{userCity}, Cyprus</span>
+            <span>{userCity ? `${userCity}, Cyprus` : "Cyprus"}</span>
           </div>
         </motion.div>
 
@@ -133,10 +249,10 @@ export function HomePage() {
         className="px-5"
       >
         <h1 className="text-[2rem] leading-[1.2] tracking-tight">
-          Explore{" "}
-          <span className="font-extrabold">Modern Student</span>
+          {t("homeHeroLine1").split(" ")[0]}{" "}
+          <span className="font-extrabold">{t("homeHeroLine1").split(" ").slice(1).join(" ")}</span>
           <br />
-          <span className="font-extrabold">Homes Near You</span>
+          <span className="font-extrabold">{t("homeHeroLine2")}</span>
         </h1>
       </motion.div>
 
@@ -152,7 +268,7 @@ export function HomePage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search city or property…"
+            placeholder={t("homeSearchPlaceholder")}
             className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
           {query && (
@@ -161,8 +277,15 @@ export function HomePage() {
             </button>
           )}
         </div>
-        <button className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-foreground text-background shadow-sm transition active:scale-95">
+        <button
+          type="button"
+          onClick={openFilters}
+          className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-foreground text-background shadow-sm transition active:scale-95"
+        >
           <SlidersHorizontal size={17} />
+          {hasActiveFilters && (
+            <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-background" />
+          )}
         </button>
       </motion.div>
 
@@ -173,12 +296,12 @@ export function HomePage() {
         transition={{ delay: 0.2, duration: 0.4 }}
       >
         <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-5 pb-1">
-          {categories.map(({ label, icon: Icon }) => {
-            const active = category === label;
+          {categoryDefs.map(({ value, icon: Icon }) => {
+            const active = category === value;
             return (
               <button
-                key={label}
-                onClick={() => setCategory(label)}
+                key={value}
+                onClick={() => setCategory(value)}
                 className={`flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
                   active
                     ? "bg-foreground text-background shadow-sm"
@@ -186,7 +309,7 @@ export function HomePage() {
                 }`}
               >
                 <Icon size={15} />
-                {label}
+                {value === "All" ? t("homeCategoryAll") : value}
               </button>
             );
           })}
@@ -219,8 +342,8 @@ export function HomePage() {
               </div>
             </div>
             <div className="absolute bottom-3.5 left-3.5">
-              <p className="text-[11px] text-white/60">Discover</p>
-              <p className="text-sm font-bold leading-tight text-white">Find Flatmates</p>
+              <p className="text-[11px] text-white/60">{t("homeDiscover")}</p>
+              <p className="text-sm font-bold leading-tight text-white">{t("homeFindFlatmates")}</p>
             </div>
           </div>
         </Link>
@@ -243,12 +366,190 @@ export function HomePage() {
               </div>
             </div>
             <div className="absolute bottom-3.5 left-3.5">
-              <p className="text-[11px] text-white/60">Powered by AI</p>
-              <p className="text-sm font-bold leading-tight text-white">AI Assistant</p>
+              <p className="text-[11px] text-white/60">{t("homePoweredByAI")}</p>
+              <p className="text-sm font-bold leading-tight text-white">{t("homeAIAssistant")}</p>
             </div>
           </div>
         </Link>
       </motion.div>
+
+      {/* ── Filter Bottom Sheet ── */}
+      {showFilters && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-end"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowFilters(false)}
+          />
+
+          {/* Panel — max 85vh so it never covers the full screen */}
+          <motion.div
+            className="relative flex w-full max-h-[85vh] flex-col rounded-t-[2rem] bg-background shadow-card"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            transition={{ type: "spring", damping: 28, stiffness: 260 }}
+          >
+            {/* Sticky header — always visible */}
+            <div className="shrink-0 px-6 pt-6 pb-4">
+              <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
+              <div className="flex items-center justify-between">
+                <h2 className="font-display text-xl font-bold">{t("filterTitle")}</h2>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  {t("filterClearAll")}
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-6 pb-4">
+              <div className="space-y-6">
+                {/* City */}
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold">{t("filterCity")}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {cities.map((city) => (
+                      <button
+                        key={city}
+                        type="button"
+                        onClick={() => selectDraftCity(city)}
+                        className={`rounded-full border-2 px-4 py-2 text-sm font-semibold transition-all ${
+                          draftCity === city
+                            ? "border-primary bg-primary/5 text-primary"
+                            : "border-border text-muted-foreground hover:border-primary/40"
+                        }`}
+                      >
+                        {city}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Area — appears only when a city is selected */}
+                {draftCity && CITY_AREAS[draftCity] && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold">{t("filterArea", { city: draftCity ?? "" })}</p>
+                      {draftAreas.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setDraftAreas([])}
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                        >
+                          {t("filterClearAreas")}
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {CITY_AREAS[draftCity].map((area) => (
+                        <button
+                          key={area}
+                          type="button"
+                          onClick={() => toggleDraftArea(area)}
+                          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                            draftAreas.includes(area)
+                              ? "border-primary bg-primary/5 text-primary"
+                              : "border-border text-muted-foreground hover:border-primary/40"
+                          }`}
+                        >
+                          {area}
+                        </button>
+                      ))}
+                    </div>
+                    {draftAreas.length === 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {t("filterAllAreas", { city: draftCity ?? "" })}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Bedrooms */}
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold">{t("filterBedrooms")}</p>
+                  <div className="flex gap-2">
+                    {[null, 1, 2, 3, 4].map((val) => (
+                      <button
+                        key={String(val)}
+                        type="button"
+                        onClick={() => setDraftBedrooms(val)}
+                        className={`flex-1 rounded-2xl border-2 py-2.5 text-sm font-semibold transition-all ${
+                          draftBedrooms === val
+                            ? "border-primary bg-primary/5 text-primary"
+                            : "border-border text-muted-foreground hover:border-primary/40"
+                        }`}
+                      >
+                        {val === null ? t("filterAny") : val === 4 ? "4+" : val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bathrooms */}
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold">{t("filterBathrooms")}</p>
+                  <div className="flex gap-2">
+                    {[null, 1, 2, 3].map((val) => (
+                      <button
+                        key={String(val)}
+                        type="button"
+                        onClick={() => setDraftBathrooms(val)}
+                        className={`flex-1 rounded-2xl border-2 py-2.5 text-sm font-semibold transition-all ${
+                          draftBathrooms === val
+                            ? "border-primary bg-primary/5 text-primary"
+                            : "border-border text-muted-foreground hover:border-primary/40"
+                        }`}
+                      >
+                        {val === null ? t("filterAny") : val === 3 ? "3+" : val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Price range — stacked vertically to prevent overflow */}
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold">{t("filterPriceRange")}</p>
+                  <div className="space-y-2">
+                    <input
+                      type="number"
+                      placeholder={t("filterMinPrice")}
+                      value={draftMinPrice}
+                      onChange={(e) => setDraftMinPrice(e.target.value)}
+                      className="h-12 w-full rounded-2xl border border-border bg-muted px-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    />
+                    <input
+                      type="number"
+                      placeholder={t("filterMaxPrice")}
+                      value={draftMaxPrice}
+                      onChange={(e) => setDraftMaxPrice(e.target.value)}
+                      className="h-12 w-full rounded-2xl border border-border bg-muted px-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sticky footer button */}
+            <div className="shrink-0 px-6 pb-10 pt-4">
+              <button
+                type="button"
+                onClick={applyFilters}
+                className="flex h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-sky-400 text-base font-semibold text-white shadow-glow transition hover:opacity-90 active:scale-[0.98]"
+              >
+                {t("filterShowResults")}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* ── Top Property ── */}
       <div className="space-y-4 px-5">
@@ -258,15 +559,15 @@ export function HomePage() {
           transition={{ delay: 0.26 }}
           className="flex items-center justify-between"
         >
-          <h2 className="text-lg font-bold">Top Property</h2>
+          <h2 className="text-lg font-bold">{t("homeTopProperty")}</h2>
           <Link to="/search" className="text-sm font-medium text-primary">
-            View All
+            {t("homeViewAll")}
           </Link>
         </motion.div>
 
         {filtered.length === 0 ? (
           <div className="glass rounded-2xl p-10 text-center text-sm text-muted-foreground">
-            No properties match your search.
+            {t("homeNoProperties")}
           </div>
         ) : (
           <div className="space-y-5">

@@ -19,7 +19,8 @@ import type {
   NotificationItem,
   Profile,
   Property,
-  StudentType
+  StudentType,
+  Swipe
 } from "@/types/supabase";
 
 interface SearchFilters {
@@ -53,6 +54,8 @@ interface CreateFlatmateInput {
   // has_flat
   flatPrice?: number;
   flatCity?: City;
+  flatArea?: string;
+  flatPostalCode?: string;
   flatFeatures?: string[];
   apartmentDescription?: string;
   profileImageUrl?: string;
@@ -69,6 +72,8 @@ interface DataContextValue {
   filteredFlatmates: FlatmateListing[];
   toggleSavedProperty: (property: Property) => void;
   togglePropertyVisibility: (propertyId: string) => void;
+  updateProperty: (propertyId: string, data: Partial<Property>) => void;
+  deleteProperty: (propertyId: string) => void;
   sendMessage: (matchId: string, content: string) => void;
   markNotificationsRead: () => void;
   swipeFlatmate: (flatmateId: string, direction: "left" | "right") => FlatmateListing | null;
@@ -231,9 +236,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [propertyFilters, snapshot.featuredProperties]);
 
   const filteredFlatmates = useMemo(() => {
+    const myListing = snapshot.flatmates.find(
+      (f) => f.user_id === snapshot.profile.id
+    );
+
+    // Users must fill out their own listing before seeing others
+    if (!myListing) return [];
+
+    // Complementary matching:
+    // - Seeking a flat → show people who HAVE a flat
+    // - Has a flat → show people who are SEEKING a flat
+    const targetStatus =
+      myListing.housing_status === "seeking_flat" ? "has_flat" : "seeking_flat";
+
     return snapshot.flatmates.filter((flatmate) => {
       if (!flatmate.is_approved) return false;
       if (flatmate.user_id === snapshot.profile.id) return false;
+      if (flatmate.housing_status !== targetStatus) return false;
       if (flatmateFilters.city && flatmate.preferred_city !== flatmateFilters.city)
         return false;
       if (flatmateFilters.minBudget && flatmate.max_budget < flatmateFilters.minBudget)
@@ -245,9 +264,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         flatmate.student_type !== flatmateFilters.studentType
       )
         return false;
-      if (snapshot.profile.user_type === "student") {
-        return flatmate.housing_status !== "seeking_flat";
-      }
       return true;
     });
   }, [flatmateFilters, snapshot.flatmates, snapshot.profile]);
@@ -310,6 +326,40 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
       },
 
+      updateProperty(propertyId, data) {
+        setSnapshot((current) => ({
+          ...current,
+          featuredProperties: current.featuredProperties.map((p) =>
+            p.id === propertyId ? { ...p, ...data } : p
+          )
+        }));
+        if (supabase && user) {
+          supabase
+            .from("properties")
+            .update(data)
+            .eq("id", propertyId)
+            .then(({ error }) => {
+              if (error) console.error("updateProperty error:", error);
+            });
+        }
+      },
+
+      deleteProperty(propertyId) {
+        setSnapshot((current) => ({
+          ...current,
+          featuredProperties: current.featuredProperties.filter((p) => p.id !== propertyId)
+        }));
+        if (supabase && user) {
+          supabase
+            .from("properties")
+            .delete()
+            .eq("id", propertyId)
+            .then(({ error }) => {
+              if (error) console.error("deleteProperty error:", error);
+            });
+        }
+      },
+
       sendMessage(matchId, content) {
         const optimistic: Message = {
           id: `msg-${crypto.randomUUID()}`,
@@ -360,8 +410,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       swipeFlatmate(flatmateId, direction) {
         const matched = snapshot.flatmates.find((item) => item.id === flatmateId) ?? null;
+        if (!matched) return null;
 
-        if (supabase && user && matched) {
+        // Check if the other person already liked the current user (mutual = match)
+        const isMutual =
+          direction === "right" &&
+          snapshot.swipes.some(
+            (s) =>
+              s.swiper_id === matched.user_id &&
+              s.swiped_id === snapshot.profile.id &&
+              s.direction === "right"
+          );
+
+        const newSwipe: Swipe = {
+          id: `swipe-${crypto.randomUUID()}`,
+          swiper_id: snapshot.profile.id,
+          swiped_id: matched.user_id,
+          direction,
+          created_at: new Date().toISOString()
+        };
+
+        if (supabase && user) {
           supabase
             .from("swipes")
             .upsert(
@@ -369,12 +438,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
               { onConflict: "swiper_id,swiped_id" }
             )
             .then(({ error }) => {
-              if (error) {
-                console.error("swipe error:", error);
-                return;
-              }
-              if (direction === "right") {
-                // DB trigger creates the match — refetch to pick it up
+              if (error) { console.error("swipe error:", error); return; }
+              if (isMutual) {
                 Promise.all([
                   supabase!
                     .from("matches")
@@ -386,37 +451,45 @@ export function DataProvider({ children }: { children: ReactNode }) {
                     .eq("recipient_id", user.id)
                     .order("created_at", { ascending: false })
                 ]).then(([{ data: newMatches }, { data: newNotifs }]) => {
-                  setSnapshot((current) => {
-                    const prevCount = current.matches.length;
-                    const nextCount = (newMatches ?? []).length;
-                    if (nextCount > prevCount) toast.success("It's a Match!");
-                    return {
-                      ...current,
-                      matches: (newMatches ?? []) as AppSnapshot["matches"],
-                      notifications: (newNotifs ?? []) as unknown as NotificationItem[]
-                    };
-                  });
+                  setSnapshot((current) => ({
+                    ...current,
+                    swipes: [...current.swipes, newSwipe],
+                    matches: (newMatches ?? []) as AppSnapshot["matches"],
+                    notifications: (newNotifs ?? []) as unknown as NotificationItem[]
+                  }));
                 });
+              } else {
+                setSnapshot((current) => ({
+                  ...current,
+                  swipes: [...current.swipes, newSwipe]
+                }));
               }
             });
-        } else if (direction === "right" && matched) {
+        } else {
           // Mock fallback (no Supabase)
-          const alreadyMatched = snapshot.matches.some(
-            (m) => m.user_b === matched.user_id
-          );
-          if (!alreadyMatched) {
+          setSnapshot((current) => {
+            const base = { ...current, swipes: [...current.swipes, newSwipe] };
+            if (!isMutual) return base;
+
+            const alreadyMatched = current.matches.some(
+              (m) =>
+                (m.user_a === current.profile.id && m.user_b === matched.user_id) ||
+                (m.user_b === current.profile.id && m.user_a === matched.user_id)
+            );
+            if (alreadyMatched) return base;
+
             const notification: NotificationItem = {
               id: `notif-${crypto.randomUUID()}`,
-              recipient_id: snapshot.profile.id,
+              recipient_id: current.profile.id,
               sender_id: matched.user_id,
               type: "match",
               title: "It's a Match!",
-              body: `You and ${matched.profile?.full_name ?? "a new flatmate"} can now chat.`,
+              body: `You and ${matched.profile?.full_name ?? "your new flatmate"} can now chat.`,
               is_read: false,
               created_at: new Date().toISOString()
             };
-            setSnapshot((current) => ({
-              ...current,
+            return {
+              ...base,
               matches: [
                 ...current.matches,
                 {
@@ -427,12 +500,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 }
               ],
               notifications: [notification, ...current.notifications]
-            }));
-            toast.success("It's a Match!");
-          }
+            };
+          });
         }
 
-        return matched;
+        // Return matched flatmate only on a mutual match (caller shows the overlay)
+        return isMutual ? matched : null;
       },
 
       approveFlatmate(flatmateId, approved) {
@@ -488,9 +561,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
           housing_status: data.housingStatus,
           flat_price: data.flatPrice ?? null,
           flat_features: data.flatFeatures ?? [],
+          flat_area: data.flatArea ?? null,
+          flat_postal_code: data.flatPostalCode ?? null,
           apartment_images: data.apartmentImages ?? [],
           apartment_description: data.apartmentDescription ?? null,
-          is_approved: false,
+          is_approved: true,
           profile: snapshot.profile
         };
         setSnapshot((current) => ({
@@ -518,6 +593,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 housing_status: data.housingStatus,
                 flat_price: data.flatPrice ?? null,
                 flat_features: data.flatFeatures ?? [],
+                flat_area: data.flatArea ?? null,
+                flat_postal_code: data.flatPostalCode ?? null,
                 apartment_images: data.apartmentImages ?? [],
                 apartment_description: data.apartmentDescription ?? null,
                 is_approved: false

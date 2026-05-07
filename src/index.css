@@ -57,6 +57,8 @@ html {
 body {
   @apply min-h-screen bg-background font-sans text-foreground antialiased;
   background-image: theme("backgroundImage.mesh-light");
+  /* Push content below the status bar; background fills behind it */
+  padding-top: env(safe-area-inset-top);
 }
 
 .dark body {
@@ -81,4 +83,17 @@ body {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Prevent iOS Safari from zooming on input focus (triggers when font-size < 16px) */
+input, textarea, select {
+  font-size: 16px !important;
+}
+
+/* Match overlay gradient — adapts to light/dark mode */
+.match-overlay-bg {
+  background: linear-gradient(160deg, #bae6fd 0%, #a5f3c4 55%, #ecfdf5 100%);
+}
+.dark .match-overlay-bg {
+  background: linear-gradient(160deg, #0f172a 0%, #0c1a2e 60%, #0f172a 100%);
 }

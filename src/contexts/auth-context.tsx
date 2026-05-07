@@ -36,6 +36,7 @@ interface AuthContextValue {
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signUp: (input: SignUpInput) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
@@ -117,13 +118,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
       },
       async signInWithGoogle() {
-        if (!supabase) return;
+        if (!supabase) throw new Error("Supabase not configured");
         const { error } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: {
             redirectTo: authRedirectUrl,
-            // On native the system browser handles the OAuth flow; skip the
-            // in-app browser redirect Supabase would otherwise attempt.
+            skipBrowserRedirect: Capacitor.isNativePlatform(),
+          }
+        });
+        if (error) throw error;
+      },
+      async signInWithApple() {
+        if (!supabase) throw new Error("Supabase not configured");
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "apple",
+          options: {
+            redirectTo: authRedirectUrl,
             skipBrowserRedirect: Capacitor.isNativePlatform(),
           }
         });
