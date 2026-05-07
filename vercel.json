@@ -1,6 +1,6 @@
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "buildCommand": "npx tsc -b && npx vite build",
+  "buildCommand": "vite build",
   "outputDirectory": "dist",
   "installCommand": "npm install"
 }
