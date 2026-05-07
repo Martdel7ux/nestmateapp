@@ -1,97 +1,467 @@
-import { BadgeCheck, Globe2, Heart, ShieldCheck } from "lucide-react";
-import { PageHeader } from "@/components/layout/page-header";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Camera, Check, ChevronRight, Eye, EyeOff,
+  Heart, Key, LogOut, MapPin, Pencil, ShieldCheck,
+  Trash2, University, User, X
+} from "lucide-react";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 import { VerificationUpload } from "@/components/features/verification/verification-upload";
-import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
+import { cities } from "@/lib/constants";
+import type { City } from "@/types/supabase";
+import { currency } from "@/lib/utils";
+
+// ── DiceBear avatars (adventurer style, Apple Memoji vibe) ──────────────────
+const PRESET_AVATARS = [
+  { seed: "Zoe",      bg: "b6e3f4" },
+  { seed: "Liam",     bg: "ffd5dc" },
+  { seed: "Emma",     bg: "c0aede" },
+  { seed: "Noah",     bg: "d1f4e0" },
+  { seed: "Olivia",   bg: "ffdfbf" },
+  { seed: "Marcus",   bg: "f4d4b6" },
+  { seed: "Sofia",    bg: "b6c9f4" },
+  { seed: "Aiden",    bg: "f4b6e3" },
+  { seed: "Isabella", bg: "b6f4d4" },
+  { seed: "James",    bg: "f4f4b6" },
+  { seed: "Mia",      bg: "d4b6f4" },
+  { seed: "Luna",     bg: "b6f4f4" },
+  { seed: "Kai",      bg: "f4b6b6" },
+  { seed: "Aria",     bg: "c8f4b6" },
+  { seed: "Ryan",     bg: "f4cdb6" },
+  { seed: "Nadia",    bg: "b6d4f4" },
+].map(({ seed, bg }) => ({
+  seed,
+  url: `https://api.dicebear.com/9.x/adventurer/svg?seed=${seed}&backgroundColor=${bg}&backgroundType=solid`
+}));
 
 export function ProfilePage() {
-  const { snapshot } = useData();
-  const isLandlord = snapshot.profile.user_type === "landlord";
+  const { snapshot, updateProfile, toggleSavedProperty } = useData();
+  const { signOut, updatePassword, deleteAccount } = useAuth();
+  const navigate = useNavigate();
+  const profile = snapshot.profile;
+  const isLandlord = profile.user_type === "landlord";
+
+  // Edit mode
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState(profile.full_name);
+  const [editBio, setEditBio] = useState(profile.bio ?? "");
+  const [editUniversity, setEditUniversity] = useState(profile.university ?? "");
+  const [editCity, setEditCity] = useState<string>(profile.city ?? cities[0]);
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  // Avatar picker
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(profile.avatar_url ?? null);
+  const photoRef = useRef<HTMLInputElement>(null);
+
+  // Password change
+  const [pwOpen, setPwOpen] = useState(false);
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [savingPw, setSavingPw] = useState(false);
+
+  // Delete confirm
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setSelectedAvatar(url);
+    setAvatarOpen(false);
+  };
+
+  const handleSaveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      await updateProfile({
+        full_name: editName,
+        bio: editBio,
+        university: editUniversity,
+        city: editCity as City,
+        avatar_url: selectedAvatar ?? undefined
+      });
+      toast.success("Profile updated");
+      setEditing(false);
+    } catch {
+      toast.error("Failed to save profile");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (newPw.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+    if (newPw !== confirmPw) { toast.error("Passwords don't match"); return; }
+    setSavingPw(true);
+    try {
+      await updatePassword(newPw);
+      toast.success("Password changed successfully");
+      setPwOpen(false);
+      setNewPw(""); setConfirmPw("");
+    } catch {
+      toast.error("Failed to change password");
+    } finally {
+      setSavingPw(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth", { replace: true });
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteAccount();
+      navigate("/auth", { replace: true });
+    } catch {
+      toast.error("Failed to delete account");
+    }
+  };
+
+  const displayAvatar = selectedAvatar ?? profile.avatar_url;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Profile"
-        title={snapshot.profile.full_name}
-        description="Manage your student identity, trust signals, and accommodation preferences."
-      />
-      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <Card className="space-y-5">
-          <div className="flex items-center gap-4">
-            <Avatar
-              name={snapshot.profile.full_name}
-              src={snapshot.profile.avatar_url}
-              className="h-20 w-20 text-xl"
-            />
-            <div>
-              <h2 className="font-display text-3xl">{snapshot.profile.full_name}</h2>
-              <p className="text-sm text-muted-foreground">{snapshot.profile.university}</p>
-            </div>
-          </div>
-          <p className="text-muted-foreground">{snapshot.profile.bio}</p>
-          <div className="flex flex-wrap gap-2">
-            <Badge>{snapshot.profile.city}</Badge>
-            <Badge>{snapshot.profile.user_type}</Badge>
-            {snapshot.profile.is_verified_landlord && (
-              <Badge className="bg-sky-500/10 text-sky-600">
-                <ShieldCheck size={12} />
-                Verified landlord
-              </Badge>
-            )}
-            <Badge className="bg-success/15 text-accent">
-              <ShieldCheck size={12} />
-              GDPR complete
-            </Badge>
-          </div>
-        </Card>
+    <div className="space-y-5 px-5 pt-2">
 
-        <Card className="space-y-5">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="font-semibold">Profile completion</p>
-              <span className="text-sm text-muted-foreground">88%</span>
-            </div>
-            <Progress value={88} />
+      {/* ── Avatar + name header ── */}
+      <div className="flex flex-col items-center gap-3 pt-2">
+        <div className="relative">
+          <div className="h-28 w-28 overflow-hidden rounded-full ring-4 ring-primary/20 shadow-card">
+            {displayAvatar ? (
+              <img src={displayAvatar} alt="Avatar" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-primary/15 text-3xl font-bold text-primary">
+                {profile.full_name?.charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {[
-              {
-                icon: BadgeCheck,
-                title: "Identity",
-                copy: "Student role, university, and city stored on your profile."
-              },
-              {
-                icon: Globe2,
-                title: "Language",
-                copy: "English and Greek are available through the context-based i18n system."
-              },
-              {
-                icon: Heart,
-                title: "Saved homes",
-                copy: `${snapshot.savedProperties.length} shortlisted properties ready for comparison.`
-              },
-              {
-                icon: ShieldCheck,
-                title: "Verification",
-                copy: isLandlord
-                  ? "Upload your ID and selfie below to get your verified badge."
-                  : "Landlord identity uploads route through a moderated verification flow."
-              }
-            ].map((item) => (
-              <div key={item.title} className="rounded-[1.5rem] bg-muted/40 p-4">
-                <item.icon className="text-primary" size={18} />
-                <p className="mt-3 font-semibold">{item.title}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{item.copy}</p>
+          <button
+            type="button"
+            onClick={() => setAvatarOpen(true)}
+            className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow transition active:scale-95"
+          >
+            <Camera size={16} />
+          </button>
+        </div>
+
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">{profile.full_name}</h1>
+          <p className="text-sm text-muted-foreground capitalize">
+            {profile.user_type} {profile.city ? `· ${profile.city}` : ""}
+          </p>
+          {profile.is_verified_landlord && (
+            <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-600">
+              <ShieldCheck size={12} /> Verified Landlord
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => { setEditing(!editing); setEditName(profile.full_name); setEditBio(profile.bio ?? ""); setEditUniversity(profile.university ?? ""); setEditCity(profile.city ?? cities[0]); }}
+          className="flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-2 text-sm font-medium transition hover:border-primary/50"
+        >
+          <Pencil size={13} />
+          {editing ? "Cancel editing" : "Edit profile"}
+        </button>
+      </div>
+
+      {/* ── Avatar picker sheet ── */}
+      <AnimatePresence>
+        {avatarOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+              onClick={() => setAvatarOpen(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="fixed inset-x-0 bottom-0 z-50 rounded-t-[2rem] bg-background p-6 shadow-card"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="font-display text-xl font-bold">Choose your avatar</h3>
+                <button onClick={() => setAvatarOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-4 gap-3">
+                {PRESET_AVATARS.map((av) => {
+                  const active = selectedAvatar === av.url;
+                  return (
+                    <button
+                      key={av.seed}
+                      type="button"
+                      onClick={() => { setSelectedAvatar(av.url); setAvatarOpen(false); }}
+                      className={`relative overflow-hidden rounded-2xl transition active:scale-95 ${active ? "ring-3 ring-primary shadow-glow" : "ring-1 ring-border"}`}
+                    >
+                      <img src={av.url} alt={av.seed} className="h-full w-full object-cover" loading="lazy" />
+                      {active && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
+                          <Check size={18} className="text-primary drop-shadow" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => photoRef.current?.click()}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border py-3 text-sm font-medium text-muted-foreground transition hover:border-primary hover:text-foreground"
+              >
+                <Camera size={16} /> Upload your own photo
+              </button>
+              <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Edit profile form ── */}
+      <AnimatePresence>
+        {editing && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            <Card className="space-y-4">
+              <h3 className="font-display text-lg font-bold">Edit Profile</h3>
+
+              <div className="space-y-1.5">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <User size={14} /> Full name
+                </label>
+                <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Your full name" />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <Pencil size={14} /> Bio
+                </label>
+                <textarea
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  placeholder="Tell others about yourself…"
+                  rows={3}
+                  className="w-full rounded-2xl border border-border bg-card/80 px-4 py-3 text-sm shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <University size={14} /> University
+                </label>
+                <Input value={editUniversity} onChange={(e) => setEditUniversity(e.target.value)} placeholder="Your university" />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <MapPin size={14} /> City
+                </label>
+                <Select value={editCity} onChange={(e) => setEditCity(e.target.value)}>
+                  {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2 rounded-2xl bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
+                <ShieldCheck size={14} />
+                Account type: <span className="font-semibold capitalize text-foreground">{profile.user_type}</span>
+              </div>
+
+              <Button onClick={handleSaveProfile} disabled={savingProfile} className="w-full">
+                {savingProfile ? "Saving…" : "Save changes"}
+              </Button>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Profile info (view mode) ── */}
+      {!editing && (
+        <Card className="space-y-3">
+          {[
+            { icon: University, label: "University", value: profile.university || "Not set" },
+            { icon: MapPin, label: "City", value: profile.city || "Not set" },
+            { icon: User, label: "Account type", value: profile.user_type, capitalize: true },
+          ].map((row) => (
+            <div key={row.label} className="flex items-center justify-between py-1">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <row.icon size={15} />
+                {row.label}
+              </div>
+              <span className={`text-sm font-medium ${row.capitalize ? "capitalize" : ""}`}>{row.value}</span>
+            </div>
+          ))}
+          {profile.bio && (
+            <div className="border-t border-border pt-3">
+              <p className="text-sm text-muted-foreground">{profile.bio}</p>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* ── Saved properties ── */}
+      {snapshot.savedProperties.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Heart size={16} className="text-rose-500" />
+            <h3 className="font-semibold">Saved Properties</h3>
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              {snapshot.savedProperties.length}
+            </span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+            {snapshot.savedProperties.map((property) => (
+              <div key={property.id} className="relative w-52 shrink-0 overflow-hidden rounded-[1.5rem] shadow-card">
+                <img src={property.image_urls[0]} alt={property.title} className="h-32 w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <p className="truncate text-xs font-semibold text-white">{property.title}</p>
+                  <p className="text-xs text-white/70">{currency(property.rent_price)}/mo</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => toggleSavedProperty(property)}
+                  className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80"
+                >
+                  <Heart size={13} className="fill-rose-500 text-rose-500" />
+                </button>
               </div>
             ))}
           </div>
-        </Card>
-      </div>
+        </div>
+      )}
 
+      {/* ── Landlord verification ── */}
       {isLandlord && <VerificationUpload />}
+
+      {/* ── Security ── */}
+      <Card className="space-y-1 p-0 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setPwOpen(!pwOpen)}
+          className="flex w-full items-center justify-between px-5 py-4 transition hover:bg-muted/40"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Key size={16} />
+            </div>
+            <span className="font-medium">Change Password</span>
+          </div>
+          <ChevronRight size={16} className={`text-muted-foreground transition-transform ${pwOpen ? "rotate-90" : ""}`} />
+        </button>
+
+        <AnimatePresence>
+          {pwOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden border-t border-border"
+            >
+              <div className="space-y-3 px-5 pb-5 pt-4">
+                <div className="relative">
+                  <Input
+                    type={showPw ? "text" : "password"}
+                    placeholder="New password (min 6 chars)"
+                    value={newPw}
+                    onChange={(e) => setNewPw(e.target.value)}
+                  />
+                  <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                <Input
+                  type={showPw ? "text" : "password"}
+                  placeholder="Confirm new password"
+                  value={confirmPw}
+                  onChange={(e) => setConfirmPw(e.target.value)}
+                />
+                <Button onClick={handleChangePassword} disabled={savingPw} className="w-full">
+                  {savingPw ? "Saving…" : "Update password"}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Card>
+
+      {/* ── Account actions ── */}
+      <Card className="space-y-1 p-0 overflow-hidden">
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="flex w-full items-center gap-3 px-5 py-4 transition hover:bg-muted/40"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-muted text-foreground">
+            <LogOut size={16} />
+          </div>
+          <span className="font-medium">Sign Out</span>
+        </button>
+
+        <div className="border-t border-border" />
+
+        <button
+          type="button"
+          onClick={() => setDeleteConfirm(true)}
+          className="flex w-full items-center gap-3 px-5 py-4 transition hover:bg-destructive/5"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+            <Trash2 size={16} />
+          </div>
+          <span className="font-medium text-destructive">Delete Account</span>
+        </button>
+      </Card>
+
+      {/* ── Delete confirmation sheet ── */}
+      <AnimatePresence>
+        {deleteConfirm && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+              onClick={() => setDeleteConfirm(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="fixed inset-x-4 bottom-6 z-50 rounded-[2rem] bg-background p-6 shadow-card"
+            >
+              <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 mx-auto">
+                <Trash2 size={22} className="text-destructive" />
+              </div>
+              <h3 className="mt-3 text-center font-display text-xl font-bold">Delete account?</h3>
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                This will permanently delete your profile, listings, and all data. This cannot be undone.
+              </p>
+              <div className="mt-5 flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setDeleteConfirm(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={handleDelete}>
+                  Yes, delete
+                </Button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <div className="h-4" />
     </div>
   );
 }

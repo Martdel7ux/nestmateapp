@@ -38,6 +38,8 @@ interface AuthContextValue {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   updateConsent: (acceptAll: boolean) => Promise<void>;
 }
 
@@ -131,6 +133,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!supabase) return;
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
+      },
+      async updatePassword(newPassword) {
+        if (!supabase) return;
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+      },
+      async deleteAccount() {
+        if (!supabase || !user) return;
+        // Delete profile row first, then sign out (account deletion requires server-side admin)
+        await supabase.from("profiles").delete().eq("id", user.id);
+        await supabase.auth.signOut();
       },
       async resetPassword(email) {
         if (!supabase) return;

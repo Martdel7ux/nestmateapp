@@ -152,6 +152,7 @@ export const seedSnapshot: AppSnapshot = {
       pet_preference: "okay",
       interests: ["Gym", "Design", "Cooking"],
       country_of_origin: "Italy",
+      language: "Italian",
       housing_status: "seeking_flat",
       apartment_images: [],
       apartment_description: null,
@@ -178,6 +179,7 @@ export const seedSnapshot: AppSnapshot = {
       pet_preference: "love",
       interests: ["Beach", "Languages", "Pilates"],
       country_of_origin: "Greece",
+      language: "Greek",
       housing_status: "has_flat",
       apartment_images: [
         "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80"

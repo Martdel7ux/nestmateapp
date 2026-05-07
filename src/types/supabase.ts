@@ -68,7 +68,10 @@ export interface FlatmateListing {
   pet_preference: "love" | "okay" | "neutral" | "no";
   interests: string[];
   country_of_origin: string;
+  language: string;
   housing_status: "has_flat" | "seeking_flat";
+  flat_price?: number | null;
+  flat_features?: string[] | null;
   apartment_images: string[];
   apartment_description?: string | null;
   is_approved: boolean;

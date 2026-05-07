@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, Bot, Building2, Grid2X2, Heart, HeartHandshake, Landmark, MapPin, Search, SlidersHorizontal, Star } from "lucide-react";
+import { ArrowUpRight, Bell, Bot, Building2, Grid2X2, Heart, HeartHandshake, Landmark, MapPin, Search, SlidersHorizontal, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useData } from "@/contexts/data-context";
 import { currency } from "@/lib/utils";
@@ -200,25 +200,51 @@ export function HomePage() {
         transition={{ delay: 0.28, duration: 0.4 }}
         className="grid grid-cols-2 gap-3 px-5"
       >
-        <Link to="/flatmates">
-          <div className="flex items-center gap-3 rounded-[1.5rem] bg-primary/10 px-4 py-4 transition active:scale-95">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-glow">
-              <HeartHandshake size={20} />
+        {/* Find Flatmate card */}
+        <Link to="/flatmates" className="group">
+          <div className="relative h-44 overflow-hidden rounded-[1.75rem] shadow-card transition-transform duration-200 ease-out group-hover:scale-[1.03] group-active:scale-[0.97]">
+            <img
+              src="/flatmates-hero.jpg"
+              alt="Find Flatmates"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            {/* Faint overlay — lightens slightly on hover */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-black/20 transition-opacity duration-200 group-hover:opacity-80" />
+            <div className="absolute left-3.5 right-3.5 top-3.5 flex items-start justify-between">
+              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+                <HeartHandshake size={17} className="text-white" />
+              </div>
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm transition-colors duration-200 group-hover:bg-white/35">
+                <ArrowUpRight size={13} className="text-white" />
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-bold">Find Flatmate</p>
-              <p className="text-xs text-muted-foreground">Swipe &amp; match</p>
+            <div className="absolute bottom-3.5 left-3.5">
+              <p className="text-[11px] text-white/60">Discover</p>
+              <p className="text-sm font-bold leading-tight text-white">Find Flatmates</p>
             </div>
           </div>
         </Link>
-        <Link to="/assistant">
-          <div className="flex items-center gap-3 rounded-[1.5rem] bg-accent/10 px-4 py-4 transition active:scale-95">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-foreground shadow-sm">
-              <Bot size={20} />
+
+        {/* AI Assistant card */}
+        <Link to="/assistant" className="group">
+          <div className="relative h-44 overflow-hidden rounded-[1.75rem] shadow-card transition-transform duration-200 ease-out group-hover:scale-[1.03] group-active:scale-[0.97]">
+            <img
+              src="/ai-hero.jpg"
+              alt="AI Assistant"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-black/20 transition-opacity duration-200 group-hover:opacity-80" />
+            <div className="absolute left-3.5 right-3.5 top-3.5 flex items-start justify-between">
+              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+                <Bot size={17} className="text-white" />
+              </div>
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm transition-colors duration-200 group-hover:bg-white/35">
+                <ArrowUpRight size={13} className="text-white" />
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-bold">AI Assistant</p>
-              <p className="text-xs text-muted-foreground">Ask anything</p>
+            <div className="absolute bottom-3.5 left-3.5">
+              <p className="text-[11px] text-white/60">Powered by AI</p>
+              <p className="text-sm font-bold leading-tight text-white">AI Assistant</p>
             </div>
           </div>
         </Link>

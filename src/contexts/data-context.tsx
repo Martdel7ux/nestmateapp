@@ -17,6 +17,7 @@ import type {
   LandlordVerification,
   Message,
   NotificationItem,
+  Profile,
   Property,
   StudentType
 } from "@/types/supabase";
@@ -40,14 +41,22 @@ interface FlatmateFilters {
 
 interface CreateFlatmateInput {
   bio: string;
-  minBudget: number;
-  maxBudget: number;
-  preferredCity: City;
+  countryOfOrigin: string;
+  language: string;
   studentType: StudentType;
   petPreference: "love" | "okay" | "neutral" | "no";
-  countryOfOrigin: string;
   housingStatus: "has_flat" | "seeking_flat";
+  // seeking_flat
+  minBudget?: number;
+  maxBudget?: number;
+  preferredCity?: City;
+  // has_flat
+  flatPrice?: number;
+  flatCity?: City;
+  flatFeatures?: string[];
   apartmentDescription?: string;
+  profileImageUrl?: string;
+  apartmentImages?: string[];
 }
 
 interface DataContextValue {
@@ -66,6 +75,7 @@ interface DataContextValue {
   approveFlatmate: (flatmateId: string, approved: boolean) => void;
   approveProperty: (propertyId: string, approved: boolean) => void;
   createFlatmateListing: (data: CreateFlatmateInput) => void;
+  updateProfile: (data: Partial<Pick<Profile, "full_name" | "bio" | "university" | "city" | "avatar_url">>) => Promise<void>;
   submitVerification: (idFile: File, selfieFile: File) => Promise<void>;
   approveVerification: (landlordId: string) => void;
   rejectVerification: (landlordId: string, reason: string) => void;
@@ -466,16 +476,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
           id: `flatmate-${crypto.randomUUID()}`,
           user_id: snapshot.profile.id,
           bio: data.bio,
-          profile_image_url: snapshot.profile.avatar_url ?? null,
-          min_budget: data.minBudget,
-          max_budget: data.maxBudget,
-          preferred_city: data.preferredCity,
+          profile_image_url: data.profileImageUrl ?? snapshot.profile.avatar_url ?? null,
+          min_budget: data.minBudget ?? 0,
+          max_budget: data.maxBudget ?? 0,
+          preferred_city: data.preferredCity ?? data.flatCity ?? "Nicosia",
           student_type: data.studentType,
           pet_preference: data.petPreference,
           interests: [],
           country_of_origin: data.countryOfOrigin,
+          language: data.language,
           housing_status: data.housingStatus,
-          apartment_images: [],
+          flat_price: data.flatPrice ?? null,
+          flat_features: data.flatFeatures ?? [],
+          apartment_images: data.apartmentImages ?? [],
           apartment_description: data.apartmentDescription ?? null,
           is_approved: false,
           profile: snapshot.profile
@@ -493,15 +506,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
               {
                 user_id: user.id,
                 bio: data.bio,
-                profile_image_url: snapshot.profile.avatar_url ?? null,
-                min_budget: data.minBudget,
-                max_budget: data.maxBudget,
-                preferred_city: data.preferredCity,
+                profile_image_url: data.profileImageUrl ?? snapshot.profile.avatar_url ?? null,
+                min_budget: data.minBudget ?? 0,
+                max_budget: data.maxBudget ?? 0,
+                preferred_city: data.preferredCity ?? data.flatCity ?? "Nicosia",
                 student_type: data.studentType,
                 pet_preference: data.petPreference,
                 interests: [],
                 country_of_origin: data.countryOfOrigin,
+                language: data.language,
                 housing_status: data.housingStatus,
+                flat_price: data.flatPrice ?? null,
+                flat_features: data.flatFeatures ?? [],
+                apartment_images: data.apartmentImages ?? [],
                 apartment_description: data.apartmentDescription ?? null,
                 is_approved: false
               },
@@ -510,6 +527,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
             .then(({ error }) => {
               if (error) console.error("create flatmate listing error:", error);
             });
+        }
+      },
+
+      async updateProfile(data) {
+        setSnapshot((current) => ({
+          ...current,
+          profile: { ...current.profile, ...data }
+        }));
+        if (supabase && user) {
+          const { error } = await supabase
+            .from("profiles")
+            .update(data)
+            .eq("id", user.id);
+          if (error) console.error("updateProfile error:", error);
         }
       },
 
