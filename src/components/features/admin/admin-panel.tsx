@@ -40,7 +40,7 @@ function StatusBadge({ approved }: { approved: boolean }) {
 
 // ─── Overview ──────────────────────────────────────────────────────────────────
 
-function OverviewTab() {
+function OverviewTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
   const { snapshot } = useData();
   const pendingProperties = snapshot.featuredProperties.filter((p) => !p.is_approved).length;
   const pendingFlatmates = snapshot.flatmates.filter((f) => !f.is_approved).length;
@@ -65,19 +65,26 @@ function OverviewTab() {
 
       <div className="grid gap-4 md:grid-cols-3">
         {[
-          { label: "Pending properties",    count: pendingProperties,    color: "text-amber-600",  bg: "bg-amber-500/10" },
-          { label: "Pending flatmates",     count: pendingFlatmates,     color: "text-amber-600",  bg: "bg-amber-500/10" },
-          { label: "Pending verifications", count: pendingVerifications, color: "text-sky-600",    bg: "bg-sky-500/10" },
+          { label: "Pending properties",    count: pendingProperties,    color: "text-amber-600", bg: "bg-amber-500/10", tab: "properties" as Tab },
+          { label: "Pending flat listings", count: pendingFlatmates,     color: "text-amber-600", bg: "bg-amber-500/10", tab: "flatmates" as Tab },
+          { label: "Pending verifications", count: pendingVerifications, color: "text-sky-600",   bg: "bg-sky-500/10",   tab: "verifications" as Tab },
         ].map((item) => (
-          <Card key={item.label} className="flex items-center gap-4 p-4">
+          <button
+            key={item.label}
+            onClick={() => onNavigate(item.tab)}
+            className="text-left w-full"
+          >
+          <Card className={`flex items-center gap-4 p-4 transition-colors hover:bg-muted/40 ${item.count > 0 ? "ring-1 ring-amber-400/30" : ""}`}>
             <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.bg}`}>
               <AlertTriangle size={20} className={item.color} />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <p className={`text-2xl font-bold ${item.color}`}>{item.count}</p>
               <p className="text-sm text-muted-foreground">{item.label}</p>
             </div>
+            {item.count > 0 && <span className="text-xs text-muted-foreground shrink-0">Review →</span>}
           </Card>
+          </button>
         ))}
       </div>
     </div>
@@ -205,30 +212,53 @@ function PropertiesTab() {
 function FlatematesTab() {
   const { snapshot, approveFlatmate, adminDeleteFlatmate } = useData();
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"pending" | "approved" | "all">("pending");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const visible = snapshot.flatmates.filter(
-    (f) =>
+  const visible = snapshot.flatmates.filter((f) => {
+    const matchesSearch =
       !search ||
       f.profile?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-      f.preferred_city.toLowerCase().includes(search.toLowerCase())
-  );
+      f.preferred_city.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "pending" && !f.is_approved) ||
+      (filter === "approved" && f.is_approved);
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <div className="space-y-4">
-      <div className="relative">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <input
-          className="w-full rounded-2xl border bg-muted/30 py-2 pl-9 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary/20"
-          placeholder="Search by name or city…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            className="w-full rounded-2xl border bg-muted/30 py-2 pl-9 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            placeholder="Search by name or city…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2">
+          {(["pending", "approved", "all"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
+                filter === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-3">
         {visible.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">No listings found.</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            {filter === "pending" ? "No pending flat listings to review." : "No listings found."}
+          </p>
         )}
         {visible.map((flatmate) => (
           <Card key={flatmate.id} className="p-4">
@@ -239,7 +269,12 @@ function FlatematesTab() {
                   <StatusBadge approved={flatmate.is_approved} />
                 </div>
                 <p className="mt-0.5 text-sm text-muted-foreground">
-                  {flatmate.preferred_city} · {flatmate.housing_status === "seeking_flat" ? "Seeking flat" : "Has flat"} · {flatmate.student_type}
+                  {flatmate.preferred_city} · {flatmate.student_type}
+                </p>
+                <p className="mt-0.5 text-xs font-medium">
+                  {flatmate.housing_status === "has_flat"
+                    ? "🏠 Student offering a flat — needs approval"
+                    : "🔍 Student seeking a flat — auto-approved"}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{flatmate.bio}</p>
               </div>
@@ -710,7 +745,7 @@ export function AdminPanel() {
       </div>
 
       {/* Tab content */}
-      {activeTab === "overview"      && <OverviewTab />}
+      {activeTab === "overview"      && <OverviewTab onNavigate={setActiveTab} />}
       {activeTab === "properties"    && <PropertiesTab />}
       {activeTab === "flatmates"     && <FlatematesTab />}
       {activeTab === "verifications" && <VerificationsTab />}
