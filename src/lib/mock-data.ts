@@ -391,9 +391,9 @@ export const seedSnapshot: AppSnapshot = {
     }
   ],
   stats: {
-    totalUsers: 1280,
-    totalProperties: 214,
-    totalMatches: 379,
-    activeListings: 162
+    totalUsers: 0,
+    totalProperties: 0,
+    totalMatches: 0,
+    activeListings: 0
   }
 };

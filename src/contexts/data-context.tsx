@@ -121,7 +121,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  // Load all profiles for admin CRM
+  // Load all profiles for admin CRM + update user count stat
   useEffect(() => {
     if (!supabase || !isAdmin) return;
     supabase
@@ -129,7 +129,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .select("*")
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        if (data) setAllProfiles(data as Profile[]);
+        if (data) {
+          setAllProfiles(data as Profile[]);
+          setSnapshot((current) => ({
+            ...current,
+            stats: { ...current.stats, totalUsers: data.length }
+          }));
+        }
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, user?.id]);
@@ -205,15 +211,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
         savedIds.has(p.id)
       );
 
+      const properties = (propsData ?? []) as unknown as Property[];
+      const flatmates = (flatmatesData ?? []) as unknown as FlatmateListing[];
+      const matches = (matchesData ?? []) as AppSnapshot["matches"];
+
       setSnapshot((current) => ({
         ...current,
-        featuredProperties: (propsData ?? []) as unknown as Property[],
+        featuredProperties: properties,
         savedProperties: savedProps as unknown as Property[],
-        flatmates: (flatmatesData ?? []) as unknown as FlatmateListing[],
-        matches: (matchesData ?? []) as AppSnapshot["matches"],
+        flatmates,
+        matches,
         messages: (msgsData ?? []) as unknown as Message[],
         notifications: (notifsData ?? []) as unknown as NotificationItem[],
-        verifications: verificationsWithUrls as unknown as LandlordVerification[]
+        verifications: verificationsWithUrls as unknown as LandlordVerification[],
+        stats: {
+          totalUsers: current.stats.totalUsers,
+          totalProperties: properties.length,
+          totalMatches: matches.length,
+          activeListings: properties.filter((p) => p.is_approved && p.is_visible).length,
+        }
       }));
     } catch (err) {
       console.error("Supabase load failed:", err);
