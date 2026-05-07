@@ -151,6 +151,7 @@ function PropertyCard({
 
 // ── Add property sheet ────────────────────────────────────────────────────────
 function AddPropertySheet({ onClose }: { onClose: () => void }) {
+  const { createProperty } = useData();
   const [title, setTitle] = useState("");
   const [city, setCity] = useState<City>("Nicosia");
   const [address, setAddress] = useState("");
@@ -179,12 +180,20 @@ function AddPropertySheet({ onClose }: { onClose: () => void }) {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title || !address || !price || !phone || !email) {
       toast.error("Please fill in all required fields");
       return;
     }
-    toast.success("Property submitted for review.");
+    await createProperty({
+      title, city, address,
+      rent_price: Number(price),
+      bedrooms: Number(bedrooms),
+      bathrooms: Number(bathrooms),
+      available_to: availableTo,
+      description, phone, email,
+      image_urls: images,
+    });
     onClose();
   };
 
@@ -342,7 +351,7 @@ function AddPropertySheet({ onClose }: { onClose: () => void }) {
             </div>
           </div>
 
-          <Button className="w-full" size="lg" onClick={handleSubmit}>Submit for Review</Button>
+          <Button className="w-full" size="lg" onClick={() => { void handleSubmit(); }}>Submit for Review</Button>
         </div>
         </div>
       </motion.div>

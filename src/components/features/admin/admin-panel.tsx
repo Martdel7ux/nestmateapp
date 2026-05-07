@@ -419,12 +419,160 @@ function VerificationsTab() {
   );
 }
 
+// ─── User profile detail modal ─────────────────────────────────────────────────
+
+import type { Profile } from "@/types/supabase";
+
+function UserDetailModal({ profile, onClose, onDelete }: {
+  profile: Profile;
+  onClose: () => void;
+  onDelete: () => void;
+}) {
+  const { snapshot } = useData();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const theirProperties = snapshot.featuredProperties.filter((p) => p.owner_id === profile.id);
+  const theirFlatmate = snapshot.flatmates.find((f) => f.user_id === profile.id);
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div className="fixed inset-x-4 top-1/2 z-50 max-h-[80dvh] -translate-y-1/2 overflow-y-auto rounded-3xl bg-background p-6 shadow-card">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 mb-5">
+          <div className="flex items-center gap-3">
+            {profile.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+                <UserRound size={22} className="text-muted-foreground" />
+              </div>
+            )}
+            <div>
+              <p className="font-display text-xl font-bold">{profile.full_name}</p>
+              <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                <Badge className="capitalize text-xs">{profile.user_type}</Badge>
+                {profile.is_verified_landlord && (
+                  <Badge className="bg-sky-500/10 text-sky-600 text-xs">
+                    <ShieldCheck size={11} /> Verified
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Details */}
+        <div className="space-y-3 text-sm">
+          {profile.city && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">City</span>
+              <span className="font-medium">{profile.city}</span>
+            </div>
+          )}
+          {profile.university && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">University</span>
+              <span className="font-medium">{profile.university}</span>
+            </div>
+          )}
+          {profile.created_at && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Joined</span>
+              <span className="font-medium">{new Date(profile.created_at).toLocaleDateString()}</span>
+            </div>
+          )}
+          {profile.bio && (
+            <div className="pt-1">
+              <p className="text-muted-foreground mb-1">Bio</p>
+              <p className="rounded-2xl bg-muted/40 px-3 py-2">{profile.bio}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Their properties */}
+        {theirProperties.length > 0 && (
+          <div className="mt-5 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Properties ({theirProperties.length})
+            </p>
+            {theirProperties.map((p) => (
+              <div key={p.id} className="flex items-center justify-between rounded-2xl bg-muted/40 px-3 py-2 text-sm">
+                <span className="truncate">{p.title}</span>
+                <StatusBadge approved={p.is_approved} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Their flatmate listing */}
+        {theirFlatmate && (
+          <div className="mt-5 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Flatmate listing</p>
+            <div className="rounded-2xl bg-muted/40 px-3 py-2 text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Status</span>
+                <span className="capitalize">{theirFlatmate.housing_status.replace("_", " ")}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">City</span>
+                <span>{theirFlatmate.preferred_city}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Approved</span>
+                <StatusBadge approved={theirFlatmate.is_approved} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete */}
+        <div className="mt-6 border-t pt-4">
+          {confirmDelete ? (
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1 text-destructive border-destructive/50"
+                onClick={onDelete}
+              >
+                <Trash2 size={14} /> Confirm Delete Account
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setConfirmDelete(false)}>
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full text-destructive"
+              onClick={() => setConfirmDelete(true)}
+            >
+              <Trash2 size={14} /> Delete this account
+            </Button>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Users ─────────────────────────────────────────────────────────────────────
 
 function UsersTab() {
   const { allProfiles, snapshot, adminDeleteAccount } = useData();
   const [search, setSearch] = useState("");
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
   // Merge allProfiles (from Supabase) with profiles embedded in mock data
   const mockProfiles: typeof allProfiles = [];
@@ -446,6 +594,17 @@ function UsersTab() {
 
   return (
     <div className="space-y-4">
+      {selectedProfile && (
+        <UserDetailModal
+          profile={selectedProfile}
+          onClose={() => setSelectedProfile(null)}
+          onDelete={() => {
+            void adminDeleteAccount(selectedProfile.id);
+            setSelectedProfile(null);
+          }}
+        />
+      )}
+
       <div className="relative">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input
@@ -461,15 +620,15 @@ function UsersTab() {
           <p className="py-8 text-center text-sm text-muted-foreground">No users found.</p>
         )}
         {visible.map((profile) => (
-          <Card key={profile.id} className="p-4">
+          <Card
+            key={profile.id}
+            className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
+            onClick={() => setSelectedProfile(profile)}
+          >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 {profile.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt=""
-                    className="h-10 w-10 rounded-full object-cover flex-shrink-0"
-                  />
+                  <img src={profile.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover flex-shrink-0" />
                 ) : (
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted flex-shrink-0">
                     <UserRound size={18} className="text-muted-foreground" />
@@ -488,31 +647,7 @@ function UsersTab() {
                   </div>
                 </div>
               </div>
-
-              {deletingId === profile.id ? (
-                <div className="flex gap-2 flex-shrink-0">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-destructive border-destructive/50"
-                    onClick={() => { void adminDeleteAccount(profile.id); setDeletingId(null); }}
-                  >
-                    <Trash2 size={14} /> Confirm
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => setDeletingId(null)}>
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-destructive flex-shrink-0"
-                  onClick={() => setDeletingId(profile.id)}
-                >
-                  <Trash2 size={14} /> Delete
-                </Button>
-              )}
+              <span className="text-xs text-muted-foreground flex-shrink-0">View →</span>
             </div>
           </Card>
         ))}

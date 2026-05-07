@@ -251,19 +251,32 @@ function SheetWrapper({ title, subtitle, onClose, children }: {
 
 // ── Add property sheet ────────────────────────────────────────────────────────
 function AddPropertySheet({ onClose }: { onClose: () => void }) {
+  const { createProperty } = useData();
   const form = usePropertyFields();
   const { fields, isValid } = form;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isValid()) return;
-    toast.success("Property submitted for review.");
+    await createProperty({
+      title: fields.title,
+      city: fields.city,
+      address: fields.address,
+      rent_price: Number(fields.price),
+      bedrooms: Number(fields.bedrooms),
+      bathrooms: Number(fields.bathrooms),
+      available_to: fields.availableTo,
+      description: fields.description,
+      phone: fields.phone,
+      email: fields.email,
+      image_urls: fields.images,
+    });
     onClose();
   };
 
   return (
     <SheetWrapper title="Add Property" subtitle="Fill in your listing details" onClose={onClose}>
       <PropertyFormBody {...form} />
-      <Button className="w-full" size="lg" onClick={handleSubmit}>Submit for Review</Button>
+      <Button className="w-full" size="lg" onClick={() => { void handleSubmit(); }}>Submit for Review</Button>
     </SheetWrapper>
   );
 }

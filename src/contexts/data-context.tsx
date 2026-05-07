@@ -62,6 +62,20 @@ interface CreateFlatmateInput {
   apartmentImages?: string[];
 }
 
+interface CreatePropertyInput {
+  title: string;
+  city: City;
+  address: string;
+  rent_price: number;
+  bedrooms: number;
+  bathrooms: number;
+  available_to: "erasmus" | "full_time";
+  description: string;
+  phone: string;
+  email: string;
+  image_urls: string[];
+}
+
 interface DataContextValue {
   snapshot: AppSnapshot;
   allProfiles: Profile[];
@@ -73,6 +87,7 @@ interface DataContextValue {
   filteredFlatmates: FlatmateListing[];
   toggleSavedProperty: (property: Property) => void;
   togglePropertyVisibility: (propertyId: string) => void;
+  createProperty: (data: CreatePropertyInput) => Promise<void>;
   updateProperty: (propertyId: string, data: Partial<Property>) => void;
   deleteProperty: (propertyId: string) => void;
   sendMessage: (matchId: string, content: string) => void;
@@ -139,6 +154,36 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, user?.id]);
+
+  // Real-time: admin sees new property submissions instantly
+  useEffect(() => {
+    if (!supabase || !isAdmin) return;
+    const channel = supabase
+      .channel("admin-properties")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "properties" },
+        (payload) => {
+          const newProp = payload.new as Property;
+          setSnapshot((current) => {
+            const already = current.featuredProperties.some((p) => p.id === newProp.id);
+            if (already) return current;
+            return {
+              ...current,
+              featuredProperties: [newProp, ...current.featuredProperties],
+              stats: {
+                ...current.stats,
+                totalProperties: current.stats.totalProperties + 1
+              }
+            };
+          });
+          toast.success(`New property submitted: ${newProp.title}`);
+        }
+      )
+      .subscribe();
+    return () => { void supabase!.removeChannel(channel); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin]);
 
   async function loadFromSupabase(userId: string) {
     if (!supabase) return;
@@ -357,6 +402,59 @@ export function DataProvider({ children }: { children: ReactNode }) {
             .then(({ error }) => {
               if (error) console.error("visibility error:", error);
             });
+        }
+      },
+
+      async createProperty(data) {
+        const newProperty: Property = {
+          id: `property-${crypto.randomUUID()}`,
+          owner_id: snapshot.profile.id,
+          title: data.title,
+          description: data.description,
+          city: data.city,
+          address: data.address,
+          rent_price: data.rent_price,
+          bedrooms: data.bedrooms,
+          bathrooms: data.bathrooms,
+          available_to: data.available_to,
+          image_urls: data.image_urls,
+          latitude: 0,
+          longitude: 0,
+          phone: data.phone,
+          email: data.email,
+          has_whatsapp: false,
+          is_visible: true,
+          is_approved: false,
+          created_at: new Date().toISOString(),
+          owner: snapshot.profile
+        };
+        setSnapshot((current) => ({
+          ...current,
+          featuredProperties: [newProperty, ...current.featuredProperties]
+        }));
+        toast.success("Property submitted for review.");
+
+        if (supabase && user) {
+          const { error } = await supabase.from("properties").insert({
+            owner_id: user.id,
+            title: data.title,
+            description: data.description,
+            city: data.city,
+            address: data.address,
+            rent_price: data.rent_price,
+            bedrooms: data.bedrooms,
+            bathrooms: data.bathrooms,
+            available_to: data.available_to,
+            image_urls: data.image_urls,
+            latitude: 0,
+            longitude: 0,
+            phone: data.phone,
+            email: data.email,
+            has_whatsapp: false,
+            is_visible: true,
+            is_approved: false
+          });
+          if (error) console.error("createProperty error:", error);
         }
       },
 
@@ -579,6 +677,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       },
 
       createFlatmateListing(data) {
+        // Seekers (no flat) are approved automatically — only those offering a flat need admin review
+        const autoApproved = data.housingStatus === "seeking_flat";
         const newListing: FlatmateListing = {
           id: `flatmate-${crypto.randomUUID()}`,
           user_id: snapshot.profile.id,
@@ -599,14 +699,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
           flat_postal_code: data.flatPostalCode ?? null,
           apartment_images: data.apartmentImages ?? [],
           apartment_description: data.apartmentDescription ?? null,
-          is_approved: true,
+          is_approved: autoApproved,
           profile: snapshot.profile
         };
         setSnapshot((current) => ({
           ...current,
           flatmates: [...current.flatmates, newListing]
         }));
-        toast.success("Listing submitted — pending admin approval.");
+        toast.success(
+          autoApproved
+            ? "You're live! Browse flatmates and start swiping."
+            : "Listing submitted — pending admin approval."
+        );
 
         if (supabase && user) {
           supabase
@@ -631,7 +735,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 flat_postal_code: data.flatPostalCode ?? null,
                 apartment_images: data.apartmentImages ?? [],
                 apartment_description: data.apartmentDescription ?? null,
-                is_approved: false
+                is_approved: autoApproved
               },
               { onConflict: "user_id" }
             )
