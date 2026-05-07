@@ -163,13 +163,16 @@ function AddPropertySheet({ onClose }: { onClose: () => void }) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const photoRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     const remaining = 5 - images.length;
-    const newUrls = files.slice(0, remaining).map((f) => URL.createObjectURL(f));
+    const sliced = files.slice(0, remaining);
+    const newUrls = sliced.map((f) => URL.createObjectURL(f));
     setImages((prev) => [...prev, ...newUrls]);
+    setImageFiles((prev) => [...prev, ...sliced]);
     e.target.value = "";
   };
 
@@ -192,7 +195,7 @@ function AddPropertySheet({ onClose }: { onClose: () => void }) {
       bathrooms: Number(bathrooms),
       available_to: availableTo,
       description, phone, email,
-      image_urls: images,
+      imageFiles,
     });
     onClose();
   };

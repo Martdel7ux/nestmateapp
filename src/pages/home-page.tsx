@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useData } from "@/contexts/data-context";
 import { useI18n } from "@/contexts/i18n-context";
 import { LandlordHome } from "@/components/features/landlord/landlord-home";
+import { PropertyDetailModal } from "@/components/features/properties/property-detail-modal";
 import { currency } from "@/lib/utils";
 import { cities } from "@/lib/constants";
 import type { Property } from "@/types/supabase";
@@ -51,10 +52,12 @@ function PropertyCard({
   property,
   saved,
   onToggleSave,
+  onOpen,
 }: {
   property: Property;
   saved: boolean;
   onToggleSave: () => void;
+  onOpen: () => void;
 }) {
   const { t } = useI18n();
   return (
@@ -62,13 +65,20 @@ function PropertyCard({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="relative overflow-hidden rounded-[2rem] shadow-card"
+      className="relative overflow-hidden rounded-[2rem] shadow-card cursor-pointer"
+      onClick={onOpen}
     >
-      <img
-        src={property.image_urls[0]}
-        alt={property.title}
-        className="h-80 w-full object-cover"
-      />
+      {property.image_urls[0] ? (
+        <img
+          src={property.image_urls[0]}
+          alt={property.title}
+          className="h-80 w-full object-cover"
+        />
+      ) : (
+        <div className="flex h-80 w-full items-center justify-center bg-muted">
+          <Building2 size={40} className="text-muted-foreground/40" />
+        </div>
+      )}
 
       {/* Heart */}
       <button
@@ -114,6 +124,7 @@ function PropertyCard({
 export function HomePage() {
   const { snapshot, toggleSavedProperty } = useData();
   const { t } = useI18n();
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [category, setCategory] = useState<Category>("All");
   const [query, setQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -216,6 +227,8 @@ export function HomePage() {
 
   return (
     <div className="space-y-7">
+      <PropertyDetailModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />
+
       {/* ── Header ── */}
       <div className="flex items-start justify-between px-5 pt-5">
         <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.35 }}>
@@ -591,6 +604,7 @@ export function HomePage() {
                 property={property}
                 saved={snapshot.savedProperties.some((s) => s.id === property.id)}
                 onToggleSave={() => toggleSavedProperty(property)}
+                onOpen={() => setSelectedProperty(property)}
               />
             ))}
           </div>

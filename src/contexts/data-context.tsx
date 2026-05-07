@@ -73,7 +73,7 @@ interface CreatePropertyInput {
   description: string;
   phone: string;
   email: string;
-  image_urls: string[];
+  imageFiles: File[];
 }
 
 interface DataContextValue {
@@ -378,7 +378,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       },
 
       async createProperty(data) {
-        const newProperty: Property = {
+        // Use blob URLs for immediate local preview
+        const previewUrls = data.imageFiles.map((f) => URL.createObjectURL(f));
+
+        const optimistic: Property = {
           id: `property-${crypto.randomUUID()}`,
           owner_id: snapshot.profile.id,
           title: data.title,
@@ -389,7 +392,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           bedrooms: data.bedrooms,
           bathrooms: data.bathrooms,
           available_to: data.available_to,
-          image_urls: data.image_urls,
+          image_urls: previewUrls,
           latitude: 0,
           longitude: 0,
           phone: data.phone,
@@ -402,32 +405,63 @@ export function DataProvider({ children }: { children: ReactNode }) {
         };
         setSnapshot((current) => ({
           ...current,
-          featuredProperties: [newProperty, ...current.featuredProperties]
+          featuredProperties: [optimistic, ...current.featuredProperties]
         }));
-        toast.success("Property submitted for review.");
 
         if (supabase && user) {
-          const { error } = await supabase.from("properties").insert({
-            owner_id: user.id,
-            title: data.title,
-            description: data.description,
-            city: data.city,
-            address: data.address,
-            rent_price: data.rent_price,
-            bedrooms: data.bedrooms,
-            bathrooms: data.bathrooms,
-            available_to: data.available_to,
-            image_urls: data.image_urls,
-            latitude: 0,
-            longitude: 0,
-            phone: data.phone,
-            email: data.email,
-            has_whatsapp: false,
-            is_visible: true,
-            is_approved: false
-          });
-          if (error) console.error("createProperty error:", error);
+          // Upload images to Supabase Storage
+          const uploadedUrls: string[] = [];
+          for (const file of data.imageFiles) {
+            const ext = file.name.split(".").pop() ?? "jpg";
+            const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+            const { error: uploadErr } = await supabase.storage
+              .from("property-images")
+              .upload(path, file, { upsert: false });
+            if (!uploadErr) {
+              const { data: urlData } = supabase.storage
+                .from("property-images")
+                .getPublicUrl(path);
+              uploadedUrls.push(urlData.publicUrl);
+            }
+          }
+
+          const { data: inserted, error } = await supabase
+            .from("properties")
+            .insert({
+              owner_id: user.id,
+              title: data.title,
+              description: data.description,
+              city: data.city,
+              address: data.address,
+              rent_price: data.rent_price,
+              bedrooms: data.bedrooms,
+              bathrooms: data.bathrooms,
+              available_to: data.available_to,
+              image_urls: uploadedUrls,
+              latitude: 0,
+              longitude: 0,
+              phone: data.phone,
+              email: data.email,
+              has_whatsapp: false,
+              is_visible: true,
+              is_approved: false
+            })
+            .select()
+            .single();
+
+          if (error) {
+            console.error("createProperty error:", error);
+          } else if (inserted) {
+            // Replace optimistic entry with real DB record (has correct id + public image URLs)
+            setSnapshot((current) => ({
+              ...current,
+              featuredProperties: current.featuredProperties.map((p) =>
+                p.id === optimistic.id ? { ...inserted as unknown as Property, owner: snapshot.profile } : p
+              )
+            }));
+          }
         }
+        toast.success("Property submitted for review.");
       },
 
       updateProperty(propertyId, data) {

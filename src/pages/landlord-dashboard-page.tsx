@@ -40,13 +40,16 @@ function usePropertyFields(defaults?: Partial<PropertyFields>) {
   const [phone, setPhone] = useState(defaults?.phone ?? "");
   const [email, setEmail] = useState(defaults?.email ?? "");
   const [images, setImages] = useState<string[]>(defaults?.images ?? []);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const photoRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     const remaining = 5 - images.length;
-    const newUrls = files.slice(0, remaining).map((f) => URL.createObjectURL(f));
+    const sliced = files.slice(0, remaining);
+    const newUrls = sliced.map((f) => URL.createObjectURL(f));
     setImages((prev) => [...prev, ...newUrls]);
+    setImageFiles((prev) => [...prev, ...sliced]);
     e.target.value = "";
   };
 
@@ -68,7 +71,7 @@ function usePropertyFields(defaults?: Partial<PropertyFields>) {
   const fields = { title, city, address, price, bedrooms, bathrooms, availableTo, description, phone, email, images };
   const setters = { setTitle, setCity, setAddress, setPrice, setBedrooms, setBathrooms, setAvailableTo, setDescription, setPhone, setEmail, setImages, photoRef, handlePhotoFiles };
 
-  return { fields, setters, generateDescription, isValid };
+  return { fields, setters, imageFiles, generateDescription, isValid };
 }
 
 // ── Shared form body ──────────────────────────────────────────────────────────
@@ -253,7 +256,7 @@ function SheetWrapper({ title, subtitle, onClose, children }: {
 function AddPropertySheet({ onClose }: { onClose: () => void }) {
   const { createProperty } = useData();
   const form = usePropertyFields();
-  const { fields, isValid } = form;
+  const { fields, imageFiles, isValid } = form;
 
   const handleSubmit = async () => {
     if (!isValid()) return;
@@ -268,7 +271,7 @@ function AddPropertySheet({ onClose }: { onClose: () => void }) {
       description: fields.description,
       phone: fields.phone,
       email: fields.email,
-      image_urls: fields.images,
+      imageFiles,
     });
     onClose();
   };
