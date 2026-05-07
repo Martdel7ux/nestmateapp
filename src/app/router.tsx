@@ -19,6 +19,13 @@ import { ProfilePage } from "@/pages/profile-page";
 import { SavedPropertiesPage } from "@/pages/saved-properties-page";
 import { SearchPage } from "@/pages/search-page";
 
+function AdminRoute() {
+  const { isAdmin, loading } = useAuth();
+  if (loading) return null;
+  if (!isAdmin) return <Navigate to="/" replace />;
+  return <Outlet />;
+}
+
 function ProtectedLayout() {
   const { user, loading } = useAuth();
 
@@ -53,7 +60,9 @@ export function AppRouter() {
           <Route path="/assistant" element={<AssistantPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminPage />} />
+          </Route>
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

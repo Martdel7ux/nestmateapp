@@ -12,6 +12,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isMessages = pathname === "/messages";
   const isChat = pathname.startsWith("/messages/");
 
+  const safeTop = "pt-[env(safe-area-inset-top)]";
+
   if (isAssistant) {
     return (
       <div className="flex h-dvh flex-col overflow-hidden">
@@ -26,7 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Messages list: locked viewport, no TopNav, BottomNav at bottom
   if (isMessages) {
     return (
-      <div className="flex h-dvh flex-col overflow-hidden">
+      <div className={`flex h-dvh flex-col overflow-hidden ${safeTop}`}>
         <main className="flex-1 overflow-hidden">{children}</main>
         <BottomNav />
       </div>
@@ -36,7 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Individual chat: locked viewport, no nav chrome at all
   if (isChat) {
     return (
-      <div className="flex h-dvh flex-col overflow-hidden">
+      <div className={`flex h-dvh flex-col overflow-hidden ${safeTop}`}>
         <main className="flex-1 overflow-hidden">{children}</main>
       </div>
     );
@@ -52,7 +54,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       ) : null}
       {!isHome && <TopNav />}
-      <main className={isHome ? "space-y-6 pb-8" : "container space-y-8 pb-8"}>
+      <main className={isHome ? `${safeTop} space-y-6 pb-8` : "container space-y-8 pb-8"}>
         {children}
       </main>
       <BottomNav />

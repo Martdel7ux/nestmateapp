@@ -10,7 +10,7 @@ export function TopNav() {
   const unread = snapshot.notifications.filter((item) => !item.is_read).length;
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between px-5 py-4">
+    <header className="sticky top-0 z-30 flex items-center justify-between px-5 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
       <Link to="/">
         <Logo className="h-12" />
       </Link>

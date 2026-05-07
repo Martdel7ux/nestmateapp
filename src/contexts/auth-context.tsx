@@ -28,11 +28,14 @@ interface SignUpInput {
   userType: UserType;
 }
 
+const ADMIN_EMAILS = ["martinahoto4@gmail.com"];
+
 interface AuthContextValue {
   user: User | null;
   session: Session | null;
   loading: boolean;
   profile: Profile | null;
+  isAdmin: boolean;
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signUp: (input: SignUpInput) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -91,12 +94,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
   }, [user]);
 
+  const isAdmin = ADMIN_EMAILS.includes(user?.email ?? "");
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       session,
       loading,
       profile,
+      isAdmin,
       async signInWithPassword(email, password) {
         if (!supabase) throw new Error("Authentication is not configured. Please contact support.");
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -179,7 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(data as Profile);
       }
     }),
-    [loading, profile, session, user]
+    [isAdmin, loading, profile, session, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

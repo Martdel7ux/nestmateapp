@@ -64,6 +64,7 @@ interface CreateFlatmateInput {
 
 interface DataContextValue {
   snapshot: AppSnapshot;
+  allProfiles: Profile[];
   propertyFilters: SearchFilters;
   flatmateFilters: FlatmateFilters;
   setPropertyFilters: (filters: SearchFilters) => void;
@@ -84,13 +85,16 @@ interface DataContextValue {
   submitVerification: (idFile: File, selfieFile: File) => Promise<void>;
   approveVerification: (landlordId: string) => void;
   rejectVerification: (landlordId: string, reason: string) => void;
+  adminDeleteAccount: (userId: string) => Promise<void>;
+  adminDeleteFlatmate: (flatmateId: string) => void;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const { user, profile: authProfile } = useAuth();
+  const { user, profile: authProfile, isAdmin } = useAuth();
   const [snapshot, setSnapshot] = useState<AppSnapshot>(() => seedSnapshot);
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [propertyFilters, setPropertyFilters] = useState<SearchFilters>({
     sort: "date_desc"
   });
@@ -116,6 +120,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
     void loadFromSupabase(user.id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  // Load all profiles for admin CRM
+  useEffect(() => {
+    if (!supabase || !isAdmin) return;
+    supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setAllProfiles(data as Profile[]);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, user?.id]);
 
   async function loadFromSupabase(userId: string) {
     if (!supabase) return;
@@ -271,6 +288,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const value = useMemo<DataContextValue>(
     () => ({
       snapshot,
+      allProfiles,
       propertyFilters,
       flatmateFilters,
       setPropertyFilters,
@@ -757,6 +775,38 @@ export function DataProvider({ children }: { children: ReactNode }) {
         toast.success("Landlord verified successfully.");
       },
 
+      async adminDeleteAccount(userId) {
+        setAllProfiles((current) => current.filter((p) => p.id !== userId));
+        setSnapshot((current) => ({
+          ...current,
+          featuredProperties: current.featuredProperties.filter((p) => p.owner_id !== userId),
+          flatmates: current.flatmates.filter((f) => f.user_id !== userId),
+          verifications: current.verifications.filter((v) => v.landlord_id !== userId)
+        }));
+        if (supabase) {
+          const { error } = await supabase.from("profiles").delete().eq("id", userId);
+          if (error) console.error("adminDeleteAccount error:", error);
+        }
+        toast.success("Account deleted.");
+      },
+
+      adminDeleteFlatmate(flatmateId) {
+        setSnapshot((current) => ({
+          ...current,
+          flatmates: current.flatmates.filter((f) => f.id !== flatmateId)
+        }));
+        if (supabase) {
+          supabase
+            .from("flatmate_listings")
+            .delete()
+            .eq("id", flatmateId)
+            .then(({ error }) => {
+              if (error) console.error("adminDeleteFlatmate error:", error);
+            });
+        }
+        toast.success("Listing removed.");
+      },
+
       rejectVerification(landlordId, reason) {
         setSnapshot((current) => ({
           ...current,
@@ -788,7 +838,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         toast.success("Verification rejected.");
       }
     }),
-    [filteredFlatmates, filteredProperties, flatmateFilters, propertyFilters, snapshot, user]
+    [allProfiles, filteredFlatmates, filteredProperties, flatmateFilters, propertyFilters, snapshot, user]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
