@@ -102,6 +102,7 @@ interface DataContextValue {
   rejectVerification: (landlordId: string, reason: string) => void;
   adminDeleteAccount: (userId: string) => Promise<void>;
   adminDeleteFlatmate: (flatmateId: string) => void;
+  reloadAdminData: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -155,35 +156,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, user?.id]);
 
-  // Real-time: admin sees new property submissions instantly
-  useEffect(() => {
-    if (!supabase || !isAdmin) return;
-    const channel = supabase
-      .channel("admin-properties")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "properties" },
-        (payload) => {
-          const newProp = payload.new as Property;
-          setSnapshot((current) => {
-            const already = current.featuredProperties.some((p) => p.id === newProp.id);
-            if (already) return current;
-            return {
-              ...current,
-              featuredProperties: [newProp, ...current.featuredProperties],
-              stats: {
-                ...current.stats,
-                totalProperties: current.stats.totalProperties + 1
-              }
-            };
-          });
-          toast.success(`New property submitted: ${newProp.title}`);
-        }
-      )
-      .subscribe();
-    return () => { void supabase!.removeChannel(channel); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdmin]);
 
   async function loadFromSupabase(userId: string) {
     if (!supabase) return;
@@ -895,6 +867,50 @@ export function DataProvider({ children }: { children: ReactNode }) {
         toast.success("Landlord verified successfully.");
       },
 
+      async reloadAdminData() {
+        if (!supabase) return;
+        const [
+          { data: propsData },
+          { data: flatmatesData },
+          { data: verifsData },
+          { data: profilesData }
+        ] = await Promise.all([
+          supabase.from("properties").select("*, owner:profiles!owner_id(*)").order("created_at", { ascending: false }),
+          supabase.from("flatmate_listings").select("*, profile:profiles!user_id(*)"),
+          supabase.from("landlord_verifications").select("*, profile:profiles!landlord_id(*)"),
+          supabase.from("profiles").select("*").order("created_at", { ascending: false })
+        ]);
+
+        const verificationsWithUrls = await Promise.all(
+          (verifsData ?? []).map(async (v: Record<string, unknown>) => {
+            try {
+              const [{ data: idSigned }, { data: selfieSigned }] = await Promise.all([
+                supabase!.storage.from("verification-docs").createSignedUrl(v.id_document_url as string, 3600),
+                supabase!.storage.from("verification-docs").createSignedUrl(v.selfie_url as string, 3600)
+              ]);
+              return { ...v, id_document_url: idSigned?.signedUrl ?? v.id_document_url, selfie_url: selfieSigned?.signedUrl ?? v.selfie_url };
+            } catch { return v; }
+          })
+        );
+
+        const props = (propsData ?? []) as unknown as Property[];
+        setSnapshot((current) => ({
+          ...current,
+          featuredProperties: props,
+          flatmates: (flatmatesData ?? []) as unknown as FlatmateListing[],
+          verifications: verificationsWithUrls as unknown as LandlordVerification[],
+          stats: {
+            ...current.stats,
+            totalProperties: props.length,
+            activeListings: props.filter((p) => p.is_approved && p.is_visible).length
+          }
+        }));
+        if (profilesData) {
+          setAllProfiles(profilesData as Profile[]);
+          setSnapshot((current) => ({ ...current, stats: { ...current.stats, totalUsers: profilesData.length } }));
+        }
+      },
+
       async adminDeleteAccount(userId) {
         setAllProfiles((current) => current.filter((p) => p.id !== userId));
         setSnapshot((current) => ({
@@ -958,6 +974,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         toast.success("Verification rejected.");
       }
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [allProfiles, filteredFlatmates, filteredProperties, flatmateFilters, propertyFilters, snapshot, user]
   );
 

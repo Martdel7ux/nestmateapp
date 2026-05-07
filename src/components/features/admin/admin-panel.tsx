@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
   Flag,
   Home,
   LayoutDashboard,
+  RefreshCw,
   Search,
   ShieldCheck,
   Trash2,
@@ -88,7 +89,7 @@ function OverviewTab() {
 function PropertiesTab() {
   const { snapshot, approveProperty, deleteProperty } = useData();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "pending" | "approved">("all");
+  const [filter, setFilter] = useState<"all" | "pending" | "approved">("pending");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const visible = snapshot.featuredProperties.filter((p) => {
@@ -659,29 +660,53 @@ function UsersTab() {
 // ─── Root panel ────────────────────────────────────────────────────────────────
 
 export function AdminPanel() {
+  const { reloadAdminData } = useData();
   const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Load fresh data from Supabase every time the admin panel mounts
+  useEffect(() => {
+    void reloadAdminData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await reloadAdminData();
+    setRefreshing(false);
+  };
 
   return (
     <div className="space-y-6">
-      {/* Tab bar */}
-      <div className="flex gap-1 overflow-x-auto rounded-2xl bg-muted/50 p-1">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all ${
-                activeTab === tab.id
-                  ? "bg-background shadow-sm text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Icon size={14} />
-              {tab.label}
-            </button>
-          );
-        })}
+      {/* Tab bar + refresh */}
+      <div className="flex items-center gap-2">
+        <div className="flex flex-1 gap-1 overflow-x-auto rounded-2xl bg-muted/50 p-1">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all ${
+                  activeTab === tab.id
+                    ? "bg-background shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon size={14} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          onClick={() => { void handleRefresh(); }}
+          disabled={refreshing}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          title="Refresh data"
+        >
+          <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
+        </button>
       </div>
 
       {/* Tab content */}
