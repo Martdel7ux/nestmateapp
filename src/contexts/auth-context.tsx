@@ -98,12 +98,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       profile,
       async signInWithPassword(email, password) {
-        if (!supabase) return;
+        if (!supabase) throw new Error("Authentication is not configured. Please contact support.");
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       },
       async signUp(input) {
-        if (!supabase) return;
+        if (!supabase) throw new Error("Authentication is not configured. Please contact support.");
         const { error } = await supabase.auth.signUp({
           email: input.email,
           password: input.password,
