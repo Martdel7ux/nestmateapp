@@ -1,4 +1,6 @@
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "engines": { "node": "20.x" }
+  "buildCommand": "npx tsc -b && npx vite build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install"
 }
