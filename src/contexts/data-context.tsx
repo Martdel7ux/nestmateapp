@@ -242,8 +242,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       const properties = (propsData ?? []) as unknown as Property[];
       const approvedFlatmates = (flatmatesData ?? []) as unknown as FlatmateListing[];
-      // Merge: own listing first (even if not approved / not in main query due to RLS), then others
-      const ownListing = ownListingData as unknown as FlatmateListing | null;
+
+      // Determine own listing: prefer Supabase data, fall back to localStorage cache
+      let ownListing = ownListingData as unknown as FlatmateListing | null;
+      if (!ownListing) {
+        try {
+          const cached = localStorage.getItem(`flatmate_submitted_${userId}`);
+          if (cached) ownListing = JSON.parse(cached) as FlatmateListing;
+        } catch { /* ignore parse errors */ }
+      }
+
+      // Merge: own listing always first so myFlatmateListing is never null after submission
       const flatmates = ownListing
         ? [ownListing, ...approvedFlatmates.filter((f) => f.user_id !== userId)]
         : approvedFlatmates;
@@ -795,10 +804,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       },
 
       createFlatmateListing(data) {
-        const autoApproved = true;
+        if (!user) return;
+        const userId = user.id;
         const newListing: FlatmateListing = {
           id: `flatmate-${crypto.randomUUID()}`,
-          user_id: snapshot.profile.id,
+          user_id: userId,
           bio: data.bio,
           profile_image_url: data.profileImageUrl ?? snapshot.profile.avatar_url ?? null,
           min_budget: data.minBudget ?? 0,
@@ -816,48 +826,55 @@ export function DataProvider({ children }: { children: ReactNode }) {
           flat_postal_code: data.flatPostalCode ?? null,
           apartment_images: data.apartmentImages ?? [],
           apartment_description: data.apartmentDescription ?? null,
-          is_approved: autoApproved,
+          is_approved: true,
           profile: snapshot.profile
         };
+
+        // Persist locally so the form never re-appears on re-login
+        localStorage.setItem(`flatmate_submitted_${userId}`, JSON.stringify(newListing));
+
         setSnapshot((current) => ({
           ...current,
-          flatmates: [...current.flatmates, newListing]
+          flatmates: [newListing, ...current.flatmates.filter((f) => f.user_id !== userId)]
         }));
-        toast.success(
-          autoApproved
-            ? "You're live! Browse flatmates and start swiping."
-            : "Listing submitted — pending admin approval."
-        );
+        toast.success("You're live! Browse flatmates and start swiping.");
 
-        if (supabase && user) {
+        if (supabase) {
+          const record = {
+            user_id: userId,
+            bio: data.bio,
+            profile_image_url: data.profileImageUrl ?? snapshot.profile.avatar_url ?? null,
+            min_budget: data.minBudget ?? 0,
+            max_budget: data.maxBudget ?? 0,
+            preferred_city: data.preferredCity ?? data.flatCity ?? "Nicosia",
+            student_type: data.studentType,
+            pet_preference: data.petPreference,
+            interests: [],
+            country_of_origin: data.countryOfOrigin,
+            language: data.language,
+            housing_status: data.housingStatus,
+            flat_price: data.flatPrice ?? null,
+            flat_features: data.flatFeatures ?? [],
+            flat_area: data.flatArea ?? null,
+            flat_postal_code: data.flatPostalCode ?? null,
+            apartment_images: data.apartmentImages ?? [],
+            apartment_description: data.apartmentDescription ?? null,
+            is_approved: true
+          };
+          // Try update first (in case they already have a row), then insert
           supabase
             .from("flatmate_listings")
-            .upsert(
-              {
-                user_id: user.id,
-                bio: data.bio,
-                profile_image_url: data.profileImageUrl ?? snapshot.profile.avatar_url ?? null,
-                min_budget: data.minBudget ?? 0,
-                max_budget: data.maxBudget ?? 0,
-                preferred_city: data.preferredCity ?? data.flatCity ?? "Nicosia",
-                student_type: data.studentType,
-                pet_preference: data.petPreference,
-                interests: [],
-                country_of_origin: data.countryOfOrigin,
-                language: data.language,
-                housing_status: data.housingStatus,
-                flat_price: data.flatPrice ?? null,
-                flat_features: data.flatFeatures ?? [],
-                flat_area: data.flatArea ?? null,
-                flat_postal_code: data.flatPostalCode ?? null,
-                apartment_images: data.apartmentImages ?? [],
-                apartment_description: data.apartmentDescription ?? null,
-                is_approved: autoApproved
-              },
-              { onConflict: "user_id" }
-            )
-            .then(({ error }) => {
-              if (error) console.error("create flatmate listing error:", error);
+            .update(record)
+            .eq("user_id", userId)
+            .then(({ error: updateErr, count }) => {
+              if (!updateErr && count && count > 0) return; // updated existing row
+              // No existing row — insert fresh
+              supabase!
+                .from("flatmate_listings")
+                .insert(record)
+                .then(({ error: insertErr }) => {
+                  if (insertErr) toast.error(`Listing save failed: ${insertErr.message}`);
+                });
             });
         }
       },
