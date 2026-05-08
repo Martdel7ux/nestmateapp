@@ -52,11 +52,16 @@
 
 html {
   scroll-behavior: smooth;
+  /* Extend behind status bar on iOS/Android */
+  height: 100%;
 }
 
 body {
-  @apply min-h-screen bg-background font-sans text-foreground antialiased;
+  @apply min-h-dvh bg-background font-sans text-foreground antialiased;
   background-image: theme("backgroundImage.mesh-light");
+  /* Remove any UA margin that could cause a gap at the top */
+  margin: 0;
+  padding: 0;
 }
 
 .dark body {
@@ -64,7 +69,10 @@ body {
 }
 
 #root {
-  @apply min-h-screen;
+  @apply min-h-dvh;
+  /* Ensure root fills behind the status bar */
+  position: relative;
+  isolation: isolate;
 }
 
 .glass {
