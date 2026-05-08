@@ -103,6 +103,7 @@ interface DataContextValue {
   adminDeleteAccount: (userId: string) => Promise<void>;
   adminDeleteFlatmate: (flatmateId: string) => void;
   reloadAdminData: () => Promise<void>;
+  dataLoading: boolean;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -111,6 +112,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const { user, profile: authProfile, isAdmin } = useAuth();
   const [snapshot, setSnapshot] = useState<AppSnapshot>(() => seedSnapshot);
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
+  const [dataLoading, setDataLoading] = useState(false);
   const [propertyFilters, setPropertyFilters] = useState<SearchFilters>({
     sort: "date_desc"
   });
@@ -133,7 +135,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Load all data from Supabase when a user session is available
   useEffect(() => {
     if (!supabase || !user) return;
-    void loadFromSupabase(user.id);
+    setDataLoading(true);
+    void loadFromSupabase(user.id).finally(() => setDataLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
@@ -1096,10 +1099,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
             });
         }
         toast.success("Verification rejected.");
-      }
+      },
+
+      dataLoading,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allProfiles, filteredFlatmates, filteredProperties, flatmateFilters, propertyFilters, snapshot, user]
+    [allProfiles, dataLoading, filteredFlatmates, filteredProperties, flatmateFilters, propertyFilters, snapshot, user]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

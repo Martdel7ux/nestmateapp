@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Filter } from "lucide-react";
+import { Filter, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -10,11 +10,20 @@ import { useI18n } from "@/contexts/i18n-context";
 import { cities } from "@/lib/constants";
 
 export function FlatmatesPage() {
-  const { snapshot, flatmateFilters, setFlatmateFilters } = useData();
+  const { snapshot, flatmateFilters, setFlatmateFilters, dataLoading } = useData();
   const { t } = useI18n();
   const [showFilters, setShowFilters] = useState(false);
 
   const myListing = snapshot.flatmates.find((f) => f.user_id === snapshot.profile.id);
+
+  // ── Still loading from Supabase: don't flash the form prematurely ──
+  if (dataLoading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <Loader2 size={32} className="animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   // ── No listing yet: show only the creation form ──
   if (!myListing) {
