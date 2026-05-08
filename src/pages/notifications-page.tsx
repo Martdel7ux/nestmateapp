@@ -1,5 +1,6 @@
 import { Bell, BellOff, Building2, Heart, MessageCircle, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { useData } from "@/contexts/data-context";
 import { useI18n } from "@/contexts/i18n-context";
 import type { NotificationItem } from "@/types/supabase";
@@ -35,7 +36,16 @@ function NotifIcon({ type }: { type: NotificationItem["type"] }) {
 export function NotificationsPage() {
   const { snapshot, markNotificationsRead } = useData();
   const { t } = useI18n();
+  const navigate = useNavigate();
   const unread = snapshot.notifications.filter((n) => !n.is_read).length;
+
+  function getMatchId(notif: NotificationItem): string | null {
+    if (notif.type !== "match" || !notif.sender_id) return null;
+    const match = snapshot.matches.find(
+      (m) => m.user_a === notif.sender_id || m.user_b === notif.sender_id
+    );
+    return match?.id ?? null;
+  }
 
   function timeAgo(iso: string) {
     const diff = Date.now() - new Date(iso).getTime();
@@ -82,17 +92,20 @@ export function NotificationsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {snapshot.notifications.map((notif, i) => (
+          {snapshot.notifications.map((notif, i) => {
+            const matchId = getMatchId(notif);
+            return (
             <motion.div
               key={notif.id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05, duration: 0.3 }}
+              onClick={() => { if (matchId) navigate(`/messages/${matchId}`); }}
               className={`flex items-start gap-4 rounded-[1.5rem] p-4 transition ${
                 notif.is_read
                   ? "bg-card/60 shadow-sm"
                   : "border border-primary/20 bg-primary/5 shadow-sm"
-              }`}
+              } ${matchId ? "cursor-pointer hover:bg-primary/10 active:scale-[0.98]" : ""}`}
             >
               <NotifIcon type={notif.type} />
 
@@ -112,7 +125,8 @@ export function NotificationsPage() {
                 <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
               )}
             </motion.div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

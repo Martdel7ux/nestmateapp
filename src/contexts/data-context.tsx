@@ -672,15 +672,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
               if (direction === "right") {
                 if (isMutual) {
-                  // Both matched — notify both users
-                  Promise.all([
-                    supabase!.from("notifications").insert([
+                  // Both matched — create match row first, then notify both users with match ID
+                  supabase!.from("matches").insert({
+                    user_a: user.id,
+                    user_b: matched.user_id
+                  }).select("id").single().then(({ data: matchRow, error: matchErr }) => {
+                    if (matchErr) { console.error("match insert error:", matchErr); return; }
+                    const matchedName = matched.profile?.full_name ?? "your new flatmate";
+                    void supabase!.from("notifications").insert([
                       {
                         recipient_id: user.id,
                         sender_id: matched.user_id,
                         type: "match",
                         title: "It's a Match!",
-                        body: `You and ${matched.profile?.full_name ?? "your new flatmate"} can now chat.`,
+                        body: `You matched with ${matchedName}. Tap to start chatting!`,
                         is_read: false
                       },
                       {
@@ -688,22 +693,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
                         sender_id: user.id,
                         type: "match",
                         title: "It's a Match!",
-                        body: `You and ${myName} can now chat.`,
+                        body: `You matched with ${myName}. Tap to start chatting!`,
                         is_read: false
                       }
-                    ]),
-                    supabase!.from("matches").insert({
-                      user_a: user.id,
-                      user_b: matched.user_id
-                    })
-                  ]).then(() => {
+                    ]);
+                    // Refresh local notifications + add match to local snapshot
                     void supabase!
                       .from("notifications")
                       .select("*")
                       .eq("recipient_id", user.id)
                       .order("created_at", { ascending: false })
                       .then(({ data }) => {
-                        if (data) setSnapshot((c) => ({ ...c, notifications: data as unknown as NotificationItem[] }));
+                        if (data) setSnapshot((c) => ({
+                          ...c,
+                          notifications: data as unknown as NotificationItem[],
+                          matches: matchRow
+                            ? [...c.matches, { id: matchRow.id, user_a: user.id, user_b: matched.user_id, created_at: new Date().toISOString() }]
+                            : c.matches
+                        }));
                       });
                   });
                 } else {
@@ -740,7 +747,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
               sender_id: matched.user_id,
               type: "match",
               title: "It's a Match!",
-              body: `You and ${matched.profile?.full_name ?? "your new flatmate"} can now chat.`,
+              body: `You matched with ${matched.profile?.full_name ?? "your new flatmate"}. Tap to start chatting!`,
               is_read: false,
               created_at: new Date().toISOString()
             };
