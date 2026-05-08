@@ -840,41 +840,34 @@ export function DataProvider({ children }: { children: ReactNode }) {
         toast.success("You're live! Browse flatmates and start swiping.");
 
         if (supabase) {
-          const record = {
-            user_id: userId,
-            bio: data.bio,
-            profile_image_url: data.profileImageUrl ?? snapshot.profile.avatar_url ?? null,
-            min_budget: data.minBudget ?? 0,
-            max_budget: data.maxBudget ?? 0,
-            preferred_city: data.preferredCity ?? data.flatCity ?? "Nicosia",
-            student_type: data.studentType,
-            pet_preference: data.petPreference,
-            interests: [],
-            country_of_origin: data.countryOfOrigin,
-            language: data.language,
-            housing_status: data.housingStatus,
-            flat_price: data.flatPrice ?? null,
-            flat_features: data.flatFeatures ?? [],
-            flat_area: data.flatArea ?? null,
-            flat_postal_code: data.flatPostalCode ?? null,
-            apartment_images: data.apartmentImages ?? [],
-            apartment_description: data.apartmentDescription ?? null,
-            is_approved: true
-          };
-          // Try update first (in case they already have a row), then insert
           supabase
             .from("flatmate_listings")
-            .update(record)
-            .eq("user_id", userId)
-            .then(({ error: updateErr, count }) => {
-              if (!updateErr && count && count > 0) return; // updated existing row
-              // No existing row — insert fresh
-              supabase!
-                .from("flatmate_listings")
-                .insert(record)
-                .then(({ error: insertErr }) => {
-                  if (insertErr) toast.error(`Listing save failed: ${insertErr.message}`);
-                });
+            .upsert(
+              {
+                user_id: userId,
+                bio: data.bio,
+                profile_image_url: data.profileImageUrl ?? snapshot.profile.avatar_url ?? null,
+                min_budget: data.minBudget ?? 0,
+                max_budget: data.maxBudget ?? 0,
+                preferred_city: data.preferredCity ?? data.flatCity ?? "Nicosia",
+                student_type: data.studentType,
+                pet_preference: data.petPreference,
+                interests: [],
+                country_of_origin: data.countryOfOrigin,
+                language: data.language,
+                housing_status: data.housingStatus,
+                flat_price: data.flatPrice ?? null,
+                flat_features: data.flatFeatures ?? [],
+                flat_area: data.flatArea ?? null,
+                flat_postal_code: data.flatPostalCode ?? null,
+                apartment_images: data.apartmentImages ?? [],
+                apartment_description: data.apartmentDescription ?? null,
+                is_approved: true
+              },
+              { onConflict: "user_id" }
+            )
+            .then(({ error }) => {
+              if (error) toast.error(`Listing save failed: ${error.message}`);
             });
         }
       },
