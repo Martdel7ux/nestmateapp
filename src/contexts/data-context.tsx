@@ -85,6 +85,7 @@ interface DataContextValue {
   setFlatmateFilters: (filters: FlatmateFilters) => void;
   filteredProperties: Property[];
   filteredFlatmates: FlatmateListing[];
+  myFlatmateListing: FlatmateListing | null;
   toggleSavedProperty: (property: Property) => void;
   togglePropertyVisibility: (propertyId: string) => void;
   createProperty: (data: CreatePropertyInput) => Promise<void>;
@@ -176,7 +177,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           .from("properties")
           .select("*, owner:profiles!owner_id(*)")
           .order("created_at", { ascending: false }),
-        supabase.from("flatmate_listings").select("*, profile:profiles!user_id(*)"),
+        supabase.from("flatmate_listings").select("*, profile:profiles!user_id(*)").eq("is_approved", true),
         supabase
           .from("matches")
           .select("*")
@@ -232,8 +233,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
         savedIds.has(p.id)
       );
 
+      // Always fetch the user's own listing explicitly — RLS may block it from the main query
+      const { data: ownListingData } = await supabase
+        .from("flatmate_listings")
+        .select("*, profile:profiles!user_id(*)")
+        .eq("user_id", userId)
+        .maybeSingle();
+
       const properties = (propsData ?? []) as unknown as Property[];
-      const flatmates = (flatmatesData ?? []) as unknown as FlatmateListing[];
+      const approvedFlatmates = (flatmatesData ?? []) as unknown as FlatmateListing[];
+      // Merge: own listing first (even if not approved / not in main query due to RLS), then others
+      const ownListing = ownListingData as unknown as FlatmateListing | null;
+      const flatmates = ownListing
+        ? [ownListing, ...approvedFlatmates.filter((f) => f.user_id !== userId)]
+        : approvedFlatmates;
       const matches = (matchesData ?? []) as AppSnapshot["matches"];
 
       setSnapshot((current) => ({
@@ -289,10 +302,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, [propertyFilters, snapshot.featuredProperties]);
 
+  // Use user?.id (auth UID) directly — never stale unlike snapshot.profile.id
+  const myFlatmateListing = useMemo(
+    () => snapshot.flatmates.find((f) => f.user_id === user?.id) ?? null,
+    [snapshot.flatmates, user?.id]
+  );
+
   const filteredFlatmates = useMemo(() => {
-    const myListing = snapshot.flatmates.find(
-      (f) => f.user_id === snapshot.profile.id
-    );
+    const myListing = myFlatmateListing;
 
     // Users must fill out their own listing before seeing others
     if (!myListing) return [];
@@ -305,7 +322,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     return snapshot.flatmates.filter((flatmate) => {
       if (!flatmate.is_approved) return false;
-      if (flatmate.user_id === snapshot.profile.id) return false;
+      if (flatmate.user_id === user?.id) return false;
       if (flatmate.housing_status !== targetStatus) return false;
       if (flatmateFilters.city && flatmate.preferred_city !== flatmateFilters.city)
         return false;
@@ -1108,10 +1125,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         await loadFromSupabase(user.id).finally(() => setDataLoading(false));
       },
 
+      myFlatmateListing,
       dataLoading,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allProfiles, dataLoading, filteredFlatmates, filteredProperties, flatmateFilters, propertyFilters, snapshot, user]
+    [allProfiles, dataLoading, filteredFlatmates, filteredProperties, flatmateFilters, myFlatmateListing, propertyFilters, snapshot, user]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
