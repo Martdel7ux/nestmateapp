@@ -99,7 +99,7 @@ interface DataContextValue {
   approveFlatmate: (flatmateId: string, approved: boolean) => void;
   approveProperty: (propertyId: string, approved: boolean) => void;
   createFlatmateListing: (data: CreateFlatmateInput) => Promise<void>;
-  updateProfile: (data: Partial<Pick<Profile, "full_name" | "bio" | "university" | "city" | "avatar_url">>) => Promise<void>;
+  updateProfile: (data: Partial<Pick<Profile, "full_name" | "bio" | "university" | "city" | "avatar_url">>, avatarFile?: File) => Promise<void>;
   submitVerification: (idFile: File, selfieFile: File) => Promise<void>;
   approveVerification: (landlordId: string) => void;
   rejectVerification: (landlordId: string, reason: string) => void;
@@ -956,15 +956,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
       },
 
-      async updateProfile(data) {
+      async updateProfile(data, avatarFile?) {
+        let profileData = { ...data };
+        if (supabase && user && avatarFile) {
+          const ext = avatarFile.name.split(".").pop() ?? "jpg";
+          const path = `avatars/${user.id}.${ext}`;
+          const { error: upErr } = await supabase.storage
+            .from("property-images")
+            .upload(path, avatarFile, { upsert: true });
+          if (!upErr) {
+            const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
+            profileData = { ...profileData, avatar_url: urlData.publicUrl };
+            // Keep flatmate listing in sync
+            await supabase.from("flatmate_listings")
+              .update({ profile_image_url: urlData.publicUrl })
+              .eq("user_id", user.id);
+          }
+        }
         setSnapshot((current) => ({
           ...current,
-          profile: { ...current.profile, ...data }
+          profile: { ...current.profile, ...profileData }
         }));
         if (supabase && user) {
           const { error } = await supabase
             .from("profiles")
-            .update(data)
+            .update(profileData)
             .eq("id", user.id);
           if (error) console.error("updateProfile error:", error);
         }

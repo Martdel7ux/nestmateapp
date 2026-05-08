@@ -63,6 +63,7 @@ export function ProfilePage() {
   // Avatar picker
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(profile.avatar_url ?? null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const photoRef = useRef<HTMLInputElement>(null);
 
   // Password change
@@ -78,23 +79,28 @@ export function ProfilePage() {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setSelectedAvatar(url);
+    setAvatarFile(file);
+    setSelectedAvatar(URL.createObjectURL(file)); // local preview only — never saved to DB
     setAvatarOpen(false);
   };
 
   const handleSaveProfile = async () => {
     setSavingProfile(true);
     try {
-      await updateProfile({
-        full_name: editName,
-        bio: editBio,
-        university: editUniversity,
-        city: editCity as City,
-        avatar_url: selectedAvatar ?? undefined
-      });
+      await updateProfile(
+        {
+          full_name: editName,
+          bio: editBio,
+          university: editUniversity,
+          city: editCity as City,
+          // Only pass avatar_url when it's a real URL (preset DiceBear), not a blob
+          avatar_url: avatarFile ? undefined : selectedAvatar ?? undefined
+        },
+        avatarFile ?? undefined
+      );
       toast.success("Profile updated");
       setEditing(false);
+      setAvatarFile(null);
     } catch {
       toast.error("Failed to save profile");
     } finally {

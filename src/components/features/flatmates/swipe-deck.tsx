@@ -26,10 +26,12 @@ function MatchOverlay({
   onClose: () => void;
   onMessage: () => void;
 }) {
+  const matchedDicebear = `https://api.dicebear.com/9.x/adventurer/svg?seed=${matched.profile?.full_name ?? matched.id}`;
   const matchedPhoto =
     matched.profile_image_url ??
+    matched.profile?.avatar_url ??
     matched.apartment_images?.[0] ??
-    `https://api.dicebear.com/9.x/adventurer/svg?seed=${matched.profile?.full_name ?? matched.id}`;
+    matchedDicebear;
   const matchedName = matched.profile?.full_name ?? "Your flatmate";
 
   return (
@@ -58,7 +60,8 @@ function MatchOverlay({
           animate={{ x: 0, opacity: 1, rotate: -8 }}
           transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.1 }}
         >
-          <img src={matchedPhoto} alt={matchedName} className="h-full w-full object-cover" />
+          <img src={matchedPhoto} alt={matchedName} className="h-full w-full object-cover"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = matchedDicebear; }} />
         </motion.div>
 
         {/* Current user — right, tilted CW */}
@@ -131,10 +134,12 @@ function ProfileCard({
   const likeOpacity = useTransform(x, [20, 100], [0, 1]);
   const nopeOpacity = useTransform(x, [-100, -20], [1, 0]);
 
+  const dicebear = `https://api.dicebear.com/9.x/adventurer/svg?seed=${flatmate.profile?.full_name ?? flatmate.id}&backgroundColor=b6e3f4&backgroundType=solid`;
   const imageUrl =
     flatmate.profile_image_url ??
+    flatmate.profile?.avatar_url ??
     flatmate.apartment_images?.[0] ??
-    `https://api.dicebear.com/9.x/adventurer/svg?seed=${flatmate.profile?.full_name ?? flatmate.id}&backgroundColor=b6e3f4&backgroundType=solid`;
+    dicebear;
 
   const name = flatmate.profile?.full_name ?? "Student";
   const city = flatmate.preferred_city ?? "Cyprus";
@@ -160,7 +165,8 @@ function ProfileCard({
           zIndex: 10 - stackIndex,
         }}
       >
-        <img src={imageUrl} alt={name} className="h-full w-full object-cover opacity-70" />
+        <img src={imageUrl} alt={name} className="h-full w-full object-cover opacity-70"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = dicebear; }} />
       </div>
     );
   }
@@ -182,7 +188,8 @@ function ProfileCard({
       transition={{ type: "spring", stiffness: 300, damping: 28 }}
     >
       {/* Photo */}
-      <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
+      <img src={imageUrl} alt={name} className="h-full w-full object-cover"
+        onError={(e) => { (e.currentTarget as HTMLImageElement).src = dicebear; }} />
 
       {/* Bottom gradient */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
