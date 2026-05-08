@@ -173,7 +173,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         { data: matchesData },
         { data: notifsData },
         { data: verifsData },
-        { data: savesData }
+        { data: savesData },
+        { data: swipesData }
       ] = await Promise.all([
         supabase
           .from("properties")
@@ -192,7 +193,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase
           .from("landlord_verifications")
           .select("*, profile:profiles!landlord_id(*)"),
-        supabase.from("property_saves").select("property_id").eq("user_id", userId)
+        supabase.from("property_saves").select("property_id").eq("user_id", userId),
+        supabase.from("swipes").select("*").eq("swiper_id", userId)
       ]);
 
       const matchIds = (matchesData ?? []).map((m: Record<string, string>) => m.id);
@@ -259,6 +261,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ? [ownListing, ...approvedFlatmates.filter((f) => f.user_id !== userId)]
         : approvedFlatmates;
       const matches = (matchesData ?? []) as AppSnapshot["matches"];
+      const swipes = (swipesData ?? []) as unknown as AppSnapshot["swipes"];
 
       setSnapshot((current) => ({
         ...current,
@@ -266,6 +269,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         savedProperties: savedProps as unknown as Property[],
         flatmates,
         matches,
+        swipes,
         messages: (msgsData ?? []) as unknown as Message[],
         notifications: (notifsData ?? []) as unknown as NotificationItem[],
         verifications: verificationsWithUrls as unknown as LandlordVerification[],
@@ -331,10 +335,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const targetStatus =
       myListing.housing_status === "seeking_flat" ? "has_flat" : "seeking_flat";
 
+    // Build set of user IDs already swiped by the current user
+    const swipedIds = new Set(snapshot.swipes.map((s) => s.swiped_id));
+
     return snapshot.flatmates.filter((flatmate) => {
       if (!flatmate.is_approved) return false;
       if (flatmate.user_id === user?.id) return false;
       if (flatmate.housing_status !== targetStatus) return false;
+      if (swipedIds.has(flatmate.user_id)) return false;
       if (flatmateFilters.city && flatmate.preferred_city !== flatmateFilters.city)
         return false;
       if (flatmateFilters.minBudget && flatmate.max_budget < flatmateFilters.minBudget)
@@ -646,6 +654,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         };
 
         if (supabase && user) {
+          const myName = snapshot.profile.full_name ?? "Someone";
           supabase
             .from("swipes")
             .upsert(
@@ -654,30 +663,62 @@ export function DataProvider({ children }: { children: ReactNode }) {
             )
             .then(({ error }) => {
               if (error) { console.error("swipe error:", error); return; }
-              if (isMutual) {
-                Promise.all([
-                  supabase!
-                    .from("matches")
-                    .select("*")
-                    .or(`user_a.eq.${user.id},user_b.eq.${user.id}`),
-                  supabase!
-                    .from("notifications")
-                    .select("*")
-                    .eq("recipient_id", user.id)
-                    .order("created_at", { ascending: false })
-                ]).then(([{ data: newMatches }, { data: newNotifs }]) => {
-                  setSnapshot((current) => ({
-                    ...current,
-                    swipes: [...current.swipes, newSwipe],
-                    matches: (newMatches ?? []) as AppSnapshot["matches"],
-                    notifications: (newNotifs ?? []) as unknown as NotificationItem[]
-                  }));
-                });
-              } else {
-                setSnapshot((current) => ({
-                  ...current,
-                  swipes: [...current.swipes, newSwipe]
-                }));
+
+              // Always update local swipes
+              setSnapshot((current) => ({
+                ...current,
+                swipes: [...current.swipes, newSwipe]
+              }));
+
+              if (direction === "right") {
+                if (isMutual) {
+                  // Both matched — notify both users
+                  Promise.all([
+                    supabase!.from("notifications").insert([
+                      {
+                        recipient_id: user.id,
+                        sender_id: matched.user_id,
+                        type: "match",
+                        title: "It's a Match!",
+                        body: `You and ${matched.profile?.full_name ?? "your new flatmate"} can now chat.`,
+                        is_read: false
+                      },
+                      {
+                        recipient_id: matched.user_id,
+                        sender_id: user.id,
+                        type: "match",
+                        title: "It's a Match!",
+                        body: `You and ${myName} can now chat.`,
+                        is_read: false
+                      }
+                    ]),
+                    supabase!.from("matches").insert({
+                      user_a: user.id,
+                      user_b: matched.user_id
+                    })
+                  ]).then(() => {
+                    void supabase!
+                      .from("notifications")
+                      .select("*")
+                      .eq("recipient_id", user.id)
+                      .order("created_at", { ascending: false })
+                      .then(({ data }) => {
+                        if (data) setSnapshot((c) => ({ ...c, notifications: data as unknown as NotificationItem[] }));
+                      });
+                  });
+                } else {
+                  // One-way like — notify User Y that someone liked them
+                  supabase!.from("notifications").insert({
+                    recipient_id: matched.user_id,
+                    sender_id: user.id,
+                    type: "match",
+                    title: "Someone likes you!",
+                    body: `${myName} swiped right on your profile. Swipe right on theirs to match!`,
+                    is_read: false
+                  }).then(({ error: ne }) => {
+                    if (ne) console.error("like notify error:", ne);
+                  });
+                }
               }
             });
         } else {
