@@ -757,7 +757,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
               .eq("id", propertyId)
               .single()
               .then(({ data: prop }) => {
-                if (!prop) return;
+                if (!prop || !supabase) return;
                 supabase
                   .from("notifications")
                   .insert({
