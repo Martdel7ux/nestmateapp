@@ -53,10 +53,12 @@ export function FlatmateForm() {
 
   // Profile photo
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
+  const [profileFile, setProfileFile] = useState<File | null>(null);
   const profileRef = useRef<HTMLInputElement>(null);
 
   // Flat images
   const [flatPreviews, setFlatPreviews] = useState<string[]>([]);
+  const [flatImageFiles, setFlatImageFiles] = useState<File[]>([]);
   const flatImgRef = useRef<HTMLInputElement>(null);
 
   // Flat features
@@ -85,13 +87,17 @@ export function FlatmateForm() {
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setProfilePreview(URL.createObjectURL(file));
+    if (file) {
+      setProfileFile(file);
+      setProfilePreview(URL.createObjectURL(file));
+    }
   };
 
   const handleFlatImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
     setFlatPreviews((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
+    setFlatImageFiles((prev) => [...prev, ...files]);
   };
 
   const removeFlatImage = (index: number) => {
@@ -104,7 +110,7 @@ export function FlatmateForm() {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errs: Record<string, string> = {};
     if (bio.trim().length < 12) errs.bio = "Write at least 12 characters about yourself";
     if (!countryOfOrigin) errs.countryOfOrigin = "Please select your country";
@@ -128,7 +134,7 @@ export function FlatmateForm() {
 
     setErrors({});
     setSubmitting(true);
-    createFlatmateListing({
+    await createFlatmateListing({
       bio: bio.trim(),
       countryOfOrigin,
       language,
@@ -145,8 +151,11 @@ export function FlatmateForm() {
       flatFeatures: selectedFeatures,
       apartmentDescription: apartmentDescription.trim() || undefined,
       profileImageUrl: profilePreview ?? undefined,
+      profileImageFile: profileFile ?? undefined,
       apartmentImages: flatPreviews,
+      apartmentImageFiles: flatImageFiles,
     });
+    setSubmitting(false);
   };
 
 
@@ -429,7 +438,7 @@ export function FlatmateForm() {
         </Card>
       )}
 
-      <Button type="button" className="w-full" size="lg" onClick={handleSubmit} disabled={submitting}>
+      <Button type="button" className="w-full" size="lg" onClick={() => { void handleSubmit(); }} disabled={submitting}>
         {submitting ? (
           <Loader2 size={16} className="animate-spin" />
         ) : (

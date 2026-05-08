@@ -60,6 +60,8 @@ interface CreateFlatmateInput {
   apartmentDescription?: string;
   profileImageUrl?: string;
   apartmentImages?: string[];
+  profileImageFile?: File;
+  apartmentImageFiles?: File[];
 }
 
 interface CreatePropertyInput {
@@ -96,7 +98,7 @@ interface DataContextValue {
   swipeFlatmate: (flatmateId: string, direction: "left" | "right") => FlatmateListing | null;
   approveFlatmate: (flatmateId: string, approved: boolean) => void;
   approveProperty: (propertyId: string, approved: boolean) => void;
-  createFlatmateListing: (data: CreateFlatmateInput) => void;
+  createFlatmateListing: (data: CreateFlatmateInput) => Promise<void>;
   updateProfile: (data: Partial<Pick<Profile, "full_name" | "bio" | "university" | "city" | "avatar_url">>) => Promise<void>;
   submitVerification: (idFile: File, selfieFile: File) => Promise<void>;
   approveVerification: (landlordId: string) => void;
@@ -803,14 +805,48 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
       },
 
-      createFlatmateListing(data) {
+      async createFlatmateListing(data) {
         if (!user) return;
         const userId = user.id;
+
+        // Upload profile image and apartment images to Storage
+        let profileImageUrl = data.profileImageUrl ?? snapshot.profile.avatar_url ?? null;
+        let apartmentImages = data.apartmentImages ?? [];
+
+        if (supabase) {
+          if (data.profileImageFile) {
+            const ext = data.profileImageFile.name.split(".").pop() ?? "jpg";
+            const path = `profiles/${userId}/${crypto.randomUUID()}.${ext}`;
+            const { error } = await supabase.storage
+              .from("property-images")
+              .upload(path, data.profileImageFile, { upsert: true });
+            if (!error) {
+              const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
+              profileImageUrl = urlData.publicUrl;
+            }
+          }
+          if (data.apartmentImageFiles && data.apartmentImageFiles.length > 0) {
+            const uploaded: string[] = [];
+            for (const file of data.apartmentImageFiles) {
+              const ext = file.name.split(".").pop() ?? "jpg";
+              const path = `flats/${userId}/${crypto.randomUUID()}.${ext}`;
+              const { error } = await supabase.storage
+                .from("property-images")
+                .upload(path, file, { upsert: false });
+              if (!error) {
+                const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
+                uploaded.push(urlData.publicUrl);
+              }
+            }
+            if (uploaded.length > 0) apartmentImages = uploaded;
+          }
+        }
+
         const newListing: FlatmateListing = {
           id: `flatmate-${crypto.randomUUID()}`,
           user_id: userId,
           bio: data.bio,
-          profile_image_url: data.profileImageUrl ?? snapshot.profile.avatar_url ?? null,
+          profile_image_url: profileImageUrl,
           min_budget: data.minBudget ?? 0,
           max_budget: data.maxBudget ?? 0,
           preferred_city: data.preferredCity ?? data.flatCity ?? "Nicosia",
@@ -824,7 +860,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           flat_features: data.flatFeatures ?? [],
           flat_area: data.flatArea ?? null,
           flat_postal_code: data.flatPostalCode ?? null,
-          apartment_images: data.apartmentImages ?? [],
+          apartment_images: apartmentImages,
           apartment_description: data.apartmentDescription ?? null,
           is_approved: true,
           profile: snapshot.profile
@@ -846,7 +882,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
               {
                 user_id: userId,
                 bio: data.bio,
-                profile_image_url: data.profileImageUrl ?? snapshot.profile.avatar_url ?? null,
+                profile_image_url: profileImageUrl,
                 min_budget: data.minBudget ?? 0,
                 max_budget: data.maxBudget ?? 0,
                 preferred_city: data.preferredCity ?? data.flatCity ?? "Nicosia",
@@ -860,7 +896,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 flat_features: data.flatFeatures ?? [],
                 flat_area: data.flatArea ?? null,
                 flat_postal_code: data.flatPostalCode ?? null,
-                apartment_images: data.apartmentImages ?? [],
+                apartment_images: apartmentImages,
                 apartment_description: data.apartmentDescription ?? null,
                 is_approved: true
               },
