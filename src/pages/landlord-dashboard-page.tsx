@@ -300,23 +300,27 @@ function EditPropertySheet({ property, onClose }: { property: Property; onClose:
     email: property.email ?? "",
     images: property.image_urls,
   });
-  const { fields, isValid } = form;
+  const { fields, imageFiles, isValid } = form;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!isValid()) return;
-    updateProperty(property.id, {
-      title: fields.title,
-      city: fields.city as City,
-      address: fields.address,
-      rent_price: Number(fields.price),
-      bedrooms: Number(fields.bedrooms),
-      bathrooms: Number(fields.bathrooms),
-      available_to: fields.availableTo,
-      description: fields.description,
-      phone: fields.phone,
-      email: fields.email,
-      image_urls: fields.images,
-    });
+    await updateProperty(
+      property.id,
+      {
+        title: fields.title,
+        city: fields.city as City,
+        address: fields.address,
+        rent_price: Number(fields.price),
+        bedrooms: Number(fields.bedrooms),
+        bathrooms: Number(fields.bathrooms),
+        available_to: fields.availableTo,
+        description: fields.description,
+        phone: fields.phone,
+        email: fields.email,
+        image_urls: fields.images,
+      },
+      imageFiles
+    );
     toast.success("Property updated.");
     onClose();
   };
@@ -324,7 +328,7 @@ function EditPropertySheet({ property, onClose }: { property: Property; onClose:
   return (
     <SheetWrapper title="Edit Property" subtitle="Update your listing details" onClose={onClose}>
       <PropertyFormBody {...form} />
-      <Button className="w-full" size="lg" onClick={handleSave}>Save Changes</Button>
+      <Button className="w-full" size="lg" onClick={() => { void handleSave(); }}>Save Changes</Button>
     </SheetWrapper>
   );
 }

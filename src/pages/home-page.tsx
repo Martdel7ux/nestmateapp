@@ -65,18 +65,18 @@ function PropertyCard({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="relative overflow-hidden rounded-[2rem] shadow-card cursor-pointer"
+      className="relative overflow-hidden rounded-[1.5rem] shadow-card cursor-pointer"
       onClick={onOpen}
     >
       {property.image_urls[0] ? (
         <img
           src={property.image_urls[0]}
           alt={property.title}
-          className="h-80 w-full object-cover"
+          className="h-44 w-full object-cover"
         />
       ) : (
-        <div className="flex h-80 w-full items-center justify-center bg-muted">
-          <Building2 size={40} className="text-muted-foreground/40" />
+        <div className="flex h-44 w-full items-center justify-center bg-muted">
+          <Building2 size={32} className="text-muted-foreground/40" />
         </div>
       )}
 
@@ -93,28 +93,20 @@ function PropertyCard({
       </button>
 
       {/* Bottom overlay */}
-      <div className="absolute inset-x-0 bottom-0 rounded-b-[2rem] bg-gradient-to-t from-black/85 via-black/50 to-transparent px-5 pb-5 pt-16">
-        <div className="mb-1 flex items-center gap-1 text-[11px] text-white/70">
-          <MapPin size={11} />
+      <div className="absolute inset-x-0 bottom-0 rounded-b-[1.5rem] bg-gradient-to-t from-black/85 via-black/50 to-transparent px-3 pb-3 pt-10">
+        <div className="mb-0.5 flex items-center gap-1 text-[10px] text-white/70">
+          <MapPin size={10} />
           {property.city}
         </div>
-        <h3 className="text-lg font-bold leading-tight text-white">{property.title}</h3>
-        <div className="mt-1 mb-4 flex items-center justify-between">
-          <span className="text-sm font-semibold text-white">
-            {currency(property.rent_price)}<span className="text-white/60">{t("homePerMonth")}</span>
+        <h3 className="text-sm font-bold leading-tight text-white line-clamp-1">{property.title}</h3>
+        <div className="mt-1 flex items-center justify-between">
+          <span className="text-xs font-semibold text-white">
+            {currency(property.rent_price)}<span className="text-white/60">/mo</span>
           </span>
-          <span className="flex items-center gap-1 text-xs text-white/80">
-            <Star size={12} className="fill-amber-400 text-amber-400" />
-            {property.average_rating != null ? property.average_rating.toFixed(1) : "New"} {t("homeReviews")}
+          <span className="flex items-center gap-0.5 text-[10px] text-white/80">
+            <Star size={10} className="fill-amber-400 text-amber-400" />
+            {property.average_rating != null ? property.average_rating.toFixed(1) : "New"}
           </span>
-        </div>
-
-        {/* Details pill */}
-        <div className="flex items-center justify-between rounded-full bg-white/15 px-5 py-3 backdrop-blur-sm">
-          <span className="text-sm font-medium text-white">{t("homeSeeDetails")}</span>
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/30">
-            <span className="text-white text-sm">›</span>
-          </div>
         </div>
       </div>
     </motion.div>
@@ -597,7 +589,7 @@ export function HomePage() {
             {t("homeNoProperties")}
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="grid grid-cols-2 gap-3">
             {filtered.map((property) => (
               <PropertyCard
                 key={property.id}

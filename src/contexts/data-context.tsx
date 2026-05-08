@@ -88,7 +88,7 @@ interface DataContextValue {
   toggleSavedProperty: (property: Property) => void;
   togglePropertyVisibility: (propertyId: string) => void;
   createProperty: (data: CreatePropertyInput) => Promise<void>;
-  updateProperty: (propertyId: string, data: Partial<Property>) => void;
+  updateProperty: (propertyId: string, data: Partial<Property>, imageFiles?: File[]) => Promise<void>;
   deleteProperty: (propertyId: string) => void;
   sendMessage: (matchId: string, content: string) => void;
   markNotificationsRead: () => void;
@@ -480,17 +480,46 @@ export function DataProvider({ children }: { children: ReactNode }) {
         toast.success("Property submitted for review.");
       },
 
-      updateProperty(propertyId, data) {
+      async updateProperty(propertyId, data, imageFiles) {
+        // Upload any new image files and replace blob URLs with real Storage URLs
+        let finalImageUrls = data.image_urls ?? [];
+        if (imageFiles && imageFiles.length > 0 && supabase && user) {
+          const uploadedUrls: string[] = [];
+          for (const file of imageFiles) {
+            const ext = file.name.split(".").pop() ?? "jpg";
+            const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+            const { error: uploadErr } = await supabase.storage
+              .from("property-images")
+              .upload(path, file, { upsert: false });
+            if (uploadErr) {
+              console.error("Image upload failed:", uploadErr.message);
+            } else {
+              const { data: urlData } = supabase.storage
+                .from("property-images")
+                .getPublicUrl(path);
+              uploadedUrls.push(urlData.publicUrl);
+            }
+          }
+          // Keep existing real URLs (non-blob), append newly uploaded URLs
+          const existingRealUrls = finalImageUrls.filter((u) => !u.startsWith("blob:"));
+          finalImageUrls = [...existingRealUrls, ...uploadedUrls];
+        } else if (data.image_urls) {
+          // Strip any stale blob URLs even when no new files were provided
+          finalImageUrls = data.image_urls.filter((u) => !u.startsWith("blob:"));
+        }
+
+        const finalData = { ...data, image_urls: finalImageUrls };
+
         setSnapshot((current) => ({
           ...current,
           featuredProperties: current.featuredProperties.map((p) =>
-            p.id === propertyId ? { ...p, ...data } : p
+            p.id === propertyId ? { ...p, ...finalData } : p
           )
         }));
         if (supabase && user) {
           supabase
             .from("properties")
-            .update(data)
+            .update(finalData)
             .eq("id", propertyId)
             .then(({ error }) => {
               if (error) console.error("updateProperty error:", error);

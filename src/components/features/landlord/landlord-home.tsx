@@ -60,11 +60,18 @@ function PropertyCard({
     <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
       {/* Photo */}
       <div className="relative h-48">
-        <img
-          src={property.image_urls[0]}
-          alt={property.title}
-          className="h-full w-full object-cover"
-        />
+        {property.image_urls[0] ? (
+          <img
+            src={property.image_urls[0]}
+            alt={property.title}
+            className="h-full w-full object-cover"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-muted">
+            <Home size={32} className="text-muted-foreground" />
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass}`}>
           {statusLabel}
