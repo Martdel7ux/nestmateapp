@@ -1,4 +1,4 @@
-import { Bell, BellOff, Heart, MessageCircle, ShieldCheck } from "lucide-react";
+import { Bell, BellOff, Building2, Heart, MessageCircle, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useData } from "@/contexts/data-context";
 import { useI18n } from "@/contexts/i18n-context";
@@ -18,6 +18,11 @@ function NotifIcon({ type }: { type: NotificationItem["type"] }) {
   if (type === "verification") return (
     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-sky-500/10">
       <ShieldCheck size={18} className="text-sky-500" />
+    </div>
+  );
+  if (type === "property_approved") return (
+    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500/10">
+      <Building2 size={18} className="text-emerald-500" />
     </div>
   );
   return (

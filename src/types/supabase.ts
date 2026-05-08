@@ -128,7 +128,8 @@ export interface NotificationItem {
     | "saved_property"
     | "verification"
     | "report"
-    | "system";
+    | "system"
+    | "property_approved";
   title: string;
   body: string;
   is_read: boolean;

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
-  Bath, Bed, Eye, EyeOff, Home, ImagePlus, MapPin, Pencil,
+  Bath, Bed, Bell, Eye, EyeOff, Home, ImagePlus, MapPin, Pencil,
   Plus, ShieldCheck, Sparkles, TrendingUp, Trash2, X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -378,6 +378,7 @@ export function LandlordHome() {
 
   const profile = snapshot.profile;
   const firstName = profile.full_name?.split(" ")[0] ?? "there";
+  const unread = snapshot.notifications.filter((n) => !n.is_read).length;
   const hour = new Date().getHours();
   const greeting =
     hour >= 5 && hour < 12 ? "Good morning" :
@@ -403,11 +404,24 @@ export function LandlordHome() {
           </div>
         </motion.div>
 
-        {profile.is_verified_landlord && (
-          <span className="flex items-center gap-1.5 rounded-full bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400">
-            <ShieldCheck size={13} /> Verified landlord
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {profile.is_verified_landlord && (
+            <span className="flex items-center gap-1.5 rounded-full bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400">
+              <ShieldCheck size={13} /> Verified landlord
+            </span>
+          )}
+          <Link
+            to="/notifications"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-muted shadow-sm"
+          >
+            <Bell size={17} />
+            {unread > 0 && (
+              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white">
+                {unread}
+              </span>
+            )}
+          </Link>
+        </div>
       </div>
 
       {/* ── Stats grid ── */}

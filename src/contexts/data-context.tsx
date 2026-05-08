@@ -710,12 +710,34 @@ export function DataProvider({ children }: { children: ReactNode }) {
       },
 
       approveProperty(propertyId, approved) {
-        setSnapshot((current) => ({
-          ...current,
-          featuredProperties: current.featuredProperties.map((p) =>
+        setSnapshot((current) => {
+          const property = current.featuredProperties.find((p) => p.id === propertyId);
+          const updatedProperties = current.featuredProperties.map((p) =>
             p.id === propertyId ? { ...p, is_approved: approved } : p
-          )
-        }));
+          );
+
+          if (!approved || !property) {
+            return { ...current, featuredProperties: updatedProperties };
+          }
+
+          const notification: NotificationItem = {
+            id: `notif-${crypto.randomUUID()}`,
+            recipient_id: property.owner_id,
+            sender_id: user?.id ?? null,
+            type: "property_approved",
+            title: "Property Approved!",
+            body: `Your listing "${property.title}" has been approved and is now live.`,
+            is_read: false,
+            created_at: new Date().toISOString()
+          };
+
+          return {
+            ...current,
+            featuredProperties: updatedProperties,
+            notifications: [notification, ...current.notifications]
+          };
+        });
+
         if (supabase && user) {
           supabase
             .from("properties")
@@ -724,6 +746,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
             .then(({ error }) => {
               if (error) console.error("approve property error:", error);
             });
+
+          if (approved) {
+            supabase
+              .from("properties")
+              .select("owner_id, title")
+              .eq("id", propertyId)
+              .single()
+              .then(({ data: prop }) => {
+                if (!prop) return;
+                supabase
+                  .from("notifications")
+                  .insert({
+                    recipient_id: prop.owner_id,
+                    sender_id: user.id,
+                    type: "property_approved",
+                    title: "Property Approved!",
+                    body: `Your listing "${prop.title}" has been approved and is now live.`,
+                    is_read: false
+                  })
+                  .then(({ error }) => {
+                    if (error) console.error("notify landlord error:", error);
+                  });
+              });
+          }
         }
       },
 
