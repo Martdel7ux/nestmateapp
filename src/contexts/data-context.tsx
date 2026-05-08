@@ -103,6 +103,7 @@ interface DataContextValue {
   adminDeleteAccount: (userId: string) => Promise<void>;
   adminDeleteFlatmate: (flatmateId: string) => void;
   reloadAdminData: () => Promise<void>;
+  reloadData: () => Promise<void>;
   dataLoading: boolean;
 }
 
@@ -1099,6 +1100,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
             });
         }
         toast.success("Verification rejected.");
+      },
+
+      async reloadData() {
+        if (!user) return;
+        setDataLoading(true);
+        await loadFromSupabase(user.id).finally(() => setDataLoading(false));
       },
 
       dataLoading,

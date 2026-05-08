@@ -1,7 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function usePullToRefresh() {
+export function usePullToRefresh(onRefresh: () => void) {
   const [pullDistance, setPullDistance] = useState(0);
+  const pullRef = useRef(0);
+  const onRefreshRef = useRef(onRefresh);
+
+  useEffect(() => {
+    onRefreshRef.current = onRefresh;
+  }, [onRefresh]);
 
   useEffect(() => {
     let startY = 0;
@@ -14,15 +20,17 @@ export function usePullToRefresh() {
     const handleMove = (event: TouchEvent) => {
       if (window.scrollY > 0 || !startY) return;
       const currentY = event.touches[0]?.clientY ?? 0;
-      const next = Math.max(0, currentY - startY);
-      setPullDistance(Math.min(next, 120));
+      const next = Math.min(Math.max(0, currentY - startY), 120);
+      pullRef.current = next;
+      setPullDistance(next);
     };
 
     const handleEnd = () => {
-      if (pullDistance > 90) {
-        window.location.reload();
+      if (pullRef.current > 90) {
+        onRefreshRef.current();
       }
       startY = 0;
+      pullRef.current = 0;
       setPullDistance(0);
     };
 
@@ -35,7 +43,7 @@ export function usePullToRefresh() {
       window.removeEventListener("touchmove", handleMove);
       window.removeEventListener("touchend", handleEnd);
     };
-  }, [pullDistance]);
+  }, []);
 
   return pullDistance;
 }

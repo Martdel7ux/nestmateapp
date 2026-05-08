@@ -2,10 +2,12 @@ import type { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { TopNav } from "@/components/layout/top-nav";
+import { useData } from "@/contexts/data-context";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const pullDistance = usePullToRefresh();
+  const { reloadData } = useData();
+  const pullDistance = usePullToRefresh(reloadData);
   const { pathname } = useLocation();
   const isHome = pathname === "/";
   const isAssistant = pathname === "/assistant";
