@@ -44,7 +44,12 @@ export function NotificationsPage() {
   // Profile sheet state — shown when tapping a "Someone likes you!" notification
   const [likerProfile, setLikerProfile] = useState<FlatmateListing | null>(null);
 
-  // For a mutual match notification → navigate to chat
+  // Returns true if the current user has already swiped on this sender
+  function alreadySwiped(senderId: string) {
+    return snapshot.swipes.some((s) => s.swiped_id === senderId);
+  }
+
+  // For a mutual match notification → navigate to chat (passing origin for back nav)
   // For a one-way like notification → show profile sheet
   function handleNotifTap(notif: NotificationItem) {
     if (notif.type !== "match" || !notif.sender_id) return;
@@ -54,10 +59,8 @@ export function NotificationsPage() {
     );
 
     if (existingMatch) {
-      // It's a mutual match — go to chat
-      navigate(`/messages/${existingMatch.id}`);
+      navigate(`/messages/${existingMatch.id}`, { state: { from: "/notifications" } });
     } else {
-      // It's a one-way like — show the liker's profile
       const liker = snapshot.flatmates.find((f) => f.user_id === notif.sender_id);
       if (liker) setLikerProfile(liker);
     }
@@ -90,11 +93,14 @@ export function NotificationsPage() {
       <ProfileDetailSheetPortal
         flatmate={likerProfile}
         onClose={() => setLikerProfile(null)}
-        onSwipe={(dir) => {
-          if (!likerProfile) return;
-          swipeFlatmate(likerProfile.id, dir);
-          setLikerProfile(null);
-        }}
+        onSwipe={
+          likerProfile && !alreadySwiped(likerProfile.user_id)
+            ? (dir) => {
+                swipeFlatmate(likerProfile.id, dir);
+                setLikerProfile(null);
+              }
+            : undefined
+        }
       />
 
       <div className="space-y-5 px-5 pt-2">
@@ -155,9 +161,11 @@ export function NotificationsPage() {
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground leading-snug">{notif.body}</p>
                     {/* Hint for like notifications */}
-                    {notif.title === "Someone likes you!" && clickable && (
+                    {notif.title === "Someone likes you!" && clickable && notif.sender_id && (
                       <p className="mt-1.5 text-[11px] font-semibold text-primary">
-                        Tap to view their profile →
+                        {alreadySwiped(notif.sender_id)
+                          ? "Tap to view their profile"
+                          : "Tap to view their profile and respond →"}
                       </p>
                     )}
                   </div>

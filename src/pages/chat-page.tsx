@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   ArrowLeft, BedDouble, Home, MapPin, Send, Search, ShieldCheck, X,
 } from "lucide-react";
@@ -191,6 +191,8 @@ function ProfileSheet({
 export function ChatPage() {
   const { matchId = "" } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const backTo = (location.state as { from?: string } | null)?.from ?? "/messages";
   const { snapshot, sendMessage } = useData();
   const [draft, setDraft] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
@@ -231,7 +233,7 @@ export function ChatPage() {
       <div className="shrink-0 flex items-center gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur-sm">
         <button
           type="button"
-          onClick={() => navigate("/messages")}
+          onClick={() => navigate(backTo)}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted transition active:scale-95"
         >
           <ArrowLeft size={18} />
