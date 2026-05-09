@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Bell, BellOff, Building2, Heart, MessageCircle, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useData } from "@/contexts/data-context";
 import { useI18n } from "@/contexts/i18n-context";
-import type { NotificationItem } from "@/types/supabase";
+import { ProfileDetailSheetPortal } from "@/components/features/flatmates/profile-detail-sheet";
+import type { FlatmateListing, NotificationItem } from "@/types/supabase";
 
 function NotifIcon({ type }: { type: NotificationItem["type"] }) {
   if (type === "match") return (
@@ -34,17 +36,40 @@ function NotifIcon({ type }: { type: NotificationItem["type"] }) {
 }
 
 export function NotificationsPage() {
-  const { snapshot, markNotificationsRead } = useData();
+  const { snapshot, markNotificationsRead, swipeFlatmate } = useData();
   const { t } = useI18n();
   const navigate = useNavigate();
   const unread = snapshot.notifications.filter((n) => !n.is_read).length;
 
-  function getMatchId(notif: NotificationItem): string | null {
-    if (notif.type !== "match" || !notif.sender_id) return null;
-    const match = snapshot.matches.find(
+  // Profile sheet state — shown when tapping a "Someone likes you!" notification
+  const [likerProfile, setLikerProfile] = useState<FlatmateListing | null>(null);
+
+  // For a mutual match notification → navigate to chat
+  // For a one-way like notification → show profile sheet
+  function handleNotifTap(notif: NotificationItem) {
+    if (notif.type !== "match" || !notif.sender_id) return;
+
+    const existingMatch = snapshot.matches.find(
       (m) => m.user_a === notif.sender_id || m.user_b === notif.sender_id
     );
-    return match?.id ?? null;
+
+    if (existingMatch) {
+      // It's a mutual match — go to chat
+      navigate(`/messages/${existingMatch.id}`);
+    } else {
+      // It's a one-way like — show the liker's profile
+      const liker = snapshot.flatmates.find((f) => f.user_id === notif.sender_id);
+      if (liker) setLikerProfile(liker);
+    }
+  }
+
+  function isClickable(notif: NotificationItem) {
+    if (notif.type !== "match" || !notif.sender_id) return false;
+    const hasMatch = snapshot.matches.some(
+      (m) => m.user_a === notif.sender_id || m.user_b === notif.sender_id
+    );
+    const hasListing = snapshot.flatmates.some((f) => f.user_id === notif.sender_id);
+    return hasMatch || hasListing;
   }
 
   function timeAgo(iso: string) {
@@ -60,75 +85,92 @@ export function NotificationsPage() {
   }
 
   return (
-    <div className="space-y-5 px-5 pt-2">
-      {/* Header */}
-      <div className="flex items-center justify-between pt-2">
-        <div>
-          <h1 className="font-display text-2xl font-bold">{t("notificationsTitle")}</h1>
+    <>
+      {/* Profile detail sheet — slides up when tapping a like notification */}
+      <ProfileDetailSheetPortal
+        flatmate={likerProfile}
+        onClose={() => setLikerProfile(null)}
+        onSwipe={(dir) => {
+          if (!likerProfile) return;
+          swipeFlatmate(likerProfile.id, dir);
+          setLikerProfile(null);
+        }}
+      />
+
+      <div className="space-y-5 px-5 pt-2">
+        {/* Header */}
+        <div className="flex items-center justify-between pt-2">
+          <div>
+            <h1 className="font-display text-2xl font-bold">{t("notificationsTitle")}</h1>
+            {unread > 0 && (
+              <p className="text-sm text-muted-foreground">{t("notificationsUnread", { n: unread })}</p>
+            )}
+          </div>
           {unread > 0 && (
-            <p className="text-sm text-muted-foreground">{t("notificationsUnread", { n: unread })}</p>
+            <button
+              onClick={() => markNotificationsRead()}
+              className="rounded-full bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
+            >
+              {t("notificationsMarkRead")}
+            </button>
           )}
         </div>
-        {unread > 0 && (
-          <button
-            onClick={() => markNotificationsRead()}
-            className="rounded-full bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
-          >
-            {t("notificationsMarkRead")}
-          </button>
+
+        {/* Notification list */}
+        {snapshot.notifications.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-16 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <BellOff size={28} className="text-muted-foreground" />
+            </div>
+            <p className="font-semibold">{t("notificationsEmpty")}</p>
+            <p className="text-sm text-muted-foreground">{t("notificationsEmptyDesc")}</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {snapshot.notifications.map((notif, i) => {
+              const clickable = isClickable(notif);
+              return (
+                <motion.div
+                  key={notif.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05, duration: 0.3 }}
+                  onClick={() => clickable && handleNotifTap(notif)}
+                  className={`flex items-start gap-4 rounded-[1.5rem] p-4 transition ${
+                    notif.is_read
+                      ? "bg-card/60 shadow-sm"
+                      : "border border-primary/20 bg-primary/5 shadow-sm"
+                  } ${clickable ? "cursor-pointer hover:bg-primary/10 active:scale-[0.98]" : ""}`}
+                >
+                  <NotifIcon type={notif.type} />
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={`text-sm leading-tight ${notif.is_read ? "font-medium" : "font-bold"}`}>
+                        {notif.title}
+                      </p>
+                      <span className="shrink-0 text-[11px] text-muted-foreground">
+                        {timeAgo(notif.created_at)}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground leading-snug">{notif.body}</p>
+                    {/* Hint for like notifications */}
+                    {notif.title === "Someone likes you!" && clickable && (
+                      <p className="mt-1.5 text-[11px] font-semibold text-primary">
+                        Tap to view their profile →
+                      </p>
+                    )}
+                  </div>
+
+                  {!notif.is_read && (
+                    <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
         )}
       </div>
-
-      {/* Notification list */}
-      {snapshot.notifications.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-            <BellOff size={28} className="text-muted-foreground" />
-          </div>
-          <p className="font-semibold">{t("notificationsEmpty")}</p>
-          <p className="text-sm text-muted-foreground">
-            {t("notificationsEmptyDesc")}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {snapshot.notifications.map((notif, i) => {
-            const matchId = getMatchId(notif);
-            return (
-            <motion.div
-              key={notif.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05, duration: 0.3 }}
-              onClick={() => { if (matchId) navigate(`/messages/${matchId}`); }}
-              className={`flex items-start gap-4 rounded-[1.5rem] p-4 transition ${
-                notif.is_read
-                  ? "bg-card/60 shadow-sm"
-                  : "border border-primary/20 bg-primary/5 shadow-sm"
-              } ${matchId ? "cursor-pointer hover:bg-primary/10 active:scale-[0.98]" : ""}`}
-            >
-              <NotifIcon type={notif.type} />
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <p className={`text-sm leading-tight ${notif.is_read ? "font-medium" : "font-bold"}`}>
-                    {notif.title}
-                  </p>
-                  <span className="shrink-0 text-[11px] text-muted-foreground">
-                    {timeAgo(notif.created_at)}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground leading-snug">{notif.body}</p>
-              </div>
-
-              {!notif.is_read && (
-                <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
-              )}
-            </motion.div>
-            );
-          })}
-        </div>
-      )}
-    </div>
+    </>
   );
 }
