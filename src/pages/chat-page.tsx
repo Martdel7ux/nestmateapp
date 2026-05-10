@@ -189,7 +189,8 @@ export function ChatPage() {
       recorder.onstop = async () => {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         stream.getTracks().forEach((t) => t.stop());
-        await uploadAttachment(new File([blob], `voice-${Date.now()}.webm`, { type: "audio/webm" }), "audio");
+        const audioFile = Object.assign(blob, { name: `voice-${Date.now()}.webm` }) as File;
+        await uploadAttachment(audioFile, "audio");
       };
       recorder.start();
       mediaRecorderRef.current = recorder;
