@@ -94,6 +94,7 @@ interface DataContextValue {
   updateProperty: (propertyId: string, data: Partial<Property>, imageFiles?: File[]) => Promise<void>;
   deleteProperty: (propertyId: string) => void;
   sendMessage: (matchId: string, content: string) => void;
+  markMessagesRead: (matchId: string) => void;
   markNotificationsRead: () => void;
   swipeFlatmate: (flatmateId: string, direction: "left" | "right") => FlatmateListing | null;
   approveFlatmate: (flatmateId: string, approved: boolean) => void;
@@ -612,6 +613,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 }));
               }
             });
+        }
+      },
+
+      markMessagesRead(matchId) {
+        setSnapshot((current) => ({
+          ...current,
+          messages: current.messages.map((m) =>
+            m.match_id === matchId && m.sender_id !== current.profile.id
+              ? { ...m, read: true }
+              : m
+          )
+        }));
+        if (supabase && user) {
+          supabase
+            .from("messages")
+            .update({ read: true })
+            .eq("match_id", matchId)
+            .neq("sender_id", user.id)
+            .then(({ error }) => { if (error) console.error("mark messages read error:", error); });
         }
       },
 

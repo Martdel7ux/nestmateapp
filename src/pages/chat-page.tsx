@@ -193,7 +193,7 @@ export function ChatPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const backTo = (location.state as { from?: string } | null)?.from ?? "/messages";
-  const { snapshot, sendMessage } = useData();
+  const { snapshot, sendMessage, markMessagesRead } = useData();
   const [draft, setDraft] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -205,6 +205,11 @@ export function ChatPage() {
   const otherProfile = otherListing?.profile ?? null;
 
   const messages = snapshot.messages.filter((m) => m.match_id === matchId);
+
+  // Mark all incoming messages as read as soon as the chat is opened
+  useEffect(() => {
+    if (matchId) markMessagesRead(matchId);
+  }, [matchId]);
 
   // Auto-scroll to latest message
   useEffect(() => {
