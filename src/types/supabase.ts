@@ -104,6 +104,7 @@ export interface Message {
   read: boolean;
   created_at: string;
   attachment_url?: string | null;
+  attachment_type?: "image" | "video" | "file" | "audio" | null;
 }
 
 export interface LandlordVerification {

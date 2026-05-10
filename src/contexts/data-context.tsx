@@ -88,12 +88,15 @@ interface DataContextValue {
   filteredProperties: Property[];
   filteredFlatmates: FlatmateListing[];
   myFlatmateListing: FlatmateListing | null;
+  blockedUserIds: string[];
+  blockUser: (userId: string) => void;
+  unblockUser: (userId: string) => void;
   toggleSavedProperty: (property: Property) => void;
   togglePropertyVisibility: (propertyId: string) => void;
   createProperty: (data: CreatePropertyInput) => Promise<void>;
   updateProperty: (propertyId: string, data: Partial<Property>, imageFiles?: File[]) => Promise<void>;
   deleteProperty: (propertyId: string) => void;
-  sendMessage: (matchId: string, content: string) => void;
+  sendMessage: (matchId: string, content: string, attachmentUrl?: string | null, attachmentType?: Message["attachment_type"]) => void;
   markMessagesRead: (matchId: string) => void;
   markNotificationsRead: () => void;
   swipeFlatmate: (flatmateId: string, direction: "left" | "right") => FlatmateListing | null;
@@ -118,6 +121,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<AppSnapshot>(() => seedSnapshot);
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
+  const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      try {
+        const stored = localStorage.getItem(`nestmate_blocked_${user.id}`);
+        setBlockedUserIds(stored ? (JSON.parse(stored) as string[]) : []);
+      } catch { setBlockedUserIds([]); }
+    }
+  }, [user?.id]);
   const [propertyFilters, setPropertyFilters] = useState<SearchFilters>({
     sort: "date_desc"
   });
@@ -370,6 +383,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
       filteredProperties,
       filteredFlatmates,
 
+      blockedUserIds,
+
+      blockUser(userId) {
+        const updated = [...blockedUserIds, userId];
+        setBlockedUserIds(updated);
+        if (user) localStorage.setItem(`nestmate_blocked_${user.id}`, JSON.stringify(updated));
+      },
+
+      unblockUser(userId) {
+        const updated = blockedUserIds.filter((id) => id !== userId);
+        setBlockedUserIds(updated);
+        if (user) localStorage.setItem(`nestmate_blocked_${user.id}`, JSON.stringify(updated));
+      },
+
       toggleSavedProperty(property) {
         const isSaved = snapshot.savedProperties.some((item) => item.id === property.id);
         setSnapshot((current) => ({
@@ -584,14 +611,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
       },
 
-      sendMessage(matchId, content) {
+      sendMessage(matchId, content, attachmentUrl, attachmentType) {
         const optimistic: Message = {
           id: `msg-${crypto.randomUUID()}`,
           match_id: matchId,
           sender_id: snapshot.profile.id,
           content,
           read: false,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          attachment_url: attachmentUrl ?? null,
+          attachment_type: attachmentType ?? null,
         };
         setSnapshot((current) => ({
           ...current,
@@ -600,7 +629,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
         if (supabase && user) {
           supabase
             .from("messages")
-            .insert({ match_id: matchId, sender_id: user.id, content })
+            .insert({
+              match_id: matchId,
+              sender_id: user.id,
+              content,
+              attachment_url: attachmentUrl ?? null,
+              attachment_type: attachmentType ?? null,
+            })
             .select()
             .single()
             .then(({ data, error }) => {
@@ -1259,7 +1294,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       dataLoading,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allProfiles, dataLoading, filteredFlatmates, filteredProperties, flatmateFilters, myFlatmateListing, propertyFilters, snapshot, user]
+    [allProfiles, blockedUserIds, dataLoading, filteredFlatmates, filteredProperties, flatmateFilters, myFlatmateListing, propertyFilters, snapshot, user]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
