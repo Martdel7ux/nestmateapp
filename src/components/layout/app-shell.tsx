@@ -29,7 +29,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (isMessages) {
     return (
       <div className="flex h-dvh flex-col overflow-hidden pt-[env(safe-area-inset-top)]">
-        <main className="flex-1 overflow-hidden">{children}</main>
+        <main className="relative flex-1 overflow-hidden">
+          {children}
+          {/* Fade content into nav */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background to-transparent" />
+        </main>
         <BottomNav />
       </div>
     );
@@ -62,6 +66,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       }>
         {children}
       </main>
+      {/* Fade content into nav as user scrolls down */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background via-background/60 to-transparent z-30" />
       <BottomNav />
     </div>
   );
