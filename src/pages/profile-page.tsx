@@ -1,11 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LandlordProfileView } from "@/components/features/landlord/landlord-profile-view";
 import { useI18n } from "@/contexts/i18n-context";
 import {
   Camera, Check, ChevronRight, Eye, EyeOff,
   Heart, Key, LogOut, MapPin, Pencil, ShieldCheck,
-  Trash2, University, User, X
+  Sparkles, Trash2, University, User, X
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -75,6 +75,26 @@ export function ProfilePage() {
 
   // Delete confirm
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+
+  // Profile completion
+  const completionFields = [
+    { label: "Full name",   done: !!profile.full_name?.trim() },
+    { label: "Bio",         done: !!profile.bio?.trim() },
+    { label: "University",  done: !!profile.university?.trim() },
+    { label: "City",        done: !!profile.city?.trim() },
+  ];
+  const completedCount = completionFields.filter((f) => f.done).length;
+  const completionPct = Math.round((completedCount / completionFields.length) * 100);
+
+  // One-time popup for incomplete profiles
+  const PROMPT_KEY = `nestmate_profile_prompt_${profile.id}`;
+  const [promptOpen, setPromptOpen] = useState(false);
+  useEffect(() => {
+    if (completionPct < 100 && !localStorage.getItem(PROMPT_KEY)) {
+      const t = setTimeout(() => setPromptOpen(true), 800);
+      return () => clearTimeout(t);
+    }
+  }, []);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -146,6 +166,79 @@ export function ProfilePage() {
   return (
     <div className="space-y-5 px-5 pt-2">
 
+      {/* ── New-user profile completion prompt ── */}
+      <AnimatePresence>
+        {promptOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              onClick={() => { setPromptOpen(false); localStorage.setItem(PROMPT_KEY, "1"); }}
+            />
+            <motion.div
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="fixed inset-x-4 bottom-6 z-50 rounded-[2rem] bg-background p-6 shadow-card"
+            >
+              <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mx-auto">
+                <Sparkles size={26} className="text-primary" />
+              </div>
+              <h3 className="text-center font-display text-xl font-bold">Complete your profile</h3>
+              <p className="mt-2 text-center text-sm text-muted-foreground leading-relaxed">
+                A complete profile helps you get better matches and enjoy the full NestMate experience.
+              </p>
+
+              {/* Mini progress inside popup */}
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between text-xs font-medium">
+                  <span className="text-muted-foreground">{completedCount} of {completionFields.length} completed</span>
+                  <span className="text-primary">{completionPct}%</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-primary to-sky-400 transition-all duration-700"
+                    style={{ width: `${completionPct}%` }}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {completionFields.map((f) => (
+                    <span key={f.label}
+                      className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                        f.done ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {f.done ? <Check size={10} /> : <span className="h-2 w-2 rounded-full bg-muted-foreground/40 inline-block" />}
+                      {f.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-5 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setPromptOpen(false); localStorage.setItem(PROMPT_KEY, "1"); }}
+                  className="flex-1 rounded-2xl border border-border py-3 text-sm font-semibold text-muted-foreground transition hover:bg-muted"
+                >
+                  Later
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPromptOpen(false);
+                    localStorage.setItem(PROMPT_KEY, "1");
+                    setEditing(true);
+                  }}
+                  className="flex-1 rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-glow transition active:scale-95"
+                >
+                  Complete now
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* ── Avatar + name header ── */}
       <div className="flex flex-col items-center gap-3 pt-2">
         <div className="relative">
@@ -188,6 +281,47 @@ export function ProfilePage() {
           {editing ? t("profileCancelBtn") : t("profileEditBtn")}
         </button>
       </div>
+
+      {/* ── Profile completion bar ── */}
+      {completionPct < 100 && (
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="w-full rounded-[1.5rem] border border-primary/20 bg-primary/5 p-4 text-left transition hover:bg-primary/10 active:scale-[0.98]"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Sparkles size={15} className="text-primary" />
+              <span className="text-sm font-semibold text-primary">Complete your profile</span>
+            </div>
+            <span className="text-sm font-bold text-primary">{completionPct}%</span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-primary/15">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-sky-400"
+              initial={{ width: 0 }}
+              animate={{ width: `${completionPct}%` }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            />
+          </div>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {completionFields.map((f) => (
+              <span key={f.label}
+                className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+                  f.done
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {f.done
+                  ? <Check size={10} />
+                  : <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />}
+                {f.label}
+              </span>
+            ))}
+          </div>
+        </button>
+      )}
 
       {/* ── Avatar picker sheet ── */}
       <AnimatePresence>
