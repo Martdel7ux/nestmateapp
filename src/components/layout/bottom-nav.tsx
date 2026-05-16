@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   Building2,
   Compass,
   HeartHandshake,
@@ -16,6 +17,7 @@ import { useData } from "@/contexts/data-context";
 
 const icons: Record<string, LucideIcon> = {
   Home,
+  BookOpen,
   Compass,
   HeartHandshake,
   MessageCircle,
@@ -28,6 +30,7 @@ const studentNavItems = [
   { key: "navHome",      path: "/",          icon: "Home" },
   { key: "navFlatmates", path: "/flatmates",  icon: "HeartHandshake" },
   { key: "navDiscover",  path: "/discover",   icon: "Compass" },
+  { key: "navStudy",     path: "/study",      icon: "BookOpen" },
   { key: "navMessages",  path: "/messages",   icon: "MessageCircle" },
   { key: "navProfile",   path: "/profile",    icon: "UserRound" },
 ] as const;
@@ -36,6 +39,7 @@ const landlordNavItems = [
   { key: "navHome",        path: "/",               icon: "Home" },
   { key: "navProperties",  path: "/my-properties",  icon: "Building2" },
   { key: "navDiscover",    path: "/discover",        icon: "Compass" },
+  { key: "navStudy",       path: "/study",           icon: "BookOpen" },
   { key: "navMessages",    path: "/messages",        icon: "MessageCircle" },
   { key: "navProfile",     path: "/profile",         icon: "UserRound" },
 ] as const;

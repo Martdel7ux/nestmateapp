@@ -15,6 +15,7 @@ const dictionary: Dictionary = {
   navHome:        { en: "Home",       el: "Αρχική" },
   navFlatmates:   { en: "Flatmates",  el: "Συγκάτοικοι" },
   navDiscover:    { en: "Discover",   el: "Ανακάλυψε" },
+  navStudy:       { en: "Study",      el: "Σπουδές" },
   navProperties:  { en: "Properties", el: "Ακίνητα" },
   navMessages:    { en: "Messages",   el: "Μηνύματα" },
   navProfile:     { en: "Profile",    el: "Προφίλ" },

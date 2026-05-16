@@ -23,6 +23,19 @@ import { ProfilePage } from "@/pages/profile-page";
 import { SavedOpportunitiesPage } from "@/pages/saved-opportunities-page";
 import { SavedPropertiesPage } from "@/pages/saved-properties-page";
 import { SearchPage } from "@/pages/search-page";
+import { StudyHubPage } from "@/pages/study/StudyHubPage";
+import { NoteEditorPage } from "@/pages/study/NoteEditorPage";
+import { NoteViewPage } from "@/pages/study/NoteViewPage";
+import { PublicLibraryPage } from "@/pages/study/PublicLibraryPage";
+import { PublicNotePage } from "@/pages/study/PublicNotePage";
+import { StudyGroupsPage } from "@/pages/study/StudyGroupsPage";
+import { StudyGroupPage } from "@/pages/study/StudyGroupPage";
+import { NewStudyGroupPage } from "@/pages/study/NewStudyGroupPage";
+import { PeersPage } from "@/pages/study/PeersPage";
+import { PeerProfilePage } from "@/pages/study/PeerProfilePage";
+import { StudyMessagesPage } from "@/pages/study/MessagesPage";
+import { ConversationPage } from "@/pages/study/ConversationPage";
+import { MyCoursesPage } from "@/pages/study/MyCoursesPage";
 
 function AdminRoute() {
   const { isAdmin, loading } = useAuth();
@@ -70,6 +83,20 @@ export function AppRouter() {
           <Route path="/discover/preferences" element={<DiscoverPreferencesPage />} />
           <Route path="/discover/saved" element={<SavedOpportunitiesPage />} />
           <Route path="/discover/:id" element={<OpportunityDetailPage />} />
+          <Route path="/study" element={<StudyHubPage />} />
+          <Route path="/study/notes/new" element={<NoteEditorPage />} />
+          <Route path="/study/notes/:id" element={<NoteViewPage />} />
+          <Route path="/study/notes/:id/edit" element={<NoteEditorPage />} />
+          <Route path="/study/library" element={<PublicLibraryPage />} />
+          <Route path="/study/library/:id" element={<PublicNotePage />} />
+          <Route path="/study/groups" element={<StudyGroupsPage />} />
+          <Route path="/study/groups/new" element={<NewStudyGroupPage />} />
+          <Route path="/study/groups/:id" element={<StudyGroupPage />} />
+          <Route path="/study/peers" element={<PeersPage />} />
+          <Route path="/study/peers/:userId" element={<PeerProfilePage />} />
+          <Route path="/study/messages" element={<StudyMessagesPage />} />
+          <Route path="/study/messages/:conversationId" element={<ConversationPage />} />
+          <Route path="/study/courses" element={<MyCoursesPage />} />
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminPage />} />
           </Route>
