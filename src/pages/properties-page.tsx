@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Building2, Grid2X2, Heart, HeartHandshake, Landmark, MapPin, Search, SlidersHorizontal, Star, Bot, ArrowUpRight } from "lucide-react";
+import { Building2, Grid2X2, Heart, Landmark, MapPin, Search, SlidersHorizontal, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { AppHeader } from "@/components/layout/app-header";
 import { useData } from "@/contexts/data-context";
@@ -267,62 +267,6 @@ export function PropertiesPage() {
             );
           })}
         </div>
-      </motion.div>
-
-      {/* ── Quick Actions ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.28, duration: 0.4 }}
-        className="grid grid-cols-2 gap-3 px-5"
-      >
-        {/* Find Flatmate card */}
-        <Link to="/flatmates" className="group">
-          <div className="relative h-44 overflow-hidden rounded-[1.75rem] shadow-card transition-transform duration-200 ease-out group-hover:scale-[1.03] group-active:scale-[0.97]">
-            <img
-              src="/flatmates-hero.jpg"
-              alt="Find Flatmates"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-black/20 transition-opacity duration-200 group-hover:opacity-80" />
-            <div className="absolute left-3.5 right-3.5 top-3.5 flex items-start justify-between">
-              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
-                <HeartHandshake size={17} className="text-white" />
-              </div>
-              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm transition-colors duration-200 group-hover:bg-white/35">
-                <ArrowUpRight size={13} className="text-white" />
-              </div>
-            </div>
-            <div className="absolute bottom-3.5 left-3.5">
-              <p className="text-[11px] text-white/60">{t("homeDiscover")}</p>
-              <p className="text-sm font-bold leading-tight text-white">{t("homeFindFlatmates")}</p>
-            </div>
-          </div>
-        </Link>
-
-        {/* AI Assistant card */}
-        <Link to="/assistant" className="group">
-          <div className="relative h-44 overflow-hidden rounded-[1.75rem] shadow-card transition-transform duration-200 ease-out group-hover:scale-[1.03] group-active:scale-[0.97]">
-            <img
-              src="/ai-hero.jpg"
-              alt="AI Assistant"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-black/20 transition-opacity duration-200 group-hover:opacity-80" />
-            <div className="absolute left-3.5 right-3.5 top-3.5 flex items-start justify-between">
-              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
-                <Bot size={17} className="text-white" />
-              </div>
-              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm transition-colors duration-200 group-hover:bg-white/35">
-                <ArrowUpRight size={13} className="text-white" />
-              </div>
-            </div>
-            <div className="absolute bottom-3.5 left-3.5">
-              <p className="text-[11px] text-white/60">{t("homePoweredByAI")}</p>
-              <p className="text-sm font-bold leading-tight text-white">{t("homeAIAssistant")}</p>
-            </div>
-          </div>
-        </Link>
       </motion.div>
 
       {/* ── Filter Bottom Sheet ── */}
