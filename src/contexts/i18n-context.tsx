@@ -14,6 +14,7 @@ const dictionary: Dictionary = {
   // ── Navigation ──
   navHome:        { en: "Home",       el: "Αρχική" },
   navFlatmates:   { en: "Flatmates",  el: "Συγκάτοικοι" },
+  navDiscover:    { en: "Discover",   el: "Ανακάλυψε" },
   navProperties:  { en: "Properties", el: "Ακίνητα" },
   navMessages:    { en: "Messages",   el: "Μηνύματα" },
   navProfile:     { en: "Profile",    el: "Προφίλ" },

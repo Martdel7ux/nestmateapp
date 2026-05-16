@@ -1,5 +1,6 @@
 import {
   Building2,
+  Compass,
   HeartHandshake,
   Home,
   MessageCircle,
@@ -15,6 +16,7 @@ import { useData } from "@/contexts/data-context";
 
 const icons: Record<string, LucideIcon> = {
   Home,
+  Compass,
   HeartHandshake,
   MessageCircle,
   UserRound,
@@ -25,6 +27,7 @@ const icons: Record<string, LucideIcon> = {
 const studentNavItems = [
   { key: "navHome",      path: "/",          icon: "Home" },
   { key: "navFlatmates", path: "/flatmates",  icon: "HeartHandshake" },
+  { key: "navDiscover",  path: "/discover",   icon: "Compass" },
   { key: "navMessages",  path: "/messages",   icon: "MessageCircle" },
   { key: "navProfile",   path: "/profile",    icon: "UserRound" },
 ] as const;
@@ -32,6 +35,7 @@ const studentNavItems = [
 const landlordNavItems = [
   { key: "navHome",        path: "/",               icon: "Home" },
   { key: "navProperties",  path: "/my-properties",  icon: "Building2" },
+  { key: "navDiscover",    path: "/discover",        icon: "Compass" },
   { key: "navMessages",    path: "/messages",        icon: "MessageCircle" },
   { key: "navProfile",     path: "/profile",         icon: "UserRound" },
 ] as const;
@@ -85,7 +89,9 @@ export function BottomNav() {
       <div className="glass flex items-center gap-1 rounded-[2rem] px-2 py-2 shadow-card">
         {navItems.map((item) => {
           const Icon = icons[item.icon];
-          const active = pathname === item.path;
+          const active =
+            pathname === item.path ||
+            (item.path !== "/" && pathname.startsWith(item.path));
           return (
             <Link
               key={item.path}

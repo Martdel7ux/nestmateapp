@@ -9,13 +9,18 @@ import { AssistantPage } from "@/pages/assistant-page";
 import { AuthCallbackPage } from "@/pages/auth-callback-page";
 import { AuthPage } from "@/pages/auth-page";
 import { ChatPage } from "@/pages/chat-page";
+import { DiscoverPage } from "@/pages/discover-page";
+import { DiscoverNotificationsPage } from "@/pages/discover-notifications-page";
+import { DiscoverPreferencesPage } from "@/pages/discover-preferences-page";
 import { FlatmatesPage } from "@/pages/flatmates-page";
 import { HomePage } from "@/pages/home-page";
 import { LandlordDashboardPage } from "@/pages/landlord-dashboard-page";
 import { MessagesPage } from "@/pages/messages-page";
 import { NotFoundPage } from "@/pages/not-found-page";
 import { NotificationsPage } from "@/pages/notifications-page";
+import { OpportunityDetailPage } from "@/pages/opportunity-detail-page";
 import { ProfilePage } from "@/pages/profile-page";
+import { SavedOpportunitiesPage } from "@/pages/saved-opportunities-page";
 import { SavedPropertiesPage } from "@/pages/saved-properties-page";
 import { SearchPage } from "@/pages/search-page";
 
@@ -60,6 +65,11 @@ export function AppRouter() {
           <Route path="/assistant" element={<AssistantPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/discover" element={<DiscoverPage />} />
+          <Route path="/discover/notifications" element={<DiscoverNotificationsPage />} />
+          <Route path="/discover/preferences" element={<DiscoverPreferencesPage />} />
+          <Route path="/discover/saved" element={<SavedOpportunitiesPage />} />
+          <Route path="/discover/:id" element={<OpportunityDetailPage />} />
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminPage />} />
           </Route>
