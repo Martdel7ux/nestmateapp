@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { BottomNav } from "@/components/layout/bottom-nav";
-import { TopNav } from "@/components/layout/top-nav";
 import { useData } from "@/contexts/data-context";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 
@@ -10,33 +9,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pullDistance = usePullToRefresh(reloadData);
   const { pathname } = useLocation();
   const isHome = pathname === "/";
-  const isAssistant = pathname === "/assistant";
-  const isMessages = pathname === "/messages";
   const isChat = pathname.startsWith("/messages/");
 
-  if (isAssistant) {
-    return (
-      <div className="flex h-dvh flex-col overflow-hidden pt-[env(safe-area-inset-top)]">
-        <TopNav />
-        <main className="flex-1 overflow-hidden">
-          {children}
-        </main>
-        <BottomNav />
-      </div>
-    );
-  }
-
-  if (isMessages) {
-    return (
-      <div className="flex h-dvh flex-col overflow-hidden pt-[env(safe-area-inset-top)]">
-        <main className="relative flex-1 overflow-hidden">
-          {children}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[var(--bg-base)] to-transparent" />
-        </main>
-        <BottomNav />
-      </div>
-    );
-  }
+  // Pages that manage their own internal scroll — need flex h-dvh container
+  // Assistant has no BottomNav; all others do
+  const isAssistant = pathname === "/assistant";
+  const isFullHeight =
+    isAssistant ||
+    pathname === "/messages" ||
+    pathname.startsWith("/discover") ||
+    pathname === "/study" ||
+    pathname.startsWith("/study/");
 
   if (isChat) {
     return (
@@ -46,7 +29,18 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
-  // Default scrollable layout
+  if (isFullHeight) {
+    return (
+      <div className="flex h-dvh flex-col overflow-hidden">
+        <main className="flex-1 overflow-hidden">
+          {children}
+        </main>
+        {!isAssistant && <BottomNav />}
+      </div>
+    );
+  }
+
+  // Default scrollable layout — pages handle their own AppHeader
   return (
     <div className="relative min-h-dvh pb-28">
       {pullDistance > 0 ? (
@@ -56,14 +50,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       ) : null}
-      {!isHome && <TopNav />}
-      <main className={isHome
-        ? "pt-[env(safe-area-inset-top)]"
-        : "container space-y-8 pb-8"
-      }>
+      <main className={isHome ? "pt-[env(safe-area-inset-top)]" : ""}>
         {children}
       </main>
-      {/* Soft fade into floating nav — hidden on home (dark bg) */}
       {!isHome && (
         <div className="pointer-events-none fixed inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/60 to-transparent z-30" />
       )}

@@ -18,7 +18,12 @@ import type {
 
 export async function fetchCourses(): Promise<Course[]> {
   if (!supabase) return [];
-  const { data } = await supabase.from("courses").select("*").eq("is_approved", true).order("title");
+  const { data, error } = await supabase
+    .from("courses")
+    .select("*")
+    .order("university", { ascending: true, nullsFirst: false })
+    .order("title");
+  if (error) console.error("[study-api] fetchCourses:", error.message);
   return (data ?? []) as Course[];
 }
 
@@ -61,6 +66,8 @@ export async function updateUserCourse(
 
 // ── Notes ─────────────────────────────────────────────────────────────────────
 
+const NOTE_COLUMNS = "id, owner_id, course_id, title, content, visibility, group_id, tags, attachment_urls, upvote_count, view_count, created_at, updated_at";
+
 export async function fetchMyNotes(userId: string, filters: NoteFilters): Promise<Note[]> {
   if (!supabase) return [];
   let q = supabase
@@ -81,9 +88,7 @@ export async function fetchNote(id: string, userId?: string): Promise<Note | nul
   if (!supabase) return null;
   const { data } = await supabase
     .from("notes")
-    .select(
-      "*, course:courses(id,title,code), owner:profiles!owner_id(id,full_name,avatar_url,university)"
-    )
+    .select(`${NOTE_COLUMNS}, course:courses(id,title,code), owner:profiles!owner_id(id,full_name,avatar_url,university)`)
     .eq("id", id)
     .maybeSingle();
   if (!data) return null;
@@ -110,9 +115,7 @@ export async function fetchPublicNotes(filters: NoteFilters, page: number): Prom
   const PAGE_SIZE = 20;
   let q = supabase
     .from("notes")
-    .select(
-      "*, course:courses(id,title,code), owner:profiles!owner_id(id,full_name,avatar_url,university)"
-    )
+    .select(`${NOTE_COLUMNS}, course:courses(id,title,code), owner:profiles!owner_id(id,full_name,avatar_url,university)`)
     .eq("visibility", "public")
     .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
@@ -139,9 +142,15 @@ export async function createNote(
   note: Partial<Note> & { owner_id: string; title: string }
 ): Promise<Note> {
   if (!supabase) throw new Error("Not configured");
-  const { data, error } = await supabase.from("notes").insert(note).select().single();
-  if (error) throw error;
-  // TODO: emit gamification event — note created; if public, award XP for public note creation
+  const { data, error } = await supabase
+    .from("notes")
+    .insert(note)
+    .select(NOTE_COLUMNS)
+    .single();
+  if (error) {
+    console.error("[study-api] createNote:", error.code, error.message, error.details);
+    throw error;
+  }
   return data as Note;
 }
 
@@ -151,9 +160,12 @@ export async function updateNote(id: string, updates: Partial<Note>): Promise<No
     .from("notes")
     .update(updates)
     .eq("id", id)
-    .select()
+    .select(NOTE_COLUMNS)
     .single();
-  if (error) throw error;
+  if (error) {
+    console.error("[study-api] updateNote:", error.code, error.message, error.details);
+    throw error;
+  }
   return data as Note;
 }
 

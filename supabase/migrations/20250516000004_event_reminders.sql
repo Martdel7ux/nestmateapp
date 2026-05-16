@@ -7,8 +7,8 @@ ALTER TABLE user_opportunity_saves
   ADD COLUMN IF NOT EXISTS reminder_enabled  boolean    DEFAULT true,
   ADD COLUMN IF NOT EXISTS reminder_sent_at  timestamptz;
 
--- 2. Timezone column on user_profiles (default Nicosia — most users are Cyprus-based)
-ALTER TABLE user_profiles
+-- 2. Timezone column on profiles (default Nicosia — most users are Cyprus-based)
+ALTER TABLE profiles
   ADD COLUMN IF NOT EXISTS timezone text DEFAULT 'Asia/Nicosia';
 
 -- Partial index speeds up the hourly cron query
@@ -68,7 +68,7 @@ BEGIN
             AND o.tags && up.interested_tags
         )                                        THEN 2     -- tag match
         WHEN EXISTS (
-          SELECT 1 FROM user_profiles pr
+          SELECT 1 FROM profiles pr
           WHERE pr.id = p_user_id
             AND pr.city IS NOT NULL
             AND o.location ILIKE '%' || pr.city || '%'

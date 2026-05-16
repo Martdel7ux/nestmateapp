@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Bookmark, Lightbulb, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AppHeader } from "@/components/layout/app-header";
 import { OpportunityCard } from "@/components/features/discover/opportunity-card";
 import { OpportunityFiltersBar } from "@/components/features/discover/opportunity-filters";
 import { NotificationBell } from "@/components/features/discover/notification-bell";
@@ -35,27 +36,31 @@ export function DiscoverPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {showSuggest && <SuggestEventModal onClose={() => setShowSuggest(false)} />}
-      {/* Header */}
-      <div className="shrink-0 bg-primary/10 px-5 pb-4 pt-4 dark:bg-primary/5">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="font-display text-3xl font-bold text-foreground">Discover</h1>
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            <Link
-              to="/discover/saved"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Bookmark size={18} />
-            </Link>
-            <Link
-              to="/discover/preferences"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Settings size={18} />
-            </Link>
-          </div>
-        </div>
-      </div>
+      <AppHeader
+        title="Discover"
+        right={{
+          type: "custom",
+          element: (
+            <div className="flex items-center gap-1.5">
+              <NotificationBell />
+              <Link
+                to="/discover/saved"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-background/60 dark:bg-slate-800/60 shadow-sm text-foreground hover:bg-muted transition-colors"
+                aria-label="Saved opportunities"
+              >
+                <Bookmark size={18} />
+              </Link>
+              <Link
+                to="/discover/preferences"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-background/60 dark:bg-slate-800/60 shadow-sm text-foreground hover:bg-muted transition-colors"
+                aria-label="Discover preferences"
+              >
+                <Settings size={18} />
+              </Link>
+            </div>
+          ),
+        }}
+      />
 
       {/* Filters */}
       <div className="shrink-0 bg-primary/10 pb-3 dark:bg-primary/5">

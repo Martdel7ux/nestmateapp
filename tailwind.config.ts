@@ -57,6 +57,13 @@ const config: Config = {
           DEFAULT: "var(--glass-fill)",
           hover: "var(--glass-fill-hover)",
           border: "var(--glass-border)",
+        },
+        // Action tile accent colors (theme-aware via CSS vars)
+        action: {
+          flatmates: "var(--action-flatmates)",
+          ai:        "var(--action-ai)",
+          property:  "var(--action-property)",
+          study:     "var(--action-study)",
         }
       },
       boxShadow: {

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AppHeader } from "@/components/layout/app-header";
 import { toast } from "sonner";
 import { CourseSelect } from "@/components/features/study/CourseSelect";
 import { useCreateStudyGroup } from "@/hooks/use-study-groups";
@@ -41,17 +41,7 @@ export function NewStudyGroupPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-border bg-background">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted text-muted-foreground"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <h1 className="font-semibold text-foreground">Create Study Group</h1>
-      </div>
+      <AppHeader variant="sub-page" title="Create Study Group" right={{ type: "none" }} />
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">

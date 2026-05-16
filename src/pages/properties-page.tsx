@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Building2, Grid2X2, Heart, HeartHandshake, Landmark, MapPin, Search, SlidersHorizontal, Star, Bot, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { AppHeader } from "@/components/layout/app-header";
 import { useData } from "@/contexts/data-context";
 import { useI18n } from "@/contexts/i18n-context";
 import { PropertyDetailModal } from "@/components/features/properties/property-detail-modal";
@@ -202,23 +203,11 @@ export function PropertiesPage() {
   });
 
   return (
-    <div className="space-y-7">
+    <>
       <PropertyDetailModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />
+      <AppHeader title="Properties" right={{ type: "notifications" }} />
 
-      {/* ── Hero text ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.08, duration: 0.4 }}
-        className="px-5 pt-2"
-      >
-        <h1 className="text-[2rem] leading-[1.2] tracking-tight">
-          {t("homeHeroLine1").split(" ")[0]}{" "}
-          <span className="font-extrabold">{t("homeHeroLine1").split(" ").slice(1).join(" ")}</span>
-          <br />
-          <span className="font-extrabold">{t("homeHeroLine2")}</span>
-        </h1>
-      </motion.div>
+      <div className="space-y-7 pb-4">
 
       {/* ── Search + Filter ── */}
       <motion.div
@@ -561,5 +550,6 @@ export function PropertiesPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

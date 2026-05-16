@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BookOpen, Plus, Trash2, X } from "lucide-react";
+import { AppHeader } from "@/components/layout/app-header";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -99,20 +100,23 @@ export function MyCoursesPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 bg-primary/10 px-5 pb-4 pt-4 dark:bg-primary/5">
-        <div className="flex items-center justify-between">
-          <h1 className="font-display text-3xl font-bold text-foreground">My Courses</h1>
-          <button
-            type="button"
-            onClick={() => setShowAddSheet(true)}
-            className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-          >
-            <Plus size={15} />
-            Add
-          </button>
-        </div>
-      </div>
+      <AppHeader
+        variant="sub-page"
+        title="My Courses"
+        right={{
+          type: "custom",
+          element: (
+            <button
+              type="button"
+              onClick={() => setShowAddSheet(true)}
+              className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            >
+              <Plus size={15} />
+              Add
+            </button>
+          ),
+        }}
+      />
 
       {/* Course list */}
       <div className="flex-1 overflow-y-auto rounded-t-3xl bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">

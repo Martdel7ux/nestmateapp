@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
+import { AppHeader } from "@/components/layout/app-header";
 import { useNavigate, useParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -152,7 +153,7 @@ export function NoteEditorPage() {
           toast.success("Note created");
           navigate(`/study/notes/${note.id}`);
         },
-        onError: () => toast.error("Failed to create note"),
+        onError: (err) => toast.error((err as Error).message || "Failed to create note"),
       });
     }
   };
@@ -168,37 +169,33 @@ export function NoteEditorPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-border bg-background">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted text-muted-foreground"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <h1 className="flex-1 font-semibold text-foreground">
-          {isEdit ? "Edit Note" : "New Note"}
-        </h1>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => handleSave(false)}
-            disabled={isSaving}
-            className="rounded-full border border-border px-4 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
-          >
-            Draft
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSave(true)}
-            disabled={isSaving}
-            className="rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
-          >
-            {isSaving ? "Saving…" : "Publish"}
-          </button>
-        </div>
-      </div>
+      <AppHeader
+        variant="sub-page"
+        title={isEdit ? "Edit Note" : "New Note"}
+        right={{
+          type: "custom",
+          element: (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleSave(false)}
+                disabled={isSaving}
+                className="rounded-full border border-border px-4 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
+              >
+                Draft
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSave(true)}
+                disabled={isSaving}
+                className="rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
+              >
+                {isSaving ? "Saving…" : "Publish"}
+              </button>
+            </div>
+          ),
+        }}
+      />
 
       {/* Form */}
       <div className="flex-1 overflow-y-auto">

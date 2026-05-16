@@ -20,7 +20,6 @@ verify_jwt = false
 
 [functions.send-event-reminders]
 verify_jwt = false
-schedule = "0 * * * *"
 
 [functions.extract-event-metadata]
 verify_jwt = true

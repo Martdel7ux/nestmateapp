@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MessageCircle, Search, X } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
+import { AppHeader } from "@/components/layout/app-header";
 import { useData } from "@/contexts/data-context";
 import { useI18n } from "@/contexts/i18n-context";
 import { useAuth } from "@/contexts/auth-context";
@@ -87,7 +88,6 @@ export function MessagesPage() {
   const { snapshot, blockedUserIds } = useData();
   const { user } = useAuth();
   const { t } = useI18n();
-  const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState("");
   const onlineUserIds = usePresence(user?.id);
 
@@ -123,37 +123,10 @@ export function MessagesPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 bg-primary/10 px-5 pb-5 pt-4 dark:bg-primary/5">
-        <div className="flex items-center justify-between">
-          {searching ? (
-            <div className="flex flex-1 items-center gap-2 rounded-2xl bg-background/70 px-3 py-2 dark:bg-slate-800/70">
-              <Search size={15} className="shrink-0 text-muted-foreground" />
-              <input
-                autoFocus
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search conversations…"
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
-              <button type="button" onClick={() => { setSearching(false); setQuery(""); }}>
-                <X size={15} className="text-muted-foreground" />
-              </button>
-            </div>
-          ) : (
-            <>
-              <h1 className="font-display text-3xl font-bold text-foreground">Chats</h1>
-              <button
-                type="button"
-                onClick={() => setSearching(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-background/60 shadow-sm dark:bg-slate-800/60"
-              >
-                <Search size={18} className="text-foreground" />
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+      <AppHeader
+        title="Chats"
+        right={{ type: "search", onSearch: setQuery, placeholder: "Search conversations…" }}
+      />
 
       {/* Conversations */}
       <div className="flex-1 overflow-y-auto rounded-t-3xl bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">

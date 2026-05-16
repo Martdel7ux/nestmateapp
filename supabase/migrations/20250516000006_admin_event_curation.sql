@@ -32,12 +32,10 @@ CREATE INDEX IF NOT EXISTS idx_opportunities_source_url ON opportunities (source
 
 -- ============================================================================
 -- Admin write policy on opportunities
--- (matches the email-based admin pattern in auth-context.tsx)
--- Only applies when RLS is enabled on the table; safe no-op if it isn't.
 -- ============================================================================
 DO $$
 BEGIN
-  -- Enable RLS only if it is not already enabled
+  -- Enable RLS if not already on
   IF NOT EXISTS (
     SELECT 1 FROM pg_class c
     JOIN   pg_namespace n ON n.oid = c.relnamespace
@@ -46,12 +44,17 @@ BEGIN
       AND  c.relrowsecurity
   ) THEN
     ALTER TABLE opportunities ENABLE ROW LEVEL SECURITY;
+  END IF;
 
-    -- Public read of published opportunities
+  -- Public read policy
+  BEGIN
     CREATE POLICY "opp_public_select" ON opportunities
       FOR SELECT USING (status = 'published' OR status IS NULL);
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
 
-    -- Admin full access
+  -- Admin full access policy
+  BEGIN
     CREATE POLICY "opp_admin_all" ON opportunities
       FOR ALL USING (
         auth.uid() IS NOT NULL
@@ -61,18 +64,8 @@ BEGIN
         auth.uid() IS NOT NULL
         AND (auth.jwt() ->> 'email') = ANY(ARRAY['martinahoto4@gmail.com'])
       );
-  ELSE
-    -- RLS already on — just add the admin write policy if missing
-    CREATE POLICY IF NOT EXISTS "opp_admin_all" ON opportunities
-      FOR ALL USING (
-        auth.uid() IS NOT NULL
-        AND (auth.jwt() ->> 'email') = ANY(ARRAY['martinahoto4@gmail.com'])
-      )
-      WITH CHECK (
-        auth.uid() IS NOT NULL
-        AND (auth.jwt() ->> 'email') = ANY(ARRAY['martinahoto4@gmail.com'])
-      );
-  END IF;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
 END;
 $$;
 
@@ -93,26 +86,43 @@ CREATE TABLE IF NOT EXISTS opportunity_suggestions (
   created_at               timestamptz NOT NULL DEFAULT now()
 );
 
-ALTER TABLE opportunity_suggestions ENABLE ROW LEVEL SECURITY;
+DO $$
+BEGIN
+  ALTER TABLE opportunity_suggestions ENABLE ROW LEVEL SECURITY;
+EXCEPTION WHEN OTHERS THEN NULL;
+END;
+$$;
 
--- Users can submit suggestions
-CREATE POLICY IF NOT EXISTS "suggestions_user_insert" ON opportunity_suggestions
-  FOR INSERT WITH CHECK (auth.uid() = submitted_by);
+DO $$
+BEGIN
+  CREATE POLICY "suggestions_user_insert" ON opportunity_suggestions
+    FOR INSERT WITH CHECK (auth.uid() = submitted_by);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END;
+$$;
 
--- Users can see their own
-CREATE POLICY IF NOT EXISTS "suggestions_user_select" ON opportunity_suggestions
-  FOR SELECT USING (auth.uid() = submitted_by);
+DO $$
+BEGIN
+  CREATE POLICY "suggestions_user_select" ON opportunity_suggestions
+    FOR SELECT USING (auth.uid() = submitted_by);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END;
+$$;
 
--- Admin can see and update all
-CREATE POLICY IF NOT EXISTS "suggestions_admin_all" ON opportunity_suggestions
-  FOR ALL USING (
-    auth.uid() IS NOT NULL
-    AND (auth.jwt() ->> 'email') = ANY(ARRAY['martinahoto4@gmail.com'])
-  )
-  WITH CHECK (
-    auth.uid() IS NOT NULL
-    AND (auth.jwt() ->> 'email') = ANY(ARRAY['martinahoto4@gmail.com'])
-  );
+DO $$
+BEGIN
+  CREATE POLICY "suggestions_admin_all" ON opportunity_suggestions
+    FOR ALL USING (
+      auth.uid() IS NOT NULL
+      AND (auth.jwt() ->> 'email') = ANY(ARRAY['martinahoto4@gmail.com'])
+    )
+    WITH CHECK (
+      auth.uid() IS NOT NULL
+      AND (auth.jwt() ->> 'email') = ANY(ARRAY['martinahoto4@gmail.com'])
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END;
+$$;
 
 -- ============================================================================
 -- Rate-limit: 5 suggestions per user per 24 hours

@@ -1,5 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AppHeader } from "@/components/layout/app-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConversationListItemRow } from "@/components/features/study/ConversationListItem";
 import { useConversations } from "@/hooks/use-conversations";
@@ -15,10 +16,7 @@ export function StudyMessagesPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 bg-primary/10 px-5 pb-4 pt-4 dark:bg-primary/5">
-        <h1 className="font-display text-3xl font-bold text-foreground">Study Messages</h1>
-      </div>
+      <AppHeader variant="sub-page" title="Study Messages" right={{ type: "none" }} />
 
       {/* List */}
       <div className="flex-1 overflow-y-auto rounded-t-3xl bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">

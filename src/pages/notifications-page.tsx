@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Bell, BellOff, Building2, Heart, MessageCircle, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { AppHeader } from "@/components/layout/app-header";
 import { useData } from "@/contexts/data-context";
 import { useI18n } from "@/contexts/i18n-context";
 import { ProfileDetailSheetPortal } from "@/components/features/flatmates/profile-detail-sheet";
@@ -103,24 +104,26 @@ export function NotificationsPage() {
         }
       />
 
-      <div className="space-y-5 px-5 pt-2">
-        {/* Header */}
-        <div className="flex items-center justify-between pt-2">
-          <div>
-            <h1 className="font-display text-2xl font-bold">{t("notificationsTitle")}</h1>
-            {unread > 0 && (
-              <p className="text-sm text-muted-foreground">{t("notificationsUnread", { n: unread })}</p>
-            )}
-          </div>
-          {unread > 0 && (
-            <button
-              onClick={() => markNotificationsRead()}
-              className="rounded-full bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
-            >
-              {t("notificationsMarkRead")}
-            </button>
-          )}
-        </div>
+      <AppHeader
+        title={t("notificationsTitle")}
+        subtitle={unread > 0 ? t("notificationsUnread", { n: unread }) : undefined}
+        right={
+          unread > 0
+            ? {
+                type: "custom",
+                element: (
+                  <button
+                    onClick={() => markNotificationsRead()}
+                    className="rounded-full bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
+                  >
+                    {t("notificationsMarkRead")}
+                  </button>
+                ),
+              }
+            : { type: "none" }
+        }
+      />
+      <div className="space-y-5 px-5 pt-4">
 
         {/* Notification list */}
         {snapshot.notifications.length === 0 ? (

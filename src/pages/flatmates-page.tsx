@@ -3,6 +3,7 @@ import { Filter, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { AppHeader } from "@/components/layout/app-header";
 import { FlatmateForm } from "@/components/features/flatmates/flatmate-form";
 import { SwipeDeck } from "@/components/features/flatmates/swipe-deck";
 import { useData } from "@/contexts/data-context";
@@ -28,36 +29,39 @@ export function FlatmatesPage() {
   // ── No listing yet: show only the creation form ──
   if (!myListing) {
     return (
-      <div className="space-y-6 px-5 pt-2">
-        <div>
-          <h1 className="font-display text-2xl font-bold">{t("flatmatesTitle")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("flatmatesSubtitle")}
-          </p>
+      <>
+        <AppHeader title={t("flatmatesTitle")} subtitle={t("flatmatesSubtitle")} right={{ type: "none" }} />
+        <div className="space-y-6 px-5 pt-4">
+          <FlatmateForm />
         </div>
-        <FlatmateForm />
-      </div>
+      </>
     );
   }
 
   // ── Listing exists: show browse view ──
   return (
-    <div className="space-y-5 px-5 pt-2">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold">{t("flatmatesTitle")}</h1>
-        <button
-          type="button"
-          onClick={() => setShowFilters((v) => !v)}
-          className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
-            showFilters
-              ? "border-primary bg-primary/5 text-primary"
-              : "border-border hover:bg-muted"
-          }`}
-        >
-          <Filter size={13} />
-          {t("flatmatesFilter")}
-        </button>
-      </div>
+    <>
+      <AppHeader
+        title={t("flatmatesTitle")}
+        right={{
+          type: "custom",
+          element: (
+            <button
+              type="button"
+              onClick={() => setShowFilters((v) => !v)}
+              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                showFilters
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border bg-background/60 dark:bg-slate-800/60 hover:bg-muted"
+              }`}
+            >
+              <Filter size={13} />
+              {t("flatmatesFilter")}
+            </button>
+          ),
+        }}
+      />
+      <div className="space-y-5 px-5 pt-4">
 
       {/* Collapsible filter panel */}
       {showFilters && (
@@ -96,5 +100,6 @@ export function FlatmatesPage() {
         <SwipeDeck />
       </div>
     </div>
+    </>
   );
 }

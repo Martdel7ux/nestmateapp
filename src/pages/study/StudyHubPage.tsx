@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { BookOpen, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { AppHeader } from "@/components/layout/app-header";
 import { MyNotesPage } from "./MyNotesPage";
 import { PublicLibraryPage } from "./PublicLibraryPage";
 import { StudyGroupsPage } from "./StudyGroupsPage";
@@ -21,22 +22,21 @@ export function StudyHubPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 bg-primary/10 px-5 pb-4 pt-4 dark:bg-primary/5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <BookOpen size={22} className="text-primary" />
-            <h1 className="font-display text-3xl font-bold text-foreground">Study Hub</h1>
-          </div>
-          <Link
-            to="/study/messages"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Messages"
-          >
-            <MessageCircle size={18} />
-          </Link>
-        </div>
-
+      <AppHeader
+        title="Study Hub"
+        right={{
+          type: "custom",
+          element: (
+            <Link
+              to="/study/messages"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-background/60 dark:bg-slate-800/60 shadow-sm text-foreground hover:bg-muted transition-colors"
+              aria-label="Study messages"
+            >
+              <MessageCircle size={18} />
+            </Link>
+          ),
+        }}
+      >
         {/* Tab bar */}
         <div className="flex gap-1 overflow-x-auto pb-0.5 scrollbar-hide">
           {TABS.map(({ value, label }) => (
@@ -55,7 +55,7 @@ export function StudyHubPage() {
             </button>
           ))}
         </div>
-      </div>
+      </AppHeader>
 
       {/* Tab content */}
       <div className="flex-1 overflow-hidden rounded-t-3xl bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">

@@ -125,9 +125,13 @@ CREATE TABLE IF NOT EXISTS direct_conversations (
   id        uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_a_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   user_b_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
-  created_at timestamptz DEFAULT now(),
-  UNIQUE (LEAST(user_a_id::text, user_b_id::text), GREATEST(user_a_id::text, user_b_id::text))
+  created_at timestamptz DEFAULT now()
 );
+CREATE UNIQUE INDEX IF NOT EXISTS direct_conversations_unique_pair
+  ON direct_conversations (
+    LEAST(user_a_id::text, user_b_id::text),
+    GREATEST(user_a_id::text, user_b_id::text)
+  );
 
 -- study_messages (renamed from 'messages' to avoid conflict with existing messages table)
 CREATE TABLE IF NOT EXISTS study_messages (

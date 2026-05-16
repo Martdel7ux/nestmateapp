@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LandlordProfileView } from "@/components/features/landlord/landlord-profile-view";
+import { AppHeader } from "@/components/layout/app-header";
 import { useI18n } from "@/contexts/i18n-context";
 import {
   Camera, Check, ChevronRight, Eye, EyeOff,
@@ -166,7 +167,9 @@ export function ProfilePage() {
   if (isLandlord) return <LandlordProfileView />;
 
   return (
-    <div className="space-y-5 px-5 pt-2">
+    <>
+      <AppHeader title="Profile" right={{ type: "none" }} />
+      <div className="space-y-5 px-5 pt-4">
 
       {/* ── New-user profile completion prompt ── */}
       <AnimatePresence>
@@ -674,5 +677,6 @@ export function ProfilePage() {
 
       <div className="h-4" />
     </div>
+    </>
   );
 }

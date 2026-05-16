@@ -1,5 +1,6 @@
-import { ArrowLeft, Bookmark } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AppHeader } from "@/components/layout/app-header";
 import { OpportunityCard } from "@/components/features/discover/opportunity-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSavedOpportunities } from "@/hooks/use-saved-opportunities";
@@ -10,19 +11,7 @@ export function SavedOpportunitiesPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 bg-primary/10 px-5 pb-5 pt-4 dark:bg-primary/5">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-background/60 shadow-sm"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <h1 className="font-display text-2xl font-bold">Saved</h1>
-        </div>
-      </div>
+      <AppHeader variant="sub-page" title="Saved Opportunities" right={{ type: "none" }} />
 
       <div className="flex-1 overflow-y-auto rounded-t-3xl bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
         <div className="p-4 space-y-3">

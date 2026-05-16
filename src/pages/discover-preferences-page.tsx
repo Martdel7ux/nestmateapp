@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { AppHeader } from "@/components/layout/app-header";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -75,19 +75,7 @@ export function DiscoverPreferencesPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 bg-primary/10 px-5 pb-5 pt-4 dark:bg-primary/5">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-background/60 shadow-sm"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <h1 className="font-display text-2xl font-bold">Preferences</h1>
-        </div>
-      </div>
+      <AppHeader variant="sub-page" title="Preferences" right={{ type: "none" }} />
 
       <div className="flex-1 overflow-y-auto rounded-t-3xl bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
         {isLoading ? (

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ArrowLeft, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { AppHeader } from "@/components/layout/app-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -96,23 +97,13 @@ export function StudyGroupPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 bg-primary/10 dark:bg-primary/5 px-4 pb-3 pt-4">
-        <div className="flex items-center gap-3 mb-3">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted/60 text-foreground"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-bold text-foreground truncate">{group.name}</h1>
-            {group.course && <CourseBadge course={group.course} className="mt-0.5" />}
-          </div>
-
-          {/* Join/Leave */}
-          {isMember ? (
+      <AppHeader
+        variant="sub-page"
+        title={group.name}
+        subtitle={group.course?.title}
+        right={{
+          type: "custom",
+          element: isMember ? (
             <button
               type="button"
               onClick={handleLeave}
@@ -130,27 +121,26 @@ export function StudyGroupPage() {
             >
               Join
             </button>
-          )}
-        </div>
-
-        {/* Tab bar */}
-        <div className="flex gap-1">
-          {TABS.map(({ value, label }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setActiveTab(value)}
-              className={cn(
-                "flex-1 rounded-full py-1.5 text-xs font-semibold transition-all",
-                activeTab === value
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+          ),
+        }}
+      />
+      {/* Tab bar */}
+      <div className="shrink-0 flex gap-1 bg-background border-b border-border px-4 py-2">
+        {TABS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setActiveTab(value)}
+            className={cn(
+              "flex-1 rounded-full py-1.5 text-xs font-semibold transition-all",
+              activeTab === value
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Tab content */}

@@ -63,6 +63,12 @@
   /* ── Focus ring ──────────────────────────────────────────────────────── */
   --focus-ring: rgba(14, 165, 233, 0.50);
 
+  /* ── Action tile accent colors — light mode ──────────────────────────── */
+  --action-flatmates: #C8B68A;
+  --action-ai:        #7A8B6E;
+  --action-property:  #9C6B4F;
+  --action-study:     #5A6B8C;
+
   /* ── Theme transition ────────────────────────────────────────────────── */
   --theme-transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
 }
@@ -127,6 +133,12 @@
 
   /* ── Focus ring ──────────────────────────────────────────────────────── */
   --focus-ring: rgba(56, 211, 241, 0.50);
+
+  /* ── Action tile accent colors — dark mode ───────────────────────────── */
+  --action-flatmates: #A6936D;
+  --action-ai:        #5F7257;
+  --action-property:  #7C4F38;
+  --action-study:     #3F4F6E;
 }
 
 /* ── Base resets ────────────────────────────────────────────────────────── */
@@ -350,4 +362,16 @@ input, textarea, select { font-size: 16px !important; }
 [data-theme="dark"] .match-overlay-bg,
 .dark .match-overlay-bg {
   background: linear-gradient(160deg, #0f172a 0%, #0c1a2e 60%, #0f172a 100%);
+}
+
+/* ── Event card Ken Burns zoom (desktop hover, respects prefers-reduced-motion) ── */
+@keyframes ken-burns {
+  0%, 100% { transform: scale(1.0); }
+  50%       { transform: scale(1.05); }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .event-card:hover .event-card-image {
+    animation: ken-burns 4s ease-in-out infinite;
+  }
 }

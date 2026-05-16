@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, Flag } from "lucide-react";
+import { Flag } from "lucide-react";
+import { AppHeader } from "@/components/layout/app-header";
 import { useNavigate, useParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -88,25 +89,23 @@ export function PeerProfilePage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-border bg-background">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted text-muted-foreground"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <h1 className="flex-1 font-semibold text-foreground truncate">{peer.full_name}</h1>
-        <button
-          type="button"
-          onClick={handleReport}
-          className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted text-muted-foreground"
-          title="Report user"
-        >
-          <Flag size={16} />
-        </button>
-      </div>
+      <AppHeader
+        variant="sub-page"
+        title={peer.full_name}
+        right={{
+          type: "custom",
+          element: (
+            <button
+              type="button"
+              onClick={handleReport}
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted text-muted-foreground"
+              aria-label="Report user"
+            >
+              <Flag size={16} />
+            </button>
+          ),
+        }}
+      />
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
