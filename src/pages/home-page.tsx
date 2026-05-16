@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, Bell, Bot, Building2, Grid2X2, Heart, HeartHandshake, Landmark, MapPin, Search, SlidersHorizontal, Star } from "lucide-react";
 import { motion } from "framer-motion";
+import { Avatar } from "@/components/ui/avatar";
 import { useData } from "@/contexts/data-context";
 import { useI18n } from "@/contexts/i18n-context";
 import { LandlordHome } from "@/components/features/landlord/landlord-home";
@@ -231,7 +232,7 @@ export function HomePage() {
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35 }}>
+        <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35 }} className="flex items-center gap-2">
           <Link
             to="/notifications"
             className="relative flex h-11 w-11 items-center justify-center rounded-full bg-muted shadow-sm"
@@ -242,6 +243,13 @@ export function HomePage() {
                 {unread}
               </span>
             )}
+          </Link>
+          <Link to="/profile">
+            <Avatar
+              name={snapshot.profile.full_name}
+              src={snapshot.profile.avatar_url}
+              className="h-11 w-11 shadow-sm"
+            />
           </Link>
         </motion.div>
       </div>
