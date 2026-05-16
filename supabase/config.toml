@@ -14,3 +14,13 @@ verify_jwt = true
 
 [functions.translate-message]
 verify_jwt = true
+
+[functions.generate-ics]
+verify_jwt = false
+
+[functions.send-event-reminders]
+verify_jwt = false
+schedule = "0 * * * *"
+
+[functions.extract-event-metadata]
+verify_jwt = true

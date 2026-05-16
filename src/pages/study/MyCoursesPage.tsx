@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BookOpen, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CourseBadge } from "@/components/features/study/CourseBadge";
 import { CourseSelect } from "@/components/features/study/CourseSelect";
 import {
@@ -119,7 +120,7 @@ export function MyCoursesPage() {
           {isLoading ? (
             <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 rounded-2xl bg-muted animate-pulse" />
+                <Skeleton key={i} className="h-24 rounded-2xl" />
               ))}
             </div>
           ) : userCourses.length === 0 ? (

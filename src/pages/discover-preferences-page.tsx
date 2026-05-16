@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   useDiscoverPreferences,
   useUpdateDiscoverPreferences,
@@ -92,7 +93,7 @@ export function DiscoverPreferencesPage() {
         {isLoading ? (
           <div className="p-5 space-y-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-12 rounded-xl bg-muted animate-pulse" />
+              <Skeleton key={i} className="h-12 rounded-xl" />
             ))}
           </div>
         ) : (
@@ -135,7 +136,7 @@ export function DiscoverPreferencesPage() {
               >
                 <span
                   className={cn(
-                    "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform",
+                    "absolute top-0.5 h-5 w-5 rounded-full bg-background shadow transition-transform",
                     remoteOk ? "translate-x-5" : "translate-x-0.5"
                   )}
                 />
@@ -158,7 +159,7 @@ export function DiscoverPreferencesPage() {
                   >
                     <span
                       className={cn(
-                        "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform",
+                        "absolute top-0.5 h-5 w-5 rounded-full bg-background shadow transition-transform",
                         notifyEmail ? "translate-x-5" : "translate-x-0.5"
                       )}
                     />
@@ -176,7 +177,7 @@ export function DiscoverPreferencesPage() {
                   >
                     <span
                       className={cn(
-                        "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform",
+                        "absolute top-0.5 h-5 w-5 rounded-full bg-background shadow transition-transform",
                         notifyInApp ? "translate-x-5" : "translate-x-0.5"
                       )}
                     />

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { MessageBubble } from "@/components/features/study/MessageBubble";
@@ -71,7 +72,7 @@ export function ConversationPage() {
                 key={i}
                 className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"}`}
               >
-                <div className="h-10 w-48 rounded-2xl bg-muted animate-pulse" />
+                <Skeleton className="h-10 w-48 rounded-2xl" />
               </div>
             ))}
           </div>

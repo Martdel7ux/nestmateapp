@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   Bath,
   BedDouble,
+  CalendarDays,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -21,6 +22,7 @@ import {
   XCircle,
   X,
 } from "lucide-react";
+import { EventsAdminTab } from "@/components/features/admin/events/EventsAdminTab";
 import type { Property } from "@/types/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,7 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useData } from "@/contexts/data-context";
 import { formatCompactNumber } from "@/lib/utils";
 
-type Tab = "overview" | "properties" | "flatmates" | "verifications" | "users";
+type Tab = "overview" | "properties" | "flatmates" | "verifications" | "users" | "events";
 
 const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview",      label: "Overview",      icon: LayoutDashboard },
@@ -37,6 +39,7 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "flatmates",     label: "Flatmates",     icon: Users2 },
   { id: "verifications", label: "Verifications", icon: ShieldCheck },
   { id: "users",         label: "Users",         icon: UserRound },
+  { id: "events",        label: "Events",        icon: CalendarDays },
 ];
 
 function StatusBadge({ approved }: { approved: boolean }) {
@@ -904,6 +907,7 @@ export function AdminPanel() {
       {activeTab === "flatmates"     && <FlatematesTab />}
       {activeTab === "verifications" && <VerificationsTab />}
       {activeTab === "users"         && <UsersTab />}
+      {activeTab === "events"        && <EventsAdminTab />}
     </div>
   );
 }

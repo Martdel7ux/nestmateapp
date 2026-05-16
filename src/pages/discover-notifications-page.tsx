@@ -2,6 +2,7 @@ import { ArrowLeft, Bell } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useDiscoverNotifications } from "@/hooks/use-discover-notifications";
 
 function timeLabel(iso: string) {
@@ -44,7 +45,7 @@ export function DiscoverNotificationsPage() {
         {isLoading ? (
           <div className="p-4 space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 rounded-xl bg-muted animate-pulse" />
+              <Skeleton key={i} className="h-16 rounded-xl" />
             ))}
           </div>
         ) : !notifications?.length ? (

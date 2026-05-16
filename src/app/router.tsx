@@ -22,6 +22,7 @@ import { OpportunityDetailPage } from "@/pages/opportunity-detail-page";
 import { ProfilePage } from "@/pages/profile-page";
 import { SavedOpportunitiesPage } from "@/pages/saved-opportunities-page";
 import { SavedPropertiesPage } from "@/pages/saved-properties-page";
+import { PropertiesPage } from "@/pages/properties-page";
 import { SearchPage } from "@/pages/search-page";
 import { StudyHubPage } from "@/pages/study/StudyHubPage";
 import { NoteEditorPage } from "@/pages/study/NoteEditorPage";
@@ -69,6 +70,7 @@ export function AppRouter() {
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route element={<ProtectedLayout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/properties" element={<PropertiesPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/saved-properties" element={<SavedPropertiesPage />} />
           <Route path="/my-properties" element={<LandlordDashboardPage />} />

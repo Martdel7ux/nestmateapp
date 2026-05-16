@@ -1,5 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ConversationListItemRow } from "@/components/features/study/ConversationListItem";
 import { useConversations } from "@/hooks/use-conversations";
 import type { StudyMessageConvType } from "@/types/study";
@@ -25,10 +26,10 @@ export function StudyMessagesPage() {
           <div className="space-y-px pt-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-3">
-                <div className="h-11 w-11 rounded-full bg-muted animate-pulse" />
+                <Skeleton className="h-11 w-11 rounded-full" />
                 <div className="flex-1 space-y-1.5">
-                  <div className="h-3 w-28 rounded bg-muted animate-pulse" />
-                  <div className="h-2.5 w-40 rounded bg-muted animate-pulse" />
+                  <Skeleton className="h-3 w-28 rounded" />
+                  <Skeleton className="h-2.5 w-40 rounded" />
                 </div>
               </div>
             ))}

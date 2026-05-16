@@ -4,8 +4,8 @@ import { LandlordProfileView } from "@/components/features/landlord/landlord-pro
 import { useI18n } from "@/contexts/i18n-context";
 import {
   Camera, Check, ChevronRight, Eye, EyeOff,
-  Heart, Key, LogOut, MapPin, Pencil, ShieldCheck,
-  Sparkles, Trash2, University, User, X
+  Heart, Key, Laptop, LogOut, MapPin, Moon, Pencil, ShieldCheck,
+  Sparkles, Sun, Trash2, University, User, X
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
+import { useTheme, type Theme } from "@/contexts/theme-context";
 import { NotificationSettings } from "@/components/features/notifications/notification-settings";
 import { cities } from "@/lib/constants";
 import type { City } from "@/types/supabase";
@@ -47,6 +48,7 @@ const PRESET_AVATARS = [
 export function ProfilePage() {
   const { snapshot, updateProfile, toggleSavedProperty } = useData();
   const { signOut, updatePassword, deleteAccount } = useAuth();
+  const { theme, setTheme } = useTheme();
   const { t, language, setLanguage } = useI18n();
   const navigate = useNavigate();
   const profile = snapshot.profile;
@@ -499,6 +501,37 @@ export function ProfilePage() {
 
       {/* ── Notification settings ── */}
       <NotificationSettings />
+
+      {/* ── Appearance ── */}
+      <Card className="space-y-3">
+        <h3 className="font-display text-base font-bold">Appearance</h3>
+        <div className="grid grid-cols-3 gap-2">
+          {(
+            [
+              { value: "system", Icon: Laptop, label: "System" },
+              { value: "light",  Icon: Sun,    label: "Light"  },
+              { value: "dark",   Icon: Moon,   label: "Dark"   },
+            ] as { value: Theme; Icon: typeof Sun; label: string }[]
+          ).map(({ value, Icon, label }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setTheme(value)}
+              className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 text-center transition-all duration-200 ${
+                theme === value
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/40"
+              }`}
+            >
+              <Icon size={22} className={theme === value ? "text-primary" : "text-muted-foreground"} />
+              <p className="text-xs font-bold">{label}</p>
+              <div className={`h-4 w-4 rounded-full border-2 transition-all ${
+                theme === value ? "border-primary bg-primary" : "border-border"
+              }`} />
+            </button>
+          ))}
+        </div>
+      </Card>
 
       {/* ── Language settings ── */}
       <Card className="space-y-3">

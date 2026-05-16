@@ -48,7 +48,7 @@ export function MessageBubble({ message, isOwn }: Props) {
             "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
             isOwn
               ? "rounded-br-sm bg-primary text-primary-foreground"
-              : "rounded-bl-sm bg-muted text-foreground",
+              : "rounded-bl-sm bg-card text-card-foreground",
             isDeleted && "opacity-60"
           )}
         >

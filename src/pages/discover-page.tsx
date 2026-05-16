@@ -1,14 +1,17 @@
 import { useCallback, useRef, useState } from "react";
-import { Bookmark, Settings } from "lucide-react";
+import { Bookmark, Lightbulb, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { OpportunityCard } from "@/components/features/discover/opportunity-card";
 import { OpportunityFiltersBar } from "@/components/features/discover/opportunity-filters";
 import { NotificationBell } from "@/components/features/discover/notification-bell";
+import { SuggestEventModal } from "@/components/features/discover/SuggestEventModal";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useOpportunities } from "@/hooks/use-opportunities";
 import type { OpportunityFilters } from "@/types/discover";
 
 export function DiscoverPage() {
-  const [filters, setFilters] = useState<OpportunityFilters>({});
+  const [filters, setFilters]   = useState<OpportunityFilters>({});
+  const [showSuggest, setShowSuggest] = useState(false);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useOpportunities(filters);
 
@@ -31,6 +34,7 @@ export function DiscoverPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
+      {showSuggest && <SuggestEventModal onClose={() => setShowSuggest(false)} />}
       {/* Header */}
       <div className="shrink-0 bg-primary/10 px-5 pb-4 pt-4 dark:bg-primary/5">
         <div className="flex items-center justify-between mb-3">
@@ -63,7 +67,7 @@ export function DiscoverPage() {
         <div className="p-4 space-y-3">
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-40 rounded-2xl bg-muted animate-pulse" />
+              <Skeleton key={i} className="h-40 rounded-2xl" />
             ))
           ) : opportunities.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-24 text-center">
@@ -79,7 +83,18 @@ export function DiscoverPage() {
           {/* Infinite scroll sentinel */}
           <div ref={sentinelRef} className="h-4" />
           {isFetchingNextPage && (
-            <div className="h-12 rounded-2xl bg-muted animate-pulse" />
+            <Skeleton className="h-12 rounded-2xl" />
+          )}
+
+          {/* Suggest CTA — shown at bottom of results */}
+          {!isLoading && (
+            <button
+              onClick={() => setShowSuggest(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-4 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+            >
+              <Lightbulb size={15} />
+              Know an event we're missing? Suggest it
+            </button>
           )}
         </div>
       </div>

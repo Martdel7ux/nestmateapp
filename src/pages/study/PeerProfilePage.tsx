@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, Flag } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { Avatar } from "@/components/ui/avatar";
@@ -64,10 +65,10 @@ export function PeerProfilePage() {
         <div className="h-14 bg-background border-b border-border" />
         <div className="p-5 space-y-3">
           <div className="flex gap-4">
-            <div className="h-16 w-16 rounded-full bg-muted animate-pulse" />
+            <Skeleton className="h-16 w-16 rounded-full" />
             <div className="flex-1 space-y-2">
-              <div className="h-5 w-32 bg-muted animate-pulse rounded" />
-              <div className="h-3 w-48 bg-muted animate-pulse rounded" />
+              <Skeleton className="h-5 w-32 rounded" />
+              <Skeleton className="h-3 w-48 rounded" />
             </div>
           </div>
         </div>

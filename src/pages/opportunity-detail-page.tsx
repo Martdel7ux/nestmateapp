@@ -12,6 +12,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import { SaveButton } from "@/components/features/discover/save-button";
 import { ShareButton } from "@/components/features/discover/share-button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useOpportunity } from "@/hooks/use-opportunity";
 import type { OpportunityType } from "@/types/discover";
 
@@ -53,11 +54,11 @@ export function OpportunityDetailPage() {
   if (isLoading) {
     return (
       <div className="flex h-full flex-col">
-        <div className="h-56 bg-muted animate-pulse" />
+        <Skeleton className="h-56 rounded-none" />
         <div className="p-5 space-y-3">
-          <div className="h-6 w-3/4 bg-muted animate-pulse rounded-lg" />
-          <div className="h-4 w-1/2 bg-muted animate-pulse rounded-lg" />
-          <div className="h-32 bg-muted animate-pulse rounded-lg" />
+          <Skeleton className="h-6 w-3/4 rounded-lg" />
+          <Skeleton className="h-4 w-1/2 rounded-lg" />
+          <Skeleton className="h-32 rounded-lg" />
         </div>
       </div>
     );

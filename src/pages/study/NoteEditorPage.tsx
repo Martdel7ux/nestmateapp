@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Upload } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { NoteEditor } from "@/components/features/study/NoteEditor";
 import { CourseSelect } from "@/components/features/study/CourseSelect";
@@ -159,8 +160,8 @@ export function NoteEditorPage() {
   if (isEdit && loadingNote) {
     return (
       <div className="p-5 space-y-3">
-        <div className="h-8 w-1/2 rounded-xl bg-muted animate-pulse" />
-        <div className="h-40 rounded-2xl bg-muted animate-pulse" />
+        <Skeleton className="h-8 w-1/2 rounded-xl" />
+        <Skeleton className="h-40 rounded-2xl" />
       </div>
     );
   }

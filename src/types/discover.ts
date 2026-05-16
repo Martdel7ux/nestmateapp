@@ -3,6 +3,8 @@ export type OppLocationType = "in_person" | "remote" | "hybrid";
 export type OppEmploymentType = "full_time" | "part_time" | "contract" | "internship" | "volunteer";
 export type OppNotifyFrequency = "instant" | "daily" | "weekly";
 
+export type OppStatus = "draft" | "published" | "unpublished" | "flagged";
+
 export interface Opportunity {
   id: string;
   type: OpportunityType;
@@ -15,6 +17,7 @@ export interface Opportunity {
   image_url?: string | null;
   source?: string | null;
   source_id?: string | null;
+  source_url?: string | null;
   starts_at?: string | null;
   ends_at?: string | null;
   salary_min?: number | null;
@@ -22,9 +25,26 @@ export interface Opportunity {
   salary_currency?: string | null;
   employment_type?: OppEmploymentType | null;
   tags?: string[];
+  status?: OppStatus | null;
+  curated_by?: string | null;
   created_at: string;
   updated_at?: string;
   is_saved?: boolean;
+}
+
+export interface OpportunitySuggestion {
+  id: string;
+  submitted_by?: string | null;
+  url?: string | null;
+  note?: string | null;
+  status: "pending" | "approved" | "rejected";
+  rejection_reason?: string | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  resulting_opportunity_id?: string | null;
+  created_at: string;
+  submitter_name?: string | null;
+  submitter_avatar?: string | null;
 }
 
 export interface UserOpportunityPreferences {

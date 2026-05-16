@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 import { GroupCard } from "@/components/features/study/GroupCard";
 import { CourseSelect } from "@/components/features/study/CourseSelect";
 import { useDiscoverGroups, useMyStudyGroups } from "@/hooks/use-study-groups";
@@ -34,7 +35,7 @@ export function StudyGroupsPage() {
             {loadingMine ? (
               <div className="space-y-3">
                 {Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className="h-24 rounded-2xl bg-muted animate-pulse" />
+                  <Skeleton key={i} className="h-24 rounded-2xl" />
                 ))}
               </div>
             ) : myGroups.length === 0 ? (
@@ -76,7 +77,7 @@ export function StudyGroupsPage() {
             {loadingDiscover ? (
               <div className="space-y-3">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-24 rounded-2xl bg-muted animate-pulse" />
+                  <Skeleton key={i} className="h-24 rounded-2xl" />
                 ))}
               </div>
             ) : discoverGroups.length === 0 ? (

@@ -1,5 +1,6 @@
 import { ArrowLeft, Download, Edit2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from "react-markdown";
 import { CourseBadge } from "@/components/features/study/CourseBadge";
 import { UpvoteButton } from "@/components/features/study/UpvoteButton";
@@ -25,9 +26,9 @@ export function NoteViewPage() {
       <div className="flex h-full flex-col">
         <div className="h-14 bg-background border-b border-border" />
         <div className="p-5 space-y-3">
-          <div className="h-7 w-3/4 bg-muted animate-pulse rounded-xl" />
-          <div className="h-4 w-1/2 bg-muted animate-pulse rounded-xl" />
-          <div className="h-40 bg-muted animate-pulse rounded-2xl" />
+          <Skeleton className="h-7 w-3/4 rounded-xl" />
+          <Skeleton className="h-4 w-1/2 rounded-xl" />
+          <Skeleton className="h-40 rounded-2xl" />
         </div>
       </div>
     );

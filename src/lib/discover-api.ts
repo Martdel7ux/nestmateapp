@@ -17,6 +17,8 @@ export async function fetchOpportunities(
   let q = supabase
     .from("opportunities")
     .select("*")
+    // Show published rows and any legacy rows that pre-date the status column (NULL)
+    .or("status.eq.published,status.is.null")
     .order("created_at", { ascending: false })
     .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 

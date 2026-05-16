@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { PeerCard } from "@/components/features/study/PeerCard";
 import { MentorRequestModal } from "@/components/features/study/MentorRequestModal";
@@ -83,7 +84,7 @@ export function PeersPage() {
           ) : isLoading ? (
             <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 rounded-2xl bg-muted animate-pulse" />
+                <Skeleton key={i} className="h-24 rounded-2xl" />
               ))}
             </div>
           ) : filteredPeers.length === 0 ? (

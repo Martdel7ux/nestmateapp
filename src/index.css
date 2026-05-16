@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Nestmate Brand tokens (HSL — used by Tailwind color utilities) ─────── */
 :root {
   --background: 205 42% 97%;
   --foreground: 222 45% 11%;
@@ -22,84 +23,331 @@
   --border: 213 30% 88%;
   --input: 213 30% 88%;
   --ring: 199 89% 48%;
+
+  /* ── Glass & surface tokens — light mode ─────────────────────────────── */
+  --bg-base: #F7F7F5;
+  --bg-elevated: #FFFFFF;
+
+  --glass-fill: rgba(255, 255, 255, 0.60);
+  --glass-fill-hover: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(15, 15, 25, 0.09);
+  --glass-border-strong: rgba(15, 15, 25, 0.16);
+  --glass-highlight: rgba(255, 255, 255, 0.92);
+  --glass-blur: 20px;
+  --glass-saturate: 160%;
+  --glass-shadow: 0 8px 32px rgba(15, 15, 25, 0.07), 0 2px 8px rgba(15, 15, 25, 0.05);
+
+  /* ── Semantic text tokens ────────────────────────────────────────────── */
+  --text-p: rgba(15, 15, 25, 0.95);
+  --text-s: rgba(15, 15, 25, 0.65);
+  --text-t: rgba(15, 15, 25, 0.42);
+
+  /* ── Ambient glow (brand colors at low opacity, for background blobs) ── */
+  /* Primary = sky-500 #0ea5e9 */
+  --ambient-primary: rgba(14, 165, 233, 0.16);
+  /* Secondary = amber-400 #f59e0b */
+  --ambient-secondary: rgba(245, 158, 11, 0.12);
+  /* Accent = emerald-500 #22c55e */
+  --ambient-accent: rgba(34, 197, 94, 0.10);
+
+  /* ── Grain ───────────────────────────────────────────────────────────── */
+  --grain-opacity: 0.018;
+
+  /* ── Nav ─────────────────────────────────────────────────────────────── */
+  --nav-fill: rgba(248, 248, 250, 0.68);
+  --nav-border: rgba(15, 15, 25, 0.08);
+  --nav-shadow: 0 12px 40px rgba(15, 15, 25, 0.12), 0 2px 10px rgba(15, 15, 25, 0.06);
+  --nav-highlight: rgba(255, 255, 255, 0.96);
+  --nav-specular: rgba(255, 255, 255, 0.55);
+
+  /* ── Focus ring ──────────────────────────────────────────────────────── */
+  --focus-ring: rgba(14, 165, 233, 0.50);
+
+  /* ── Theme transition ────────────────────────────────────────────────── */
+  --theme-transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
 }
 
+/* ── Dark theme overrides ───────────────────────────────────────────────── */
+/* Both selectors fire — [data-theme="dark"] for Tailwind selector mode,
+   .dark for backwards-compat with any inline dark: utilities              */
+[data-theme="dark"],
 .dark {
-  --background: 222 47% 7%;
+  --background: 240 20% 5%;
   --foreground: 210 40% 98%;
-  --card: 223 40% 12%;
+  --card: 240 18% 9%;
   --card-foreground: 210 40% 98%;
   --primary: 191 91% 61%;
   --primary-foreground: 222 47% 8%;
   --secondary: 215 28% 19%;
   --secondary-foreground: 210 40% 96%;
-  --muted: 217 24% 16%;
-  --muted-foreground: 215 20% 70%;
+  --muted: 217 24% 14%;
+  --muted-foreground: 215 20% 65%;
   --accent: 152 63% 38%;
   --accent-foreground: 210 40% 98%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 210 40% 98%;
   --success: 152 63% 38%;
   --success-foreground: 210 40% 98%;
-  --border: 215 26% 20%;
-  --input: 215 26% 20%;
+  --border: 240 15% 18%;
+  --input: 240 15% 18%;
   --ring: 191 91% 61%;
+
+  /* ── Glass & surface tokens — dark mode ─────────────────────────────── */
+  --bg-base: #0A0A0F;
+  --bg-elevated: #12121A;
+
+  --glass-fill: rgba(255, 255, 255, 0.055);
+  --glass-fill-hover: rgba(255, 255, 255, 0.09);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-border-strong: rgba(255, 255, 255, 0.20);
+  --glass-highlight: rgba(255, 255, 255, 0.15);
+  --glass-blur: 24px;
+  --glass-saturate: 180%;
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.14);
+
+  /* ── Semantic text tokens ────────────────────────────────────────────── */
+  --text-p: rgba(255, 255, 255, 0.95);
+  --text-s: rgba(255, 255, 255, 0.65);
+  --text-t: rgba(255, 255, 255, 0.42);
+
+  /* ── Ambient glow — dark mode (more vivid) ───────────────────────────── */
+  --ambient-primary: rgba(14, 165, 233, 0.24);
+  --ambient-secondary: rgba(245, 158, 11, 0.18);
+  --ambient-accent: rgba(34, 197, 94, 0.14);
+
+  /* ── Grain ───────────────────────────────────────────────────────────── */
+  --grain-opacity: 0.028;
+
+  /* ── Nav ─────────────────────────────────────────────────────────────── */
+  --nav-fill: rgba(10, 10, 18, 0.62);
+  --nav-border: rgba(255, 255, 255, 0.12);
+  --nav-shadow: 0 12px 40px rgba(0, 0, 0, 0.40), 0 2px 10px rgba(0, 0, 0, 0.22);
+  --nav-highlight: rgba(255, 255, 255, 0.22);
+  --nav-specular: rgba(255, 255, 255, 0.14);
+
+  /* ── Focus ring ──────────────────────────────────────────────────────── */
+  --focus-ring: rgba(56, 211, 241, 0.50);
 }
 
-* {
+/* ── Base resets ────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
   @apply border-border;
 }
 
 html {
   scroll-behavior: smooth;
-  /* Extend behind status bar on iOS/Android */
   height: 100%;
+  /* Smooth theme flip */
+  transition: var(--theme-transition);
 }
 
 body {
-  @apply min-h-dvh bg-background font-sans text-foreground antialiased;
-  background-image: theme("backgroundImage.mesh-light");
-  /* Remove any UA margin that could cause a gap at the top */
+  @apply min-h-dvh font-sans antialiased;
+  background-color: var(--bg-base);
+  color: var(--text-p);
   margin: 0;
   padding: 0;
-}
-
-.dark body {
-  background-image: theme("backgroundImage.mesh-dark");
+  /* Ambient mesh on body for pages that don't use AmbientBackground */
+  background-image:
+    radial-gradient(circle at 20% 10%,  var(--ambient-primary),   transparent 42%),
+    radial-gradient(circle at 80% 15%,  var(--ambient-secondary),  transparent 36%),
+    radial-gradient(circle at 10% 85%,  var(--ambient-accent),     transparent 40%);
 }
 
 #root {
   @apply min-h-dvh;
-  /* Ensure root fills behind the status bar */
   position: relative;
   isolation: isolate;
 }
 
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+.scrollbar-hide { scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* ── Typography ──────────────────────────────────────────────────────────── */
+.text-balance { text-wrap: balance; }
+
+/* ── iOS font-size zoom prevention ──────────────────────────────────────── */
+input, textarea, select { font-size: 16px !important; }
+
+/* ── Glass surface ───────────────────────────────────────────────────────── */
+/* Theme-adaptive glass card — works in both light and dark */
 .glass {
-  @apply border border-white/20 bg-white/70 shadow-card backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 }
 
-.text-balance {
-  text-wrap: balance;
+.glass:hover {
+  background: var(--glass-fill-hover);
 }
 
-.scrollbar-hide {
-  scrollbar-width: none;
+/* Full glass card — with shadow + inner top highlight */
+.glass-card {
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--glass-shadow);
+  position: relative;
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--glass-highlight) 50%,
+    transparent 100%
+  );
+  border-radius: inherit;
 }
 
-/* Prevent iOS Safari from zooming on input focus (triggers when font-size < 16px) */
-input, textarea, select {
-  font-size: 16px !important;
+/* Legacy dark-specific glass (home dashboard) — keep for backwards compat */
+.glass-card-dark {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
 
-/* Match overlay gradient — adapts to light/dark mode */
+/* Glass nav — liquid glass style */
+.glass-nav {
+  /* Multi-layer fill: gradient wash sits on top of the base fill so ambient
+     colours bleed through the higher-translucency base */
+  background:
+    linear-gradient(
+      170deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.06) 55%,
+      rgba(255, 255, 255, 0.00) 100%
+    ),
+    var(--nav-fill);
+  border: 1px solid var(--nav-border);
+  backdrop-filter: blur(44px) saturate(220%) brightness(1.03);
+  -webkit-backdrop-filter: blur(44px) saturate(220%) brightness(1.03);
+  box-shadow:
+    var(--nav-shadow),
+    /* Inset top specular edge — catches the light */
+    inset 0 1.5px 0 var(--nav-highlight),
+    /* Inset bottom inner shadow — glass has thickness */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Top-edge specular streak — brighter than the inset shadow */
+.glass-nav::before {
+  content: "";
+  position: absolute;
+  inset-inline: 12%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--nav-specular) 25%,
+    var(--nav-highlight) 50%,
+    var(--nav-specular) 75%,
+    transparent 100%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Subtle angled sheen across the pill face (liquid depth) */
+.glass-nav::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    130deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    transparent 45%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Dark-mode tweaks for the liquid layers */
+[data-theme="dark"] .glass-nav,
+.dark .glass-nav {
+  background:
+    linear-gradient(
+      170deg,
+      rgba(255, 255, 255, 0.09) 0%,
+      rgba(255, 255, 255, 0.02) 55%,
+      rgba(255, 255, 255, 0.00) 100%
+    ),
+    var(--nav-fill);
+  box-shadow:
+    var(--nav-shadow),
+    inset 0 1.5px 0 var(--nav-highlight),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ── Legacy nav (dark overlay) — kept for pages that used it ────────────── */
+.glass-nav-dark {
+  background: rgba(10, 10, 20, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+}
+
+/* ── Grain texture overlay ───────────────────────────────────────────────── */
+@layer utilities {
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    pointer-events: none;
+  }
+}
+
+/* ── Ambient blobs (shared across AmbientBackground component) ───────────── */
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* ── Verification badge gradients ───────────────────────────────────────── */
+.badge-verified {
+  background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #7dd3fc 100%);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.35);
+}
+
+.badge-gold {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 30%, #f59e0b 60%, #fbbf24 100%);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.40);
+}
+
+.badge-platinum {
+  background: linear-gradient(135deg, #64748b 0%, #94a3b8 40%, #e2e8f0 70%, #cbd5e1 100%);
+  box-shadow: 0 2px 8px rgba(148, 163, 184, 0.30);
+}
+
+/* ── Focus rings (theme-aware) ───────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── Match overlay (flatmate swipe) ─────────────────────────────────────── */
 .match-overlay-bg {
   background: linear-gradient(160deg, #bae6fd 0%, #a5f3c4 55%, #ecfdf5 100%);
 }
+
+[data-theme="dark"] .match-overlay-bg,
 .dark .match-overlay-bg {
   background: linear-gradient(160deg, #0f172a 0%, #0c1a2e 60%, #0f172a 100%);
 }

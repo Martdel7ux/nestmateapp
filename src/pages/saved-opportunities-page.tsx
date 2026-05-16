@@ -1,6 +1,7 @@
 import { ArrowLeft, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { OpportunityCard } from "@/components/features/discover/opportunity-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSavedOpportunities } from "@/hooks/use-saved-opportunities";
 
 export function SavedOpportunitiesPage() {
@@ -27,7 +28,7 @@ export function SavedOpportunitiesPage() {
         <div className="p-4 space-y-3">
           {isLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-40 rounded-2xl bg-muted animate-pulse" />
+              <Skeleton key={i} className="h-40 rounded-2xl" />
             ))
           ) : !data?.length ? (
             <div className="flex flex-col items-center gap-3 py-24 text-center px-8">

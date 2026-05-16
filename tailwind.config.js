@@ -1,5 +1,6 @@
 var config = {
-    darkMode: ["class"],
+    // Use attribute selector so ThemeProvider's data-theme="dark" drives dark: utilities
+    darkMode: ["selector", '[data-theme="dark"]'],
     content: ["./index.html", "./src/**/*.{ts,tsx}"],
     theme: {
         container: {
@@ -48,11 +49,18 @@ var config = {
                 success: {
                     DEFAULT: "hsl(var(--success))",
                     foreground: "hsl(var(--success-foreground))"
+                },
+                // Semantic glass token aliases
+                glass: {
+                    DEFAULT: "var(--glass-fill)",
+                    hover: "var(--glass-fill-hover)",
+                    border: "var(--glass-border)",
                 }
             },
             boxShadow: {
                 glow: "0 18px 40px -24px rgba(15, 23, 42, 0.45)",
-                card: "0 24px 60px -30px rgba(15, 23, 42, 0.35)"
+                card: "0 24px 60px -30px rgba(15, 23, 42, 0.35)",
+                glass: "var(--glass-shadow)"
             },
             fontFamily: {
                 display: ['"Playfair Display"', "serif"],
@@ -70,11 +78,21 @@ var config = {
                 "pulse-glow": {
                     "0%, 100%": { boxShadow: "0 0 0 rgba(14,165,233,0.3)" },
                     "50%": { boxShadow: "0 0 24px rgba(14,165,233,0.4)" }
+                },
+                shimmer: {
+                    "0%": { transform: "translateX(-100%)" },
+                    "100%": { transform: "translateX(100%)" }
+                },
+                "typing-dot": {
+                    "0%, 60%, 100%": { transform: "translateY(0)", opacity: "0.4" },
+                    "30%": { transform: "translateY(-4px)", opacity: "1" }
                 }
             },
             animation: {
                 "fade-up": "fade-up 0.45s ease-out",
-                "pulse-glow": "pulse-glow 2.4s ease-in-out infinite"
+                "pulse-glow": "pulse-glow 2.4s ease-in-out infinite",
+                shimmer: "shimmer 1.6s ease-in-out infinite",
+                "typing-dot": "typing-dot 1.4s ease-in-out infinite"
             }
         }
     },

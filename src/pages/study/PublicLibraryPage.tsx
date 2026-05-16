@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { BookOpen } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { NoteCard } from "@/components/features/study/NoteCard";
 import { NoteFiltersBar } from "@/components/features/study/NoteFilters";
 import { usePublicLibrary } from "@/hooks/use-public-library";
@@ -39,7 +40,7 @@ export function PublicLibraryPage() {
         <div className="px-4 pb-32 pt-2 space-y-3">
           {isLoading ? (
             Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-32 rounded-2xl bg-muted animate-pulse" />
+              <Skeleton key={i} className="h-32 rounded-2xl" />
             ))
           ) : notes.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-24 text-center">
@@ -62,7 +63,7 @@ export function PublicLibraryPage() {
           {/* Infinite scroll sentinel */}
           <div ref={sentinelRef} className="h-4" />
           {isFetchingNextPage && (
-            <div className="h-12 rounded-2xl bg-muted animate-pulse" />
+            <Skeleton className="h-12 rounded-2xl" />
           )}
         </div>
       </div>

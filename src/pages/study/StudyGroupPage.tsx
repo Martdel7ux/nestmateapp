@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { GroupMembersList } from "@/components/features/study/GroupMembersList";
@@ -72,8 +73,8 @@ export function StudyGroupPage() {
       <div className="flex h-full flex-col">
         <div className="h-14 bg-background border-b border-border" />
         <div className="p-5 space-y-3">
-          <div className="h-7 w-3/4 bg-muted animate-pulse rounded-xl" />
-          <div className="h-24 bg-muted animate-pulse rounded-2xl" />
+          <Skeleton className="h-7 w-3/4 rounded-xl" />
+          <Skeleton className="h-24 rounded-2xl" />
         </div>
       </div>
     );

@@ -29,7 +29,7 @@ function IconInput({
       <div className="relative">
         <Icon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input
-          className="h-14 w-full rounded-2xl border border-border bg-white/80 pl-11 pr-11 text-sm shadow-sm outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 dark:bg-card/80"
+          className="h-14 w-full rounded-2xl border border-border bg-background/80 pl-11 pr-11 text-sm shadow-sm outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
           {...props}
         />
         {rightIcon && (() => {
@@ -168,12 +168,12 @@ export function AuthPanel() {
       : t("authResetDesc");
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-primary/30 via-primary/5 to-background">
+    <div className="flex min-h-screen flex-col bg-background">
       {mode !== "login" && (
         <button
           type="button"
           onClick={() => setMode("login")}
-          className="m-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur transition hover:bg-white"
+          className="m-5 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 shadow-sm backdrop-blur transition hover:bg-background"
         >
           ←
         </button>
@@ -393,7 +393,7 @@ function GoogleButton({ label, onClick }: { label: string; onClick: () => void }
     <button
       type="button"
       onClick={onClick}
-      className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-border bg-white/60 text-sm font-semibold shadow-sm transition hover:bg-white active:scale-[0.98] dark:bg-card/60 dark:hover:bg-card"
+      className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-border bg-background/60 text-sm font-semibold shadow-sm transition hover:bg-background active:scale-[0.98]"
     >
       <svg className="h-5 w-5" viewBox="0 0 24 24">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
