@@ -92,7 +92,7 @@ export async function fetchNote(id: string, userId?: string): Promise<Note | nul
     .eq("id", id)
     .maybeSingle();
   if (!data) return null;
-  const note = data as Note;
+  const note = data as unknown as Note;
   if (userId) {
     const { data: upvote } = await supabase
       .from("note_upvotes")
@@ -126,7 +126,7 @@ export async function fetchPublicNotes(filters: NoteFilters, page: number): Prom
   else q = q.order("created_at", { ascending: false });
 
   const { data } = await q;
-  return (data ?? []) as Note[];
+  return (data ?? []) as unknown as Note[];
 }
 
 export async function searchNotes(query: string, userId: string): Promise<Note[]> {
