@@ -6,6 +6,7 @@ import {
   createCuratedEvent,
   updateCuratedEvent,
   deleteCuratedEvent,
+  permanentlyDeleteEvent,
   findSoftDuplicates,
   type CuratedEventFilters,
   type EventFormData,
@@ -63,6 +64,18 @@ export function useDeleteCuratedEvent() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["admin-events"] });
       void qc.invalidateQueries({ queryKey: ["opportunities"] });
+    },
+  });
+}
+
+export function usePermanentlyDeleteEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => permanentlyDeleteEvent(id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["admin-events"] });
+      void qc.invalidateQueries({ queryKey: ["opportunities"] });
+      void qc.invalidateQueries({ queryKey: ["upcoming-events"] });
     },
   });
 }

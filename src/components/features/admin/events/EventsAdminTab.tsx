@@ -26,6 +26,7 @@ import {
   useCreateCuratedEvent,
   useUpdateCuratedEvent,
   useDeleteCuratedEvent,
+  usePermanentlyDeleteEvent,
 } from "@/hooks/use-curated-events";
 import { useSuggestions, useReviewSuggestion } from "@/hooks/use-suggestions";
 import { useExtractMetadata } from "@/hooks/use-extract-metadata";
@@ -97,7 +98,8 @@ function EventsListView({
   };
 
   const { data: events, isLoading, refetch } = useCuratedEvents({ ...filters, _key: refreshKey } as CuratedEventFilters);
-  const deleteMutation = useDeleteCuratedEvent();
+  const deleteMutation         = useDeleteCuratedEvent();
+  const permanentDeleteMutation = usePermanentlyDeleteEvent();
 
   function handleRefresh() {
     void refetch();
@@ -202,9 +204,15 @@ function EventsListView({
               key={ev.id}
               event={ev}
               onEdit={() => onEdit(ev.id)}
-              onDelete={() => {
+              onUnpublish={() => {
                 deleteMutation.mutate(ev.id, {
                   onSuccess: () => toast.success("Event unpublished."),
+                  onError:   (e) => toast.error(String(e)),
+                });
+              }}
+              onPermanentDelete={() => {
+                permanentDeleteMutation.mutate(ev.id, {
+                  onSuccess: () => toast.success("Event permanently deleted."),
                   onError:   (e) => toast.error(String(e)),
                 });
               }}
@@ -219,13 +227,17 @@ function EventsListView({
 function EventRow({
   event,
   onEdit,
-  onDelete,
+  onUnpublish,
+  onPermanentDelete,
 }: {
   event: Opportunity;
   onEdit: () => void;
-  onDelete: () => void;
+  onUnpublish: () => void;
+  onPermanentDelete: () => void;
 }) {
-  const [confirmDel, setConfirmDel] = useState(false);
+  const [confirm, setConfirm] = useState<"unpublish" | "delete" | null>(null);
+  const isUnpublished = event.status === "unpublished";
+
   return (
     <Card className="p-4">
       <div className="flex items-start gap-3">
@@ -247,17 +259,34 @@ function EventRow({
             source: {event.source ?? "manual"}
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Button size="sm" variant="outline" onClick={onEdit}>Edit</Button>
-          {confirmDel ? (
-            <>
-              <Button size="sm" variant="outline" className="text-destructive" onClick={onDelete}>Confirm</Button>
-              <Button size="sm" variant="outline" onClick={() => setConfirmDel(false)}>Cancel</Button>
-            </>
-          ) : (
-            <Button size="sm" variant="outline" className="text-destructive" onClick={() => setConfirmDel(true)}>
-              Unpublish
-            </Button>
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={onEdit}>Edit</Button>
+            {!isUnpublished && (
+              confirm === "unpublish" ? (
+                <>
+                  <Button size="sm" variant="outline" className="text-destructive" onClick={() => { onUnpublish(); setConfirm(null); }}>Confirm</Button>
+                  <Button size="sm" variant="outline" onClick={() => setConfirm(null)}>Cancel</Button>
+                </>
+              ) : (
+                <Button size="sm" variant="outline" className="text-destructive" onClick={() => setConfirm("unpublish")}>
+                  Unpublish
+                </Button>
+              )
+            )}
+          </div>
+          {isUnpublished && (
+            confirm === "delete" ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-destructive font-medium">Permanently delete?</span>
+                <Button size="sm" variant="outline" className="text-destructive" onClick={() => { onPermanentDelete(); setConfirm(null); }}>Delete</Button>
+                <Button size="sm" variant="outline" onClick={() => setConfirm(null)}>Cancel</Button>
+              </div>
+            ) : (
+              <Button size="sm" variant="destructive" onClick={() => setConfirm("delete")}>
+                Delete permanently
+              </Button>
+            )
           )}
         </div>
       </div>

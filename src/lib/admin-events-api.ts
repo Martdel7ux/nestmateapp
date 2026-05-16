@@ -168,6 +168,15 @@ export async function deleteCuratedEvent(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function permanentlyDeleteEvent(id: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase
+    .from("opportunities")
+    .delete()
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
 // ── Soft duplicate search: same title within ±3 days ───────────────────────
 
 export async function findSoftDuplicates(
