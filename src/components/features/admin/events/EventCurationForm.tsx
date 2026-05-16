@@ -12,6 +12,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -91,6 +92,7 @@ export function EventCurationForm({
 
   const [tagInput,   setTagInput]   = useState("");
   const [uploading,  setUploading]  = useState(false);
+  const [imgError,   setImgError]   = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Keep form in sync when `initial` changes (e.g. after extraction)
@@ -104,8 +106,10 @@ export function EventCurationForm({
     }));
   }, [initial]);
 
-  const set = <K extends keyof EventFormData>(key: K, val: EventFormData[K]) =>
+  const set = <K extends keyof EventFormData>(key: K, val: EventFormData[K]) => {
+    if (key === "image_url") setImgError(false);
     setForm((prev) => ({ ...prev, [key]: val }));
+  };
 
   // Soft duplicate check
   const { data: softDupes } = useSoftDuplicates(
@@ -141,7 +145,8 @@ export function EventCurationForm({
       const url = await uploadEventImage(file);
       set("image_url", url);
     } catch (err) {
-      console.error("[EventCurationForm] image upload:", err);
+      const msg = err instanceof Error ? err.message : "Upload failed";
+      toast.error(`Image upload failed: ${msg}`);
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -342,7 +347,7 @@ export function EventCurationForm({
         </p>
         <div className="space-y-2">
           <input
-            type="url"
+            type="text"
             value={form.image_url}
             onChange={(e) => set("image_url", e.target.value)}
             placeholder="https://… or upload below"
@@ -350,14 +355,19 @@ export function EventCurationForm({
           />
           {form.image_url && (
             <div className="relative">
-              <img
-                src={form.image_url}
-                alt="preview"
-                className="h-36 w-full rounded-xl object-cover"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = "none";
-                }}
-              />
+              {imgError ? (
+                <div className="flex h-36 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-destructive/50 bg-destructive/5 text-sm text-destructive">
+                  <AlertTriangle size={15} />
+                  Can't load image — check the URL or use a different one
+                </div>
+              ) : (
+                <img
+                  src={form.image_url}
+                  alt="preview"
+                  className="h-36 w-full rounded-xl object-cover"
+                  onError={() => setImgError(true)}
+                />
+              )}
               <button
                 type="button"
                 onClick={() => set("image_url", "")}
