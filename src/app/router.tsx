@@ -37,6 +37,17 @@ import { PeerProfilePage } from "@/pages/study/PeerProfilePage";
 import { StudyMessagesPage } from "@/pages/study/MessagesPage";
 import { ConversationPage } from "@/pages/study/ConversationPage";
 import { MyCoursesPage } from "@/pages/study/MyCoursesPage";
+import { HouseholdIndexPage } from "@/pages/household/HouseholdIndexPage";
+import { HouseholdNewPage } from "@/pages/household/HouseholdNewPage";
+import { HouseholdJoinPage } from "@/pages/household/HouseholdJoinPage";
+import { HouseholdDashboardPage } from "@/pages/household/HouseholdDashboardPage";
+import { ExpensesListPage } from "@/pages/household/ExpensesListPage";
+import { ExpenseNewPage } from "@/pages/household/ExpenseNewPage";
+import { ExpenseDetailPage } from "@/pages/household/ExpenseDetailPage";
+import { SettleUpPage } from "@/pages/household/SettleUpPage";
+import { SettlementNewPage } from "@/pages/household/SettlementNewPage";
+import { MembersPage } from "@/pages/household/MembersPage";
+import { HouseholdSettingsPage } from "@/pages/household/HouseholdSettingsPage";
 
 function AdminRoute() {
   const { isAdmin, loading } = useAuth();
@@ -99,6 +110,17 @@ export function AppRouter() {
           <Route path="/study/messages" element={<StudyMessagesPage />} />
           <Route path="/study/messages/:conversationId" element={<ConversationPage />} />
           <Route path="/study/courses" element={<MyCoursesPage />} />
+          <Route path="/household" element={<HouseholdIndexPage />} />
+          <Route path="/household/new" element={<HouseholdNewPage />} />
+          <Route path="/household/join" element={<HouseholdJoinPage />} />
+          <Route path="/household/:id" element={<HouseholdDashboardPage />} />
+          <Route path="/household/:id/expenses" element={<ExpensesListPage />} />
+          <Route path="/household/:id/expenses/new" element={<ExpenseNewPage />} />
+          <Route path="/household/:id/expenses/:expenseId" element={<ExpenseDetailPage />} />
+          <Route path="/household/:id/settle" element={<SettleUpPage />} />
+          <Route path="/household/:id/settle/new" element={<SettlementNewPage />} />
+          <Route path="/household/:id/members" element={<MembersPage />} />
+          <Route path="/household/:id/settings" element={<HouseholdSettingsPage />} />
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminPage />} />
           </Route>
