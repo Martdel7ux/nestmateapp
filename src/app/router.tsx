@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom
 import { AppShell } from "@/components/layout/app-shell";
 import { OnboardingTour } from "@/components/features/profile/onboarding-tour";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
+import { LocationGate } from "@/components/features/location/LocationGate";
+import { LocationSettingsPage } from "@/pages/location/LocationSettingsPage";
 import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
 import { AdminPage } from "@/pages/admin-page";
@@ -85,6 +87,7 @@ function ProtectedLayout() {
         <Outlet />
       </AppShell>
       <OnboardingTour />
+      <LocationGate />
     </>
   );
 }
@@ -149,6 +152,7 @@ export function AppRouter() {
           <Route path="/documents/trash" element={<DocumentsTrashPage />} />
           <Route path="/documents/:id" element={<DocumentViewerPage />} />
           <Route path="/documents/:id/edit" element={<DocumentEditPage />} />
+          <Route path="/profile/settings/location" element={<LocationSettingsPage />} />
           <Route path="/tools/bills-calculator" element={<BillsCalculatorPage />} />
           <Route path="/tools/outages" element={<OutagesPage />} />
           <Route path="/tools/outages/:id" element={<OutageDetailPage />} />

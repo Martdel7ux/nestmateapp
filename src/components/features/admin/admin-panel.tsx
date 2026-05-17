@@ -28,6 +28,7 @@ import { EventsAdminTab } from "@/components/features/admin/events/EventsAdminTa
 import { OutagesAdminTab } from "@/components/features/admin/OutagesAdminTab";
 import { BusRoutesAdminTab } from "@/components/features/admin/BusRoutesAdminTab";
 import { GarbageAdminTab } from "@/components/features/admin/GarbageAdminTab";
+import { CyprusAreasAdminTab } from "@/components/features/admin/CyprusAreasAdminTab";
 import type { Property } from "@/types/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useData } from "@/contexts/data-context";
 import { formatCompactNumber } from "@/lib/utils";
 
-type Tab = "overview" | "properties" | "flatmates" | "verifications" | "users" | "events" | "outages" | "buses" | "garbage";
+type Tab = "overview" | "properties" | "flatmates" | "verifications" | "users" | "events" | "outages" | "buses" | "garbage" | "areas";
 
 const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview",      label: "Overview",      icon: LayoutDashboard },
@@ -48,6 +49,7 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "outages",       label: "Outages",       icon: Zap },
   { id: "buses",         label: "Buses",         icon: Bus },
   { id: "garbage",       label: "Garbage",       icon: Trash2 },
+  { id: "areas",         label: "Areas",         icon: MapPin },
 ];
 
 function StatusBadge({ approved }: { approved: boolean }) {
@@ -919,6 +921,7 @@ export function AdminPanel() {
       {activeTab === "outages"       && <OutagesAdminTab />}
       {activeTab === "buses"         && <BusRoutesAdminTab />}
       {activeTab === "garbage"       && <GarbageAdminTab />}
+      {activeTab === "areas"         && <CyprusAreasAdminTab />}
     </div>
   );
 }

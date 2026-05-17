@@ -103,7 +103,7 @@ interface DataContextValue {
   approveFlatmate: (flatmateId: string, approved: boolean) => void;
   approveProperty: (propertyId: string, approved: boolean) => void;
   createFlatmateListing: (data: CreateFlatmateInput) => Promise<void>;
-  updateProfile: (data: Partial<Pick<Profile, "full_name" | "bio" | "university" | "city" | "avatar_url">>, avatarFile?: File) => Promise<void>;
+  updateProfile: (data: Partial<Pick<Profile, "full_name" | "bio" | "university" | "city" | "avatar_url" | "area" | "street_address" | "postal_code" | "location_set_at" | "location_confirmed_at">>, avatarFile?: File) => Promise<void>;
   submitVerification: (idFile: File, selfieFile: File) => Promise<void>;
   approveVerification: (landlordId: string) => void;
   rejectVerification: (landlordId: string, reason: string) => void;

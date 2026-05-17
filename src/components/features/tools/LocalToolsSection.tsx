@@ -63,45 +63,43 @@ export function LocalToolsSection() {
       <p className="mb-3 text-[14px] font-semibold text-foreground">Local Tools</p>
       <div className="-mx-5">
         <div className="flex gap-3 overflow-x-auto px-5 pb-1 scrollbar-none snap-x snap-mandatory">
-          {[
-            <motion.div key="bills" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.30, duration: 0.3 }} className="snap-start">
-              <ToolTile
-                to="/tools/bills-calculator"
-                icon={Calculator}
-                label="Summer Bills"
-                sublabel="Estimate monthly costs"
-                color="linear-gradient(135deg, #e85d3a 0%, #f0845e 100%)"
-              />
-            </motion.div>,
+          <motion.div key="bills" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.30, duration: 0.3 }} className="snap-start">
+            <ToolTile
+              to="/tools/bills-calculator"
+              icon={Calculator}
+              label="Bills Calc"
+              sublabel="Estimate monthly costs"
+              color="linear-gradient(135deg, #e85d3a 0%, #f0845e 100%)"
+            />
+          </motion.div>
 
-            <motion.div key="outage" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.37, duration: 0.3 }} className="snap-start">
-              <OutageAwareTile district={district} />
-            </motion.div>,
+          <motion.div key="outage" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.37, duration: 0.3 }} className="snap-start">
+            <OutageAwareTile district={district} />
+          </motion.div>
 
-            <motion.div key="buses" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.44, duration: 0.3 }} className="snap-start">
-              <ToolTile
-                to="/tools/buses"
-                icon={Bus}
-                label="Bus Routes"
-                sublabel="UNIC · UCY · CUT · EUC"
-                color="linear-gradient(135deg, #1a7fd4 0%, #3a9fd4 100%)"
-              />
-            </motion.div>,
+          <motion.div key="buses" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.44, duration: 0.3 }} className="snap-start">
+            <ToolTile
+              to="/tools/buses"
+              icon={Bus}
+              label="Bus Routes"
+              sublabel="UNIC · UCY · CUT · EUC"
+              color="linear-gradient(135deg, #1a7fd4 0%, #3a9fd4 100%)"
+            />
+          </motion.div>
 
-            <motion.div key="garbage" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.51, duration: 0.3 }} className="snap-start">
-              <ToolTile
-                to="/tools/garbage"
-                icon={Trash2}
-                label="Garbage Days"
-                sublabel="Collection schedule"
-                color="linear-gradient(135deg, #3a8f4f 0%, #5aaf6f 100%)"
-              />
-            </motion.div>,
-          ]}
+          <motion.div key="garbage" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.51, duration: 0.3 }} className="snap-start">
+            <ToolTile
+              to="/tools/garbage"
+              icon={Trash2}
+              label="Garbage Days"
+              sublabel="Collection schedule"
+              color="linear-gradient(135deg, #3a8f4f 0%, #5aaf6f 100%)"
+            />
+          </motion.div>
         </div>
       </div>
     </motion.div>

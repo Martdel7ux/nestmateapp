@@ -26,7 +26,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     pathname.startsWith("/rent/") ||
     pathname === "/documents" ||
     pathname.startsWith("/documents/") ||
-    pathname.startsWith("/tools/");
+    pathname.startsWith("/tools/") ||
+    pathname === "/profile/settings/location";
 
   if (isChat) {
     return (

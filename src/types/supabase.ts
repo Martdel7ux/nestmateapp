@@ -21,6 +21,10 @@ export interface Profile {
   created_at?: string;
   area?: string | null;
   garbage_reminder_enabled?: boolean;
+  street_address?: string | null;
+  postal_code?: string | null;
+  location_set_at?: string | null;
+  location_confirmed_at?: string | null;
 }
 
 export interface Property {

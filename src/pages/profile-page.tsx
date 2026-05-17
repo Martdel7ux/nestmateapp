@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { LandlordProfileView } from "@/components/features/landlord/landlord-profile-view";
 import { AppHeader } from "@/components/layout/app-header";
 import { useI18n } from "@/contexts/i18n-context";
@@ -562,6 +562,29 @@ export function ProfilePage() {
             </button>
           ))}
         </div>
+      </Card>
+
+      {/* ── Location ── */}
+      <Card className="p-0 overflow-hidden">
+        <Link
+          to="/profile/settings/location"
+          className="flex w-full items-center justify-between px-5 py-4 transition hover:bg-muted/40"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <MapPin size={16} />
+            </div>
+            <div>
+              <p className="font-medium">Location</p>
+              <p className="text-xs text-muted-foreground">
+                {profile.city && profile.area
+                  ? `${profile.area}, ${profile.city}`
+                  : profile.city ?? "Not set"}
+              </p>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-muted-foreground" />
+        </Link>
       </Card>
 
       {/* ── Security ── */}

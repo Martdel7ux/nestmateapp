@@ -8,6 +8,7 @@ import { UpcomingEvents } from "@/components/features/home/UpcomingEvents";
 import { useUpcomingRentPayment } from "@/hooks/use-rent";
 import { ExpiringSoonStrip } from "@/components/features/documents/ExpiringSoonStrip";
 import { LocalToolsSection } from "@/components/features/tools/LocalToolsSection";
+import { LocationConfirmationBanner } from "@/components/features/location/LocationConfirmationBanner";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
@@ -93,6 +94,13 @@ const ACTIONS: ActionTileProps[] = [
     label:     "Documents",
     color:     "var(--action-study)",
     ariaLabel: "Open Documents",
+  },
+  {
+    to:        "/household",
+    icon:      Wallet,
+    label:     "Bills",
+    color:     "var(--action-property)",
+    ariaLabel: "Open Bills & Household",
   },
 ];
 
@@ -251,6 +259,9 @@ export function HomePage() {
             </div>
           </div>
         </motion.div>
+
+        {/* ── Location confirmation banner ── */}
+        <LocationConfirmationBanner />
 
         {/* ── Rent chip ── */}
         {user && <RentChip userId={user.id} />}

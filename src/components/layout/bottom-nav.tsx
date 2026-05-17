@@ -7,7 +7,6 @@ import {
   MessageCircle,
   ShieldCheck,
   User,
-  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -17,12 +16,11 @@ import { useAuth } from "@/contexts/auth-context";
 import { useI18n } from "@/contexts/i18n-context";
 import { useData } from "@/contexts/data-context";
 
-const icons: Record<string, LucideIcon> = { Home, Compass, MessageCircle, ShieldCheck, User, Wallet };
+const icons: Record<string, LucideIcon> = { Home, Compass, MessageCircle, ShieldCheck, User };
 
 const studentNavItems = [
   { key: "navHome",      path: "/",          icon: "Home" },
   { key: "navDiscover",  path: "/discover",  icon: "Compass" },
-  { key: "navHousehold", path: "/household", icon: "Wallet",        label: "Bills" },
   { key: "navMessages",  path: "/messages",  icon: "MessageCircle" },
   { key: "navProfile",   path: "/profile",   icon: "User" },
 ] as const;
@@ -30,7 +28,6 @@ const studentNavItems = [
 const landlordNavItems = [
   { key: "navHome",      path: "/",          icon: "Home" },
   { key: "navDiscover",  path: "/discover",  icon: "Compass" },
-  { key: "navHousehold", path: "/household", icon: "Wallet",        label: "Bills" },
   { key: "navMessages",  path: "/messages",  icon: "MessageCircle" },
   { key: "navProfile",   path: "/profile",   icon: "User" },
 ] as const;

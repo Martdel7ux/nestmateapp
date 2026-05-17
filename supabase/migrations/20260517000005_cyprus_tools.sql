@@ -162,12 +162,8 @@ VALUES
   -- UNIC
   ('127', 'City Center → UNIC (Makedonitissa)', 'unic', 'Intercity KTEL', 'Eleftheria Square', 'UNIC Main Gate',
    'Every 30–40 min weekdays, hourly weekends', '06:30', '22:00', 1.50,
-   'Buy ticket on board. Free for UNIC students with valid ID on campus shuttle.',
+   'Buy ticket on board. Validate with Suica-style card for discount.',
    'https://www.osypa.com.cy', 1),
-  ('UNIC-S', 'UNIC Campus Shuttle', 'unic', 'UNIC', 'Makedonitissa Terminal', 'UNIC Campus',
-   'Every 20 min during semester (07:30–20:00)', '07:30', '20:00', 0.00,
-   'Free for all UNIC students with valid student card. Does not operate on public holidays.',
-   'https://www.unic.ac.cy/campus-life', 2),
 
   -- UCY
   ('72', 'City Center → UCY (Aglantzia)', 'ucy', 'Intercity KTEL', 'Eleftheria Square', 'UCY Main Campus',
@@ -188,20 +184,12 @@ VALUES
    'Every 30 min weekdays', '07:00', '21:00', 1.50,
    'Alternative route through residential areas — useful from eastern Limassol.',
    'https://emel.com.cy', 2),
-  ('CUT-S', 'CUT Campus Shuttle', 'cut', 'CUT', 'Limassol Center Pickup', 'CUT Campus',
-   'Morning + afternoon runs during semester', '08:00', '18:00', 0.00,
-   'Check CUT student portal for semester schedule. Free for registered students.',
-   'https://www.cut.ac.cy/services/transport', 3),
 
   -- EUC (shares area with UNIC — both in Engomi, Nicosia)
   ('127', 'City Center → EUC (Engomi)', 'euc', 'Intercity KTEL', 'Eleftheria Square', 'EUC / Diogenes St',
    'Every 30–40 min weekdays, hourly weekends', '06:30', '22:00', 1.50,
    'Same route as UNIC route 127 — EUC is a short walk from the Makedonitissa stop.',
-   'https://www.osypa.com.cy', 1),
-  ('EUC-S', 'EUC Campus Shuttle', 'euc', 'EUC', 'Nicosia Center', 'EUC Campus',
-   'Twice daily during semester (morning + afternoon)', '08:00', '17:00', 0.00,
-   'Free for EUC students. Check EUC student services for exact pickup points.',
-   'https://www.euc.ac.cy', 2)
+   'https://www.osypa.com.cy', 1)
 ON CONFLICT DO NOTHING;
 
 -- Stops for Route 127 (UNIC)
