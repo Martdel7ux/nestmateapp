@@ -32,9 +32,10 @@ interface Props {
   userId: string;
   onSubmit: (form: RentAgreementFormData) => Promise<void>;
   isPending: boolean;
+  footer?: React.ReactNode;
 }
 
-export function RentAgreementForm({ initial, households = [], userId, onSubmit, isPending }: Props) {
+export function RentAgreementForm({ initial, households = [], userId, onSubmit, isPending, footer }: Props) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<RentAgreementFormData>({ ...EMPTY, ...initial });
   const push = usePushSubscription(userId);
@@ -295,6 +296,7 @@ export function RentAgreementForm({ initial, households = [], userId, onSubmit, 
           </button>
         )}
         </div>
+        {footer && <div className="pt-3">{footer}</div>}
       </div>
     </div>
   );

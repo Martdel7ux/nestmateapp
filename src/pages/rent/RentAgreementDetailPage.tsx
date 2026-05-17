@@ -77,13 +77,13 @@ export function RentAgreementDetailPage() {
         households={households}
         onSubmit={handleSubmit}
         isPending={isPending}
+        footer={
+          <button type="button" onClick={handleDeactivate}
+            className="w-full rounded-2xl border border-destructive/30 bg-destructive/5 py-3 text-sm font-semibold text-destructive">
+            End this agreement
+          </button>
+        }
       />
-      <div className="px-5 pb-5">
-        <button type="button" onClick={handleDeactivate}
-          className="w-full rounded-2xl border border-destructive/30 bg-destructive/5 py-3 text-sm font-semibold text-destructive">
-          End this agreement
-        </button>
-      </div>
     </div>
   );
 }
