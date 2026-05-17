@@ -1,9 +1,12 @@
-import { Link } from "react-router-dom";
-import { Bell, MapPin, UsersRound, Sparkles, KeyRound, GraduationCap } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Bell, MapPin, UsersRound, Sparkles, KeyRound, GraduationCap, AlertCircle, Clock, Wallet } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useData } from "@/contexts/data-context";
+import { useAuth } from "@/contexts/auth-context";
 import { LandlordHome } from "@/components/features/landlord/landlord-home";
 import { UpcomingEvents } from "@/components/features/home/UpcomingEvents";
+import { useUpcomingRentPayment } from "@/hooks/use-rent";
+import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
 // ── Action tile ───────────────────────────────────────────────────────────
@@ -75,12 +78,65 @@ const ACTIONS: ActionTileProps[] = [
     color:     "var(--action-study)",
     ariaLabel: "Open Study Hub",
   },
+  {
+    to:        "/rent",
+    icon:      Wallet,
+    label:     "Rent",
+    color:     "var(--action-flatmates)",
+    ariaLabel: "Open Rent",
+  },
 ];
 
 // ── Page ─────────────────────────────────────────────────────────────────
 
+function RentChip({ userId }: { userId: string }) {
+  const navigate = useNavigate();
+  const { data: payment } = useUpcomingRentPayment(userId);
+  if (!payment) return null;
+
+  const due   = new Date(payment.due_date);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const days  = Math.round((due.getTime() - today.getTime()) / 86400000);
+  if (days > 7 && payment.status !== "late") return null;
+
+  const overdue = days < 0 || payment.status === "late";
+  const label   = overdue
+    ? `Overdue by ${Math.abs(days)} day${Math.abs(days) !== 1 ? "s" : ""}`
+    : days === 0 ? "Due today"
+    : days === 1 ? "Due tomorrow"
+    : `Due in ${days} days`;
+  const amount  = `€${Number(payment.amount).toFixed(2)}`;
+
+  return (
+    <motion.button
+      type="button"
+      onClick={() => navigate(`/rent/payments/${payment.id}`)}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3, duration: 0.3 }}
+      className={cn(
+        "w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left active:scale-[0.98] transition-transform",
+        overdue ? "bg-rose-50 dark:bg-rose-900/20" : "bg-amber-50 dark:bg-amber-900/20"
+      )}
+    >
+      {overdue
+        ? <AlertCircle size={16} className="text-rose-500 shrink-0" />
+        : <Clock size={16} className="text-amber-500 shrink-0" />
+      }
+      <div className="flex-1 min-w-0">
+        <span className={cn("text-sm font-semibold", overdue ? "text-rose-600 dark:text-rose-400" : "text-amber-700 dark:text-amber-400")}>
+          Rent {label}
+        </span>
+        <span className="text-sm text-muted-foreground"> · {amount}</span>
+      </div>
+      <span className="text-xs font-semibold text-primary shrink-0">Mark paid →</span>
+    </motion.button>
+  );
+}
+
 export function HomePage() {
   const { snapshot } = useData();
+  const { user } = useAuth();
 
   if (snapshot.profile.user_type === "landlord") return <LandlordHome />;
 
@@ -186,6 +242,9 @@ export function HomePage() {
             </div>
           </div>
         </motion.div>
+
+        {/* ── Rent chip ── */}
+        {user && <RentChip userId={user.id} />}
 
         {/* ── Upcoming Events ── */}
         <UpcomingEvents />

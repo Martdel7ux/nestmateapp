@@ -37,6 +37,10 @@ import { PeerProfilePage } from "@/pages/study/PeerProfilePage";
 import { StudyMessagesPage } from "@/pages/study/MessagesPage";
 import { ConversationPage } from "@/pages/study/ConversationPage";
 import { MyCoursesPage } from "@/pages/study/MyCoursesPage";
+import { RentOverviewPage } from "@/pages/rent/RentOverviewPage";
+import { RentNewPage } from "@/pages/rent/RentNewPage";
+import { RentAgreementDetailPage } from "@/pages/rent/RentAgreementDetailPage";
+import { RentPaymentDetailPage } from "@/pages/rent/RentPaymentDetailPage";
 import { HouseholdIndexPage } from "@/pages/household/HouseholdIndexPage";
 import { HouseholdNewPage } from "@/pages/household/HouseholdNewPage";
 import { HouseholdJoinPage } from "@/pages/household/HouseholdJoinPage";
@@ -110,6 +114,10 @@ export function AppRouter() {
           <Route path="/study/messages" element={<StudyMessagesPage />} />
           <Route path="/study/messages/:conversationId" element={<ConversationPage />} />
           <Route path="/study/courses" element={<MyCoursesPage />} />
+          <Route path="/rent" element={<RentOverviewPage />} />
+          <Route path="/rent/new" element={<RentNewPage />} />
+          <Route path="/rent/:agreementId" element={<RentAgreementDetailPage />} />
+          <Route path="/rent/payments/:paymentId" element={<RentPaymentDetailPage />} />
           <Route path="/household" element={<HouseholdIndexPage />} />
           <Route path="/household/new" element={<HouseholdNewPage />} />
           <Route path="/household/join" element={<HouseholdJoinPage />} />
