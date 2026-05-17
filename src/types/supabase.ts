@@ -19,6 +19,8 @@ export interface Profile {
   accepted_privacy_at?: string | null;
   accepted_cookies_at?: string | null;
   created_at?: string;
+  area?: string | null;
+  garbage_reminder_enabled?: boolean;
 }
 
 export interface Property {
