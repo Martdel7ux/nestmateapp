@@ -98,7 +98,7 @@ const ACTIONS: ActionTileProps[] = [
   {
     to:        "/household",
     icon:      Wallet,
-    label:     "Bills",
+    label:     "Bill Spliting",
     color:     "var(--action-property)",
     ariaLabel: "Open Bills & Household",
   },
