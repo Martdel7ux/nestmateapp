@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   Bath,
   BedDouble,
+  Bus,
   CalendarDays,
   CheckCircle2,
   ChevronLeft,
@@ -21,8 +22,12 @@ import {
   Users2,
   XCircle,
   X,
+  Zap,
 } from "lucide-react";
 import { EventsAdminTab } from "@/components/features/admin/events/EventsAdminTab";
+import { OutagesAdminTab } from "@/components/features/admin/OutagesAdminTab";
+import { BusRoutesAdminTab } from "@/components/features/admin/BusRoutesAdminTab";
+import { GarbageAdminTab } from "@/components/features/admin/GarbageAdminTab";
 import type { Property } from "@/types/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,7 +36,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useData } from "@/contexts/data-context";
 import { formatCompactNumber } from "@/lib/utils";
 
-type Tab = "overview" | "properties" | "flatmates" | "verifications" | "users" | "events";
+type Tab = "overview" | "properties" | "flatmates" | "verifications" | "users" | "events" | "outages" | "buses" | "garbage";
 
 const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview",      label: "Overview",      icon: LayoutDashboard },
@@ -40,6 +45,9 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "verifications", label: "Verifications", icon: ShieldCheck },
   { id: "users",         label: "Users",         icon: UserRound },
   { id: "events",        label: "Events",        icon: CalendarDays },
+  { id: "outages",       label: "Outages",       icon: Zap },
+  { id: "buses",         label: "Buses",         icon: Bus },
+  { id: "garbage",       label: "Garbage",       icon: Trash2 },
 ];
 
 function StatusBadge({ approved }: { approved: boolean }) {
@@ -908,6 +916,9 @@ export function AdminPanel() {
       {activeTab === "verifications" && <VerificationsTab />}
       {activeTab === "users"         && <UsersTab />}
       {activeTab === "events"        && <EventsAdminTab />}
+      {activeTab === "outages"       && <OutagesAdminTab />}
+      {activeTab === "buses"         && <BusRoutesAdminTab />}
+      {activeTab === "garbage"       && <GarbageAdminTab />}
     </div>
   );
 }

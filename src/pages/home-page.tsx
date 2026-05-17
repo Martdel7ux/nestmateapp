@@ -1,11 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, MapPin, UsersRound, Sparkles, KeyRound, GraduationCap, AlertCircle, Clock, Wallet } from "lucide-react";
+import { Bell, MapPin, UsersRound, Sparkles, KeyRound, GraduationCap, AlertCircle, Clock, Wallet, FolderOpen } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useData } from "@/contexts/data-context";
 import { useAuth } from "@/contexts/auth-context";
 import { LandlordHome } from "@/components/features/landlord/landlord-home";
 import { UpcomingEvents } from "@/components/features/home/UpcomingEvents";
 import { useUpcomingRentPayment } from "@/hooks/use-rent";
+import { ExpiringSoonStrip } from "@/components/features/documents/ExpiringSoonStrip";
+import { LocalToolsSection } from "@/components/features/tools/LocalToolsSection";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
@@ -84,6 +86,13 @@ const ACTIONS: ActionTileProps[] = [
     label:     "Rent",
     color:     "var(--action-flatmates)",
     ariaLabel: "Open Rent",
+  },
+  {
+    to:        "/documents",
+    icon:      FolderOpen,
+    label:     "Documents",
+    color:     "var(--action-study)",
+    ariaLabel: "Open Documents",
   },
 ];
 
@@ -245,6 +254,12 @@ export function HomePage() {
 
         {/* ── Rent chip ── */}
         {user && <RentChip userId={user.id} />}
+
+        {/* ── Document expiry strip ── */}
+        <ExpiringSoonStrip />
+
+        {/* ── Local Tools strip ── */}
+        <LocalToolsSection />
 
         {/* ── Upcoming Events ── */}
         <UpcomingEvents />

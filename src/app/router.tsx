@@ -52,6 +52,19 @@ import { SettleUpPage } from "@/pages/household/SettleUpPage";
 import { SettlementNewPage } from "@/pages/household/SettlementNewPage";
 import { MembersPage } from "@/pages/household/MembersPage";
 import { HouseholdSettingsPage } from "@/pages/household/HouseholdSettingsPage";
+import { DocumentsListPage } from "@/pages/documents/DocumentsListPage";
+import { DocumentNewPage } from "@/pages/documents/DocumentNewPage";
+import { DocumentViewerPage } from "@/pages/documents/DocumentViewerPage";
+import { DocumentEditPage } from "@/pages/documents/DocumentEditPage";
+import { DocumentsExpiringPage } from "@/pages/documents/DocumentsExpiringPage";
+import { DocumentsTrashPage } from "@/pages/documents/DocumentsTrashPage";
+import { DocumentSearchPage } from "@/pages/documents/DocumentSearchPage";
+import { BillsCalculatorPage } from "@/pages/tools/BillsCalculatorPage";
+import { OutagesPage } from "@/pages/tools/OutagesPage";
+import { OutageDetailPage } from "@/pages/tools/OutageDetailPage";
+import { BusesPage } from "@/pages/tools/BusesPage";
+import { BusRouteDetailPage } from "@/pages/tools/BusRouteDetailPage";
+import { GarbagePage } from "@/pages/tools/GarbagePage";
 
 function AdminRoute() {
   const { isAdmin, loading } = useAuth();
@@ -129,6 +142,19 @@ export function AppRouter() {
           <Route path="/household/:id/settle/new" element={<SettlementNewPage />} />
           <Route path="/household/:id/members" element={<MembersPage />} />
           <Route path="/household/:id/settings" element={<HouseholdSettingsPage />} />
+          <Route path="/documents" element={<DocumentsListPage />} />
+          <Route path="/documents/new" element={<DocumentNewPage />} />
+          <Route path="/documents/search" element={<DocumentSearchPage />} />
+          <Route path="/documents/expiring" element={<DocumentsExpiringPage />} />
+          <Route path="/documents/trash" element={<DocumentsTrashPage />} />
+          <Route path="/documents/:id" element={<DocumentViewerPage />} />
+          <Route path="/documents/:id/edit" element={<DocumentEditPage />} />
+          <Route path="/tools/bills-calculator" element={<BillsCalculatorPage />} />
+          <Route path="/tools/outages" element={<OutagesPage />} />
+          <Route path="/tools/outages/:id" element={<OutageDetailPage />} />
+          <Route path="/tools/buses" element={<BusesPage />} />
+          <Route path="/tools/buses/:university" element={<BusRouteDetailPage />} />
+          <Route path="/tools/garbage" element={<GarbagePage />} />
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminPage />} />
           </Route>
