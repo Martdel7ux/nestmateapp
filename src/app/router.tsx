@@ -4,6 +4,8 @@ import { OnboardingTour } from "@/components/features/profile/onboarding-tour";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 import { LocationGate } from "@/components/features/location/LocationGate";
 import { LocationSettingsPage } from "@/pages/location/LocationSettingsPage";
+import { SearchProvider } from "@/contexts/search-context";
+import { UniversalSearchOverlay } from "@/features/search/components/UniversalSearchOverlay";
 import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
 import { AdminPage } from "@/pages/admin-page";
@@ -82,13 +84,14 @@ function ProtectedLayout() {
   if (supabase && !user) return <Navigate to="/auth" replace />;
 
   return (
-    <>
+    <SearchProvider>
       <AppShell>
         <Outlet />
       </AppShell>
       <OnboardingTour />
       <LocationGate />
-    </>
+      <UniversalSearchOverlay />
+    </SearchProvider>
   );
 }
 

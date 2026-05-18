@@ -1,8 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, MapPin, UsersRound, Sparkles, KeyRound, GraduationCap, AlertCircle, Clock, Wallet, FolderOpen } from "lucide-react";
+import { MapPin, UsersRound, Sparkles, KeyRound, GraduationCap, AlertCircle, Clock, Wallet, FolderOpen } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useData } from "@/contexts/data-context";
 import { useAuth } from "@/contexts/auth-context";
+import { AppHeader } from "@/components/layout/app-header";
 import { LandlordHome } from "@/components/features/landlord/landlord-home";
 import { UpcomingEvents } from "@/components/features/home/UpcomingEvents";
 import { useUpcomingRentPayment } from "@/hooks/use-rent";
@@ -164,10 +165,9 @@ export function HomePage() {
     hour >= 12 && hour < 18 ? "Good afternoon" :
     "Good evening";
   const userCity = snapshot.profile.city;
-  const unread = snapshot.notifications.filter((n) => !n.is_read).length;
 
   return (
-    <div className="relative min-h-dvh overflow-x-hidden">
+    <div className="relative min-h-dvh [overflow-x:clip]">
       {/* Ambient background blobs */}
       <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden>
         <div className="absolute inset-0 bg-[var(--bg-base)]" />
@@ -189,10 +189,13 @@ export function HomePage() {
         />
       </div>
 
-      <div className="space-y-7 px-5 pb-32" style={{ paddingTop: "max(1.5rem, env(safe-area-inset-top))" }}>
+      {/* Sticky header — search + bell, no title */}
+      <AppHeader title="" right={{ type: "notifications" }} />
 
-        {/* ── Header row: greeting + bell ── */}
-        <div className="flex items-start justify-between gap-4">
+      <div className="space-y-7 px-5 pb-32 pt-4">
+
+        {/* ── Welcome block ── */}
+        <div>
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
@@ -211,27 +214,6 @@ export function HomePage() {
                 <span>{userCity}, Cyprus</span>
               </div>
             )}
-          </motion.div>
-
-          {/* Notification bell */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.35 }}
-            className="flex-shrink-0 mt-1"
-          >
-            <Link
-              to="/notifications"
-              aria-label={unread > 0 ? `${unread} unread notifications` : "Notifications"}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full glass transition hover:opacity-80"
-            >
-              <Bell size={17} className="text-foreground/80" />
-              {unread > 0 && (
-                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
-                  {unread}
-                </span>
-              )}
-            </Link>
           </motion.div>
         </div>
 
