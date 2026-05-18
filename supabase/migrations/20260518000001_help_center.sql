@@ -20,10 +20,7 @@ create policy "anyone_select_categories" on public.help_categories
   for select using (is_active = true);
 create policy "admin_all_categories" on public.help_categories
   for all using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
+    auth.email() = 'martinahoto4@gmail.com'
   );
 
 -- ── Articles ──────────────────────────────────────────────────────────────────
@@ -58,10 +55,7 @@ create policy "published_select" on public.help_articles
   for select using (status = 'published');
 create policy "admin_all_articles" on public.help_articles
   for all using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
+    auth.email() = 'martinahoto4@gmail.com'
   );
 
 -- FTS trigger
@@ -100,10 +94,7 @@ create policy "user_select_own_feedback" on public.help_article_feedback
   for select using (user_id = auth.uid());
 create policy "admin_all_feedback" on public.help_article_feedback
   for all using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
+    auth.email() = 'martinahoto4@gmail.com'
   );
 
 -- Keep helpful_count / not_helpful_count in sync
@@ -165,10 +156,7 @@ create policy "user_insert_ticket" on public.support_messages
   for insert with check (true);
 create policy "admin_all_tickets" on public.support_messages
   for all using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
+    auth.email() = 'martinahoto4@gmail.com'
   );
 
 -- ── Support replies ───────────────────────────────────────────────────────────
@@ -192,10 +180,7 @@ create policy "participants_select_replies" on public.support_message_replies
       select 1 from public.support_messages
       where id = message_id and user_id = auth.uid()
     )
-    or exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
+    or auth.email() = 'martinahoto4@gmail.com'
   );
 create policy "participants_insert_reply" on public.support_message_replies
   for insert with check (
@@ -205,18 +190,12 @@ create policy "participants_insert_reply" on public.support_message_replies
         select 1 from public.support_messages
         where id = message_id and user_id = auth.uid()
       )
-      or exists (
-        select 1 from public.profiles
-        where id = auth.uid() and role = 'admin'
-      )
+      or auth.email() = 'martinahoto4@gmail.com'
     )
   );
 create policy "admin_update_replies" on public.support_message_replies
   for update using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
+    auth.email() = 'martinahoto4@gmail.com'
   );
 
 -- ── AI handoff context ────────────────────────────────────────────────────────
@@ -236,10 +215,7 @@ create policy "user_select_own_ai_context" on public.ai_assistant_help_context
   for select using (user_id = auth.uid());
 create policy "admin_all_ai_context" on public.ai_assistant_help_context
   for all using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
+    auth.email() = 'martinahoto4@gmail.com'
   );
 
 -- ── RPC: record article view ──────────────────────────────────────────────────

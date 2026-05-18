@@ -60,6 +60,10 @@
   --nav-highlight: rgba(255, 255, 255, 0.96);
   --nav-specular: rgba(255, 255, 255, 0.55);
 
+  /* ── Header glass tokens ────────────────────────────────────────────── */
+  --header-inner-highlight: rgba(15, 15, 25, 0.03);
+  --glass-fill-fallback: rgba(247, 247, 245, 0.92);
+
   /* ── Focus ring ──────────────────────────────────────────────────────── */
   --focus-ring: rgba(14, 165, 233, 0.50);
 
@@ -110,6 +114,10 @@
   --glass-blur: 24px;
   --glass-saturate: 180%;
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.14);
+
+  /* ── Header glass tokens — dark mode ────────────────────────────────── */
+  --header-inner-highlight: rgba(255, 255, 255, 0.04);
+  --glass-fill-fallback: rgba(10, 10, 15, 0.85);
 
   /* ── Semantic text tokens ────────────────────────────────────────────── */
   --text-p: rgba(255, 255, 255, 0.95);
@@ -373,5 +381,29 @@ input, textarea, select { font-size: 16px !important; }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .event-card:hover .event-card-image {
     animation: ken-burns 4s ease-in-out infinite;
+  }
+}
+
+/* ── AppHeader glass — no border, blur-only separation ─────────────────────── */
+.app-header {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition: background 200ms ease, backdrop-filter 200ms ease, box-shadow 200ms ease;
+}
+
+.app-header[data-scrolled] {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: inset 0 -1px 0 var(--header-inner-highlight);
+}
+
+/* Fallback: browsers that don't support backdrop-filter get an opaque fill */
+@supports not (backdrop-filter: blur(1px)) {
+  .app-header[data-scrolled] {
+    background: var(--glass-fill-fallback);
   }
 }

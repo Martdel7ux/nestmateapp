@@ -56,10 +56,7 @@ export function AppHeader({
   const isScrolled = useScrolled();
 
   const handleBack = onBack ?? (() => navigate(-1));
-
-  const scrolledClasses = isScrolled
-    ? "border-b border-[var(--glass-border)] [background:var(--glass-fill)] [backdrop-filter:blur(24px)_saturate(180%)] [-webkit-backdrop-filter:blur(24px)_saturate(180%)]"
-    : "border-b border-transparent bg-transparent";
+  const scrolledAttr = isScrolled ? "" : undefined;
 
   // Right-zone element for non-universal-search pages (Messages inline search, notifications, etc.)
   function getRightSlotElement(): ReactNode {
@@ -88,7 +85,8 @@ export function AppHeader({
     if (right?.type === "search" && searching) {
       return (
         <header
-          className={`shrink-0 sticky top-0 z-40 flex items-center gap-3 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] transition-[background,border-color,backdrop-filter] duration-200 ${scrolledClasses}`}
+          className="app-header shrink-0 sticky top-0 z-40 flex items-center gap-3 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
+          data-scrolled={scrolledAttr}
         >
           <div className="flex flex-1 items-center gap-2 rounded-2xl bg-background/70 dark:bg-slate-800/70 px-3 py-2">
             <Search size={15} className="shrink-0 text-muted-foreground" />
@@ -123,7 +121,8 @@ export function AppHeader({
 
     return (
       <header
-        className={`shrink-0 sticky top-0 z-40 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] transition-[background,border-color,backdrop-filter] duration-200 ${scrolledClasses}`}
+        className="app-header shrink-0 sticky top-0 z-40 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
+        data-scrolled={scrolledAttr}
       >
         {/* Three-zone grid: [back+title] [search bar] [right slot] */}
         <div
@@ -167,7 +166,8 @@ export function AppHeader({
   if (right?.type === "search" && searching) {
     return (
       <div
-        className={`shrink-0 sticky top-0 z-40 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))] transition-[background,border-color,backdrop-filter] duration-200 ${scrolledClasses}`}
+        className="app-header shrink-0 sticky top-0 z-40 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]"
+        data-scrolled={scrolledAttr}
       >
         <div className="flex flex-1 items-center gap-2 rounded-2xl bg-background/70 dark:bg-slate-800/70 px-3 py-2">
           <Search size={15} className="shrink-0 text-muted-foreground" />
@@ -204,7 +204,8 @@ export function AppHeader({
 
   return (
     <div
-      className={`shrink-0 sticky top-0 z-40 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))] transition-[background,border-color,backdrop-filter] duration-200 ${scrolledClasses}`}
+      className="app-header shrink-0 sticky top-0 z-40 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]"
+      data-scrolled={scrolledAttr}
     >
       {/* Three-zone grid: [title?] [search bar] [right slot] */}
       <div
