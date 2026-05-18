@@ -1,6 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Sparkles, SendHorizontal } from "lucide-react";
+
+export interface AssistantChatRef {
+  setInput: (value: string) => void;
+}
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -336,12 +340,17 @@ const starter: Message[] = [
   },
 ];
 
-export function AssistantChat() {
+export const AssistantChat = forwardRef<AssistantChatRef, { initialPrompt?: string }>(
+function AssistantChat({ initialPrompt }, ref) {
   const [messages, setMessages] = useState<Message[]>(starter);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(initialPrompt ?? "");
   const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    setInput: (value: string) => setDraft(value),
+  }));
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -498,4 +507,4 @@ export function AssistantChat() {
       </div>
     </div>
   );
-}
+});

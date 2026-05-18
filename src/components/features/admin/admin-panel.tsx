@@ -3,11 +3,14 @@ import {
   AlertTriangle,
   Bath,
   BedDouble,
+  BookOpen,
   Bus,
   CalendarDays,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  HelpCircle,
+  MessageSquare,
   Flag,
   Home,
   LayoutDashboard,
@@ -29,6 +32,8 @@ import { OutagesAdminTab } from "@/components/features/admin/OutagesAdminTab";
 import { BusRoutesAdminTab } from "@/components/features/admin/BusRoutesAdminTab";
 import { GarbageAdminTab } from "@/components/features/admin/GarbageAdminTab";
 import { CyprusAreasAdminTab } from "@/components/features/admin/CyprusAreasAdminTab";
+import { HelpArticlesAdminTab } from "@/components/features/admin/HelpArticlesAdminTab";
+import { SupportQueueAdminTab } from "@/components/features/admin/SupportQueueAdminTab";
 import type { Property } from "@/types/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +42,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useData } from "@/contexts/data-context";
 import { formatCompactNumber } from "@/lib/utils";
 
-type Tab = "overview" | "properties" | "flatmates" | "verifications" | "users" | "events" | "outages" | "buses" | "garbage" | "areas";
+type Tab = "overview" | "properties" | "flatmates" | "verifications" | "users" | "events" | "outages" | "buses" | "garbage" | "areas" | "help" | "support";
 
 const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "overview",      label: "Overview",      icon: LayoutDashboard },
@@ -50,6 +55,8 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "buses",         label: "Buses",         icon: Bus },
   { id: "garbage",       label: "Garbage",       icon: Trash2 },
   { id: "areas",         label: "Areas",         icon: MapPin },
+  { id: "help",          label: "Help Articles", icon: BookOpen },
+  { id: "support",       label: "Support Queue", icon: MessageSquare },
 ];
 
 function StatusBadge({ approved }: { approved: boolean }) {
@@ -922,6 +929,8 @@ export function AdminPanel() {
       {activeTab === "buses"         && <BusRoutesAdminTab />}
       {activeTab === "garbage"       && <GarbageAdminTab />}
       {activeTab === "areas"         && <CyprusAreasAdminTab />}
+      {activeTab === "help"          && <HelpArticlesAdminTab />}
+      {activeTab === "support"       && <SupportQueueAdminTab />}
     </div>
   );
 }

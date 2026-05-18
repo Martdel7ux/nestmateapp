@@ -69,6 +69,13 @@ import { OutageDetailPage } from "@/pages/tools/OutageDetailPage";
 import { BusesPage } from "@/pages/tools/BusesPage";
 import { BusRouteDetailPage } from "@/pages/tools/BusRouteDetailPage";
 import { GarbagePage } from "@/pages/tools/GarbagePage";
+import { HelpLandingPage } from "@/pages/help/HelpLandingPage";
+import { HelpSearchPage } from "@/pages/help/HelpSearchPage";
+import { HelpCategoryPage } from "@/pages/help/HelpCategoryPage";
+import { HelpArticlePage } from "@/pages/help/HelpArticlePage";
+import { ContactFormPage } from "@/pages/help/ContactFormPage";
+import { MyTicketsPage } from "@/pages/help/MyTicketsPage";
+import { TicketDetailPage } from "@/pages/help/TicketDetailPage";
 
 function AdminRoute() {
   const { isAdmin, loading } = useAuth();
@@ -162,6 +169,13 @@ export function AppRouter() {
           <Route path="/tools/buses" element={<BusesPage />} />
           <Route path="/tools/buses/:university" element={<BusRouteDetailPage />} />
           <Route path="/tools/garbage" element={<GarbagePage />} />
+          <Route path="/profile/help" element={<HelpLandingPage />} />
+          <Route path="/profile/help/search" element={<HelpSearchPage />} />
+          <Route path="/profile/help/category/:slug" element={<HelpCategoryPage />} />
+          <Route path="/profile/help/article/:slug" element={<HelpArticlePage />} />
+          <Route path="/profile/help/contact" element={<ContactFormPage />} />
+          <Route path="/profile/help/my-tickets" element={<MyTicketsPage />} />
+          <Route path="/profile/help/my-tickets/:id" element={<TicketDetailPage />} />
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminPage />} />
           </Route>

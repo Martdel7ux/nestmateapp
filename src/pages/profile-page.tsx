@@ -5,7 +5,7 @@ import { AppHeader } from "@/components/layout/app-header";
 import { useI18n } from "@/contexts/i18n-context";
 import {
   Camera, Check, ChevronRight, Eye, EyeOff,
-  Heart, Key, Laptop, LogOut, MapPin, Moon, Pencil, ShieldCheck,
+  Heart, HelpCircle, Key, Laptop, LogOut, MapPin, Moon, Pencil, ShieldCheck,
   Sparkles, Sun, Trash2, University, User, X
 } from "lucide-react";
 import { toast } from "sonner";
@@ -562,6 +562,25 @@ export function ProfilePage() {
             </button>
           ))}
         </div>
+      </Card>
+
+      {/* ── Help & Support ── */}
+      <Card className="p-0 overflow-hidden">
+        <Link
+          to="/profile/help"
+          className="flex w-full items-center justify-between px-5 py-4 transition hover:bg-muted/40"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500">
+              <HelpCircle size={16} />
+            </div>
+            <div>
+              <p className="font-medium">Help & Support</p>
+              <p className="text-xs text-muted-foreground">Articles, AI assistant, contact us</p>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-muted-foreground" />
+        </Link>
       </Card>
 
       {/* ── Location ── */}
