@@ -190,7 +190,20 @@ export function HomePage() {
       </div>
 
       {/* Sticky header — search + bell, no title */}
-      <AppHeader title="" right={{ type: "notifications" }} />
+      <AppHeader variant="home" title="" right={{ type: "notifications" }} />
+
+      {/* Blur veil — sits just below the header (z-39), blurs content as it scrolls up */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 z-[39]"
+        style={{
+          height: "calc(72px + env(safe-area-inset-top))",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          maskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
+        }}
+      />
 
       <div className="space-y-7 px-5 pb-32 pt-4">
 

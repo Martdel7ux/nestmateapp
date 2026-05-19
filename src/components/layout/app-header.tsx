@@ -12,7 +12,7 @@ type RightSlot =
   | { type: "custom"; element: ReactNode };
 
 interface AppHeaderProps {
-  variant?: "top-level" | "sub-page";
+  variant?: "home" | "top-level" | "sub-page";
   title: string;
   subtitle?: string;
   right?: RightSlot;
@@ -56,7 +56,8 @@ export function AppHeader({
   const isScrolled = useScrolled();
 
   const handleBack = onBack ?? (() => navigate(-1));
-  const scrolledAttr = isScrolled ? "" : undefined;
+  // Home variant is always transparent — never enter the scrolled state
+  const scrolledAttr = variant !== "home" && isScrolled ? "" : undefined;
 
   // Right-zone element for non-universal-search pages (Messages inline search, notifications, etc.)
   function getRightSlotElement(): ReactNode {
@@ -85,7 +86,7 @@ export function AppHeader({
     if (right?.type === "search" && searching) {
       return (
         <header
-          className="app-header shrink-0 sticky top-0 z-40 flex items-center gap-3 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
+          className={`app-header app-header--${variant} shrink-0 sticky top-0 z-40 flex items-center gap-3 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]`}
           data-scrolled={scrolledAttr}
         >
           <div className="flex flex-1 items-center gap-2 rounded-2xl bg-background/70 dark:bg-slate-800/70 px-3 py-2">
@@ -121,7 +122,7 @@ export function AppHeader({
 
     return (
       <header
-        className="app-header shrink-0 sticky top-0 z-40 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
+        className={`app-header app-header--${variant} shrink-0 sticky top-0 z-40 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]`}
         data-scrolled={scrolledAttr}
       >
         {/* Three-zone grid: [back+title] [search bar] [right slot] */}
@@ -166,7 +167,7 @@ export function AppHeader({
   if (right?.type === "search" && searching) {
     return (
       <div
-        className="app-header shrink-0 sticky top-0 z-40 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]"
+        className={`app-header app-header--${variant} shrink-0 sticky top-0 z-40 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]`}
         data-scrolled={scrolledAttr}
       >
         <div className="flex flex-1 items-center gap-2 rounded-2xl bg-background/70 dark:bg-slate-800/70 px-3 py-2">
@@ -204,7 +205,7 @@ export function AppHeader({
 
   return (
     <div
-      className="app-header shrink-0 sticky top-0 z-40 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]"
+      className={`app-header app-header--${variant} shrink-0 sticky top-0 z-40 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]`}
       data-scrolled={scrolledAttr}
     >
       {/* Three-zone grid: [title?] [search bar] [right slot] */}
