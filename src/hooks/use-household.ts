@@ -163,9 +163,42 @@ export function useAddExpense(householdId: string) {
   return useMutation({
     mutationFn: ({ form, userId }: { form: ExpenseFormData; userId: string }) =>
       addExpense(form, householdId, userId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: hhKeys.expenses(householdId) });
-      qc.invalidateQueries({ queryKey: hhKeys.balances(householdId) });
+    onMutate: async ({ form, userId }) => {
+      await qc.cancelQueries({ queryKey: hhKeys.expenses(householdId) });
+      const prevExpenses = qc.getQueryData<import("@/types/household").Expense[]>(hhKeys.expenses(householdId));
+
+      const optimistic: import("@/types/household").Expense = {
+        id: `optimistic-${Date.now()}`,
+        household_id: householdId,
+        description: form.description,
+        amount: Number(form.amount),
+        currency: "EUR",
+        category: form.category ?? null,
+        paid_by: form.paid_by || userId,
+        paid_at: form.paid_at || new Date().toISOString(),
+        split_method: form.split_method,
+        receipt_url: null,
+        notes: form.notes ?? null,
+        created_by: userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      qc.setQueryData<import("@/types/household").Expense[]>(
+        hhKeys.expenses(householdId),
+        (old) => (old ? [optimistic, ...old] : [optimistic])
+      );
+
+      return { prevExpenses };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prevExpenses) {
+        qc.setQueryData(hhKeys.expenses(householdId), context.prevExpenses);
+      }
+    },
+    onSettled: () => {
+      void qc.invalidateQueries({ queryKey: hhKeys.expenses(householdId) });
+      void qc.invalidateQueries({ queryKey: hhKeys.balances(householdId) });
     },
   });
 }

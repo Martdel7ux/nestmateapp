@@ -96,10 +96,37 @@ export function useMarkRentPaid(paymentId: string, userId: string) {
   return useMutation({
     mutationFn: ({ payment, form }: { payment: Parameters<typeof markRentPaid>[0]; form: MarkPaidFormData }) =>
       markRentPaid(payment, form, userId),
-    onSuccess: (_, { payment }) => {
-      qc.invalidateQueries({ queryKey: rentKeys.payment(paymentId) });
-      qc.invalidateQueries({ queryKey: rentKeys.payments(payment.agreement_id) });
-      qc.invalidateQueries({ queryKey: rentKeys.upcoming(userId) });
+    onMutate: async ({ payment }) => {
+      await qc.cancelQueries({ queryKey: rentKeys.payment(paymentId) });
+
+      const prev = qc.getQueryData<Parameters<typeof markRentPaid>[0]>(rentKeys.payment(paymentId));
+      const prevPayments = qc.getQueryData<Parameters<typeof markRentPaid>[0][]>(rentKeys.payments(payment.agreement_id));
+
+      const now = new Date().toISOString();
+      if (prev) {
+        qc.setQueryData(rentKeys.payment(paymentId), { ...prev, status: "paid", paid_at: now });
+      }
+      if (prevPayments) {
+        qc.setQueryData(
+          rentKeys.payments(payment.agreement_id),
+          prevPayments.map((p) => p.id === paymentId ? { ...p, status: "paid", paid_at: now } : p)
+        );
+      }
+
+      return { prev, prevPayments };
+    },
+    onError: (_err, { payment }, context) => {
+      if (context?.prev) {
+        qc.setQueryData(rentKeys.payment(paymentId), context.prev);
+      }
+      if (context?.prevPayments) {
+        qc.setQueryData(rentKeys.payments(payment.agreement_id), context.prevPayments);
+      }
+    },
+    onSettled: (_, __, { payment }) => {
+      void qc.invalidateQueries({ queryKey: rentKeys.payment(paymentId) });
+      void qc.invalidateQueries({ queryKey: rentKeys.payments(payment.agreement_id) });
+      void qc.invalidateQueries({ queryKey: rentKeys.upcoming(userId) });
     },
   });
 }

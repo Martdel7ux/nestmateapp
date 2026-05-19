@@ -88,14 +88,41 @@ export function useSendMessage(conversationId: string, convType: StudyMessageCon
         content,
         attachment_url,
       }),
+    onMutate: async ({ content, attachment_url }) => {
+      await qc.cancelQueries({ queryKey: ["study-messages", conversationId, convType] });
+      const prevMessages = qc.getQueryData<StudyMessage[]>(["study-messages", conversationId, convType]);
+
+      const optimistic: StudyMessage = {
+        id: `optimistic-${Date.now()}`,
+        conversation_id: conversationId,
+        conversation_type: convType,
+        sender_id: user!.id,
+        content,
+        attachment_url: attachment_url ?? null,
+        created_at: new Date().toISOString(),
+      };
+
+      qc.setQueryData<StudyMessage[]>(
+        ["study-messages", conversationId, convType],
+        (old) => (old ? [...old, optimistic] : [optimistic])
+      );
+
+      return { prevMessages };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prevMessages) {
+        qc.setQueryData(["study-messages", conversationId, convType], context.prevMessages);
+      }
+    },
     onSuccess: (newMsg) => {
-      // Append optimistically to cache
+      // Replace the optimistic entry with the real server message
       qc.setQueryData<StudyMessage[]>(
         ["study-messages", conversationId, convType],
         (old) => {
           if (!old) return [newMsg];
-          if (old.some((m) => m.id === newMsg.id)) return old;
-          return [...old, newMsg];
+          const withoutOptimistic = old.filter((m) => !m.id.startsWith("optimistic-"));
+          if (withoutOptimistic.some((m) => m.id === newMsg.id)) return withoutOptimistic;
+          return [...withoutOptimistic, newMsg];
         }
       );
     },
