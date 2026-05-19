@@ -2,21 +2,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchUpcomingOutages, fetchOutage, createOutage, updateOutage, deleteOutage,
   fetchNextOutageForDistrict,
-  fetchBusRoutes, fetchAllBusRoutes, createBusRoute, updateBusRoute, deleteBusRoute,
   fetchGarbageSchedules, fetchGarbageSchedule, fetchAllGarbageSchedules,
   upsertGarbageSchedule, deleteGarbageSchedule,
 } from "@/lib/tools-api";
-import type { CyprusDistrict, UniversityKey, EacOutage, GarbageSchedule, BusRoute } from "@/types/tools";
+import type { CyprusDistrict, EacOutage, GarbageSchedule } from "@/types/tools";
 
 export const toolKeys = {
-  outages:         (district?: CyprusDistrict) => ["tools", "outages", district ?? "all"] as const,
-  outage:          (id: string)                => ["tools", "outage", id] as const,
-  nextOutage:      (district: CyprusDistrict)  => ["tools", "outage-next", district] as const,
-  buses:           (uni: UniversityKey)        => ["tools", "buses", uni] as const,
-  busesAll:        ()                          => ["tools", "buses", "all"] as const,
-  garbage:         (city: string)              => ["tools", "garbage", city] as const,
-  garbageArea:     (city: string, area: string)=> ["tools", "garbage", city, area] as const,
-  garbageAll:      ()                          => ["tools", "garbage", "all"] as const,
+  outages:     (district?: CyprusDistrict) => ["tools", "outages", district ?? "all"] as const,
+  outage:      (id: string)                => ["tools", "outage", id] as const,
+  nextOutage:  (district: CyprusDistrict)  => ["tools", "outage-next", district] as const,
+  garbage:     (city: string)              => ["tools", "garbage", city] as const,
+  garbageArea: (city: string, area: string)=> ["tools", "garbage", city, area] as const,
+  garbageAll:  ()                          => ["tools", "garbage", "all"] as const,
 };
 
 // ── Outages ───────────────────────────────────────────────────────────────────
@@ -66,49 +63,6 @@ export function useDeleteOutage() {
   return useMutation({
     mutationFn: (id: string) => deleteOutage(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tools", "outages"] }),
-  });
-}
-
-// ── Bus Routes ────────────────────────────────────────────────────────────────
-
-export function useBusRoutes(university: UniversityKey | undefined) {
-  return useQuery({
-    queryKey: toolKeys.buses(university ?? "unic"),
-    queryFn:  () => fetchBusRoutes(university!),
-    enabled:  !!university,
-    staleTime: 60 * 60 * 1000, // bus schedule changes rarely
-  });
-}
-
-export function useAllBusRoutes() {
-  return useQuery({
-    queryKey: toolKeys.busesAll(),
-    queryFn:  fetchAllBusRoutes,
-    staleTime: 60 * 60 * 1000,
-  });
-}
-
-export function useCreateBusRoute() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (patch: Parameters<typeof createBusRoute>[0]) => createBusRoute(patch),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["tools", "buses"] }),
-  });
-}
-
-export function useUpdateBusRoute() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: Partial<BusRoute> }) => updateBusRoute(id, patch),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["tools", "buses"] }),
-  });
-}
-
-export function useDeleteBusRoute() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => deleteBusRoute(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["tools", "buses"] }),
   });
 }
 

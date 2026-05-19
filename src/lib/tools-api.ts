@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import type {
-  EacOutage, BusRoute, GarbageSchedule, CyprusDistrict, UniversityKey,
+  EacOutage, GarbageSchedule, CyprusDistrict,
 } from "@/types/tools";
 
 function sb() {
@@ -67,51 +67,6 @@ export async function fetchNextOutageForDistrict(
     .maybeSingle();
   if (error) return null;
   return data as EacOutage | null;
-}
-
-// ── Bus Routes ────────────────────────────────────────────────────────────────
-
-export async function fetchBusRoutes(university: UniversityKey): Promise<BusRoute[]> {
-  const { data, error } = await sb()
-    .from("bus_routes")
-    .select("*, stops:bus_route_stops(*)")
-    .eq("university", university)
-    .eq("is_active", true)
-    .order("display_order", { ascending: true });
-  if (error) throw error;
-  return (data ?? []) as BusRoute[];
-}
-
-export async function fetchAllBusRoutes(): Promise<BusRoute[]> {
-  const { data, error } = await sb()
-    .from("bus_routes")
-    .select("*")
-    .eq("is_active", true)
-    .order("university, display_order", { ascending: true });
-  if (error) throw error;
-  return (data ?? []) as BusRoute[];
-}
-
-export async function createBusRoute(
-  patch: Omit<BusRoute, 'id' | 'updated_at' | 'stops'>
-): Promise<BusRoute> {
-  const { data, error } = await sb()
-    .from("bus_routes")
-    .insert(patch)
-    .select()
-    .single();
-  if (error) throw error;
-  return data as BusRoute;
-}
-
-export async function updateBusRoute(id: string, patch: Partial<BusRoute>): Promise<void> {
-  const { error } = await sb().from("bus_routes").update(patch).eq("id", id);
-  if (error) throw error;
-}
-
-export async function deleteBusRoute(id: string): Promise<void> {
-  const { error } = await sb().from("bus_routes").delete().eq("id", id);
-  if (error) throw error;
 }
 
 // ── Garbage Schedules ─────────────────────────────────────────────────────────

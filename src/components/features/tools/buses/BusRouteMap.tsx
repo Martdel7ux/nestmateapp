@@ -1,21 +1,8 @@
-import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import type { BusRoute } from "@/types/tools";
-
-// Fix Leaflet default marker icon in Vite
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon   from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-
-delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
-L.Icon.Default.mergeOptions({ iconUrl: markerIcon, iconRetinaUrl: markerIcon2x, shadowUrl: markerShadow });
-
-const startIcon = new L.Icon({
-  iconUrl: markerIcon, iconRetinaUrl: markerIcon2x, shadowUrl: markerShadow,
-  iconSize: [25, 41], iconAnchor: [12, 41],
-});
+import type { GtfsStopWithSeq, GtfsShapePoint } from "@/types/gtfs";
+import { routeBgColor } from "@/types/gtfs";
 
 function RecenterMap({ lat, lon, zoom }: { lat: number; lon: number; zoom: number }) {
   const map = useMap();
@@ -24,22 +11,35 @@ function RecenterMap({ lat, lon, zoom }: { lat: number; lon: number; zoom: numbe
 }
 
 interface Props {
-  routes: BusRoute[];
-  centerLat: number;
-  centerLon: number;
+  shape:          GtfsShapePoint[];
+  stops:          GtfsStopWithSeq[];
+  routeColor:     string;
+  centerLat?:     number;
+  centerLon?:     number;
+  onStopClick?:   (stop: GtfsStopWithSeq) => void;
+  selectedStopId?: string | null;
 }
 
-const LINE_COLORS = ["#3b82f6", "#8b5cf6", "#f59e0b", "#10b981", "#ef4444", "#06b6d4"];
+const NICOSIA_LAT = 35.1667;
+const NICOSIA_LON = 33.3667;
 
-export function BusRouteMap({ routes, centerLat, centerLon }: Props) {
-  const routesWithStops = routes.filter((r) => r.stops && r.stops.length > 0);
+export function BusRouteMap({
+  shape, stops, routeColor, centerLat, centerLon, onStopClick, selectedStopId,
+}: Props) {
+  const polyline = shape.map((p): [number, number] => [p.lat, p.lon]);
+  const color    = routeBgColor(routeColor);
+
+  // Default center: midpoint of shape, or Nicosia
+  const midIdx   = Math.floor(polyline.length / 2);
+  const defLat   = centerLat ?? (polyline[midIdx]?.[0] ?? NICOSIA_LAT);
+  const defLon   = centerLon ?? (polyline[midIdx]?.[1] ?? NICOSIA_LON);
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-border" style={{ height: 240 }}>
+    <div className="rounded-2xl overflow-hidden border border-border" style={{ height: 260 }}>
       <MapContainer
-        center={[centerLat, centerLon]}
+        center={[defLat, defLon]}
         zoom={13}
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: '100%', height: '100%' }}
         scrollWheelZoom={false}
         zoomControl={false}
       >
@@ -47,34 +47,33 @@ export function BusRouteMap({ routes, centerLat, centerLon }: Props) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <RecenterMap lat={centerLat} lon={centerLon} zoom={13} />
+        <RecenterMap lat={defLat} lon={defLon} zoom={13} />
 
-        {routesWithStops.map((route, routeIdx) => {
-          const stops = [...(route.stops ?? [])].sort((a, b) => a.stop_order - b.stop_order);
-          const coords = stops
-            .filter((s) => s.latitude != null && s.longitude != null)
-            .map((s) => [s.latitude!, s.longitude!] as [number, number]);
-          const color = LINE_COLORS[routeIdx % LINE_COLORS.length];
+        {/* Route polyline */}
+        {polyline.length > 1 && (
+          <Polyline positions={polyline} color={color} weight={4} opacity={0.85} />
+        )}
 
+        {/* Stop markers */}
+        {stops.map((stop) => {
+          const isSelected = selectedStopId === stop.stop_id;
           return (
-            <span key={route.id}>
-              {coords.length > 1 && (
-                <Polyline positions={coords} color={color} weight={3} opacity={0.8} />
-              )}
-              {stops.filter((s) => s.latitude && s.longitude).map((stop, idx) => (
-                <Marker
-                  key={stop.id}
-                  position={[stop.latitude!, stop.longitude!]}
-                  icon={idx === 0 || idx === stops.length - 1 ? startIcon : new L.Icon({
-                    iconUrl: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><circle cx="5" cy="5" r="5" fill="${encodeURIComponent(color)}"/></svg>`,
-                    iconSize: [10, 10],
-                    iconAnchor: [5, 5],
-                  })}
-                >
-                  <Popup>{stop.stop_name}</Popup>
-                </Marker>
-              ))}
-            </span>
+            <CircleMarker
+              key={stop.stop_id}
+              center={[stop.stop_lat, stop.stop_lon]}
+              radius={isSelected ? 9 : 6}
+              pathOptions={{
+                color:       isSelected ? '#f59e0b' : color,
+                fillColor:   isSelected ? '#f59e0b' : '#ffffff',
+                fillOpacity: 1,
+                weight:      isSelected ? 3 : 2,
+              }}
+              eventHandlers={{ click: () => onStopClick?.(stop) }}
+            >
+              <Popup>
+                <span className="text-xs font-semibold">{stop.stop_name}</span>
+              </Popup>
+            </CircleMarker>
           );
         })}
       </MapContainer>

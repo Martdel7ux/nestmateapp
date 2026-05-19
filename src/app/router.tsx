@@ -84,6 +84,7 @@ const OutagesPage         = lazy(() => import("@/pages/tools/OutagesPage").then(
 const OutageDetailPage    = lazy(() => import("@/pages/tools/OutageDetailPage").then(m => ({ default: m.OutageDetailPage })));
 const BusesPage           = lazy(() => import("@/pages/tools/BusesPage").then(m => ({ default: m.BusesPage })));
 const BusRouteDetailPage  = lazy(() => import("@/pages/tools/BusRouteDetailPage").then(m => ({ default: m.BusRouteDetailPage })));
+const BusStopPage         = lazy(() => import("@/pages/tools/BusStopPage").then(m => ({ default: m.BusStopPage })));
 const GarbagePage         = lazy(() => import("@/pages/tools/GarbagePage").then(m => ({ default: m.GarbagePage })));
 
 // Help
@@ -189,7 +190,8 @@ export function AppRouter() {
           <Route path="/tools/outages" element={<OutagesPage />} />
           <Route path="/tools/outages/:id" element={<OutageDetailPage />} />
           <Route path="/tools/buses" element={<BusesPage />} />
-          <Route path="/tools/buses/:university" element={<BusRouteDetailPage />} />
+          <Route path="/tools/buses/route/:routeId" element={<BusRouteDetailPage />} />
+          <Route path="/tools/buses/stop/:stopId" element={<BusStopPage />} />
           <Route path="/tools/garbage" element={<GarbagePage />} />
           <Route path="/profile/help" element={<HelpLandingPage />} />
           <Route path="/profile/help/search" element={<HelpSearchPage />} />
