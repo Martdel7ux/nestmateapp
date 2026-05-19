@@ -18,6 +18,21 @@ import { useData } from "@/contexts/data-context";
 
 const icons: Record<string, LucideIcon> = { Home, Compass, MessageCircle, ShieldCheck, User };
 
+// Preload page chunk on hover / touch so it's ready before the tap completes
+const preloadMap: Partial<Record<string, () => unknown>> = {
+  "/discover":  () => import("@/pages/discover-page"),
+  "/messages":  () => import("@/pages/messages-page"),
+  "/profile":   () => import("@/pages/profile-page"),
+  "/admin":     () => import("@/pages/admin-page"),
+  "/flatmates": () => import("@/pages/flatmates-page"),
+  "/assistant": () => import("@/pages/assistant-page"),
+  "/rent":      () => import("@/pages/rent/RentOverviewPage"),
+  "/household": () => import("@/pages/household/HouseholdIndexPage"),
+  "/documents": () => import("@/pages/documents/DocumentsListPage"),
+  "/study":     () => import("@/pages/study/StudyHubPage"),
+  "/properties":() => import("@/pages/properties-page"),
+};
+
 const studentNavItems = [
   { key: "navHome",      path: "/",          icon: "Home" },
   { key: "navDiscover",  path: "/discover",  icon: "Compass" },
@@ -94,6 +109,8 @@ export function BottomNav() {
                   to={item.path}
                   className="relative flex flex-1 flex-col items-center gap-0.5 py-2 min-h-[44px] justify-center"
                   aria-current={isActive ? "page" : undefined}
+                  onPointerEnter={() => preloadMap[item.path]?.()}
+                  onTouchStart={() => preloadMap[item.path]?.()}
                 >
                   {isActive && (
                     <motion.div
@@ -162,6 +179,7 @@ export function BottomNav() {
                 to={item.path}
                 className="relative flex flex-col items-center gap-1 px-3 py-2.5 min-w-[52px] min-h-[52px] justify-center rounded-xl"
                 aria-current={isActive ? "page" : undefined}
+                onPointerEnter={() => preloadMap[item.path]?.()}
               >
                 {isActive && (
                   <motion.div

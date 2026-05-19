@@ -23,6 +23,16 @@ interface ActionTileProps {
   ariaLabel: string;
 }
 
+const preloadTile: Partial<Record<string, () => unknown>> = {
+  "/flatmates":  () => import("@/pages/flatmates-page"),
+  "/assistant":  () => import("@/pages/assistant-page"),
+  "/properties": () => import("@/pages/properties-page"),
+  "/study":      () => import("@/pages/study/StudyHubPage"),
+  "/rent":       () => import("@/pages/rent/RentOverviewPage"),
+  "/documents":  () => import("@/pages/documents/DocumentsListPage"),
+  "/household":  () => import("@/pages/household/HouseholdIndexPage"),
+};
+
 function ActionTile({ to, icon: Icon, label, color, ariaLabel }: ActionTileProps) {
   const reduced = useReducedMotion();
   return (
@@ -34,6 +44,8 @@ function ActionTile({ to, icon: Icon, label, color, ariaLabel }: ActionTileProps
       <Link
         to={to}
         aria-label={ariaLabel}
+        onPointerEnter={() => preloadTile[to]?.()}
+        onTouchStart={() => preloadTile[to]?.()}
         className="flex flex-col justify-between rounded-[20px] p-3.5 focus-visible:outline-2 focus-visible:outline-primary hover:brightness-105 transition-[filter] duration-150"
         style={{ width: "108px", height: "108px", background: color }}
       >

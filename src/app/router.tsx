@@ -1,81 +1,101 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { AppShell } from "@/components/layout/app-shell";
 import { OnboardingTour } from "@/components/features/profile/onboarding-tour";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 import { LocationGate } from "@/components/features/location/LocationGate";
-import { LocationSettingsPage } from "@/pages/location/LocationSettingsPage";
 import { SearchProvider } from "@/contexts/search-context";
 import { UniversalSearchOverlay } from "@/features/search/components/UniversalSearchOverlay";
 import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
-import { AdminPage } from "@/pages/admin-page";
-import { AssistantPage } from "@/pages/assistant-page";
-import { AuthCallbackPage } from "@/pages/auth-callback-page";
-import { AuthPage } from "@/pages/auth-page";
-import { ChatPage } from "@/pages/chat-page";
-import { DiscoverPage } from "@/pages/discover-page";
-import { DiscoverNotificationsPage } from "@/pages/discover-notifications-page";
-import { DiscoverPreferencesPage } from "@/pages/discover-preferences-page";
-import { FlatmatesPage } from "@/pages/flatmates-page";
+import { PageSkeleton } from "@/components/layout/PageSkeleton";
+
+// ── Static imports (always needed immediately) ──────────────────────────────
 import { HomePage } from "@/pages/home-page";
-import { LandlordDashboardPage } from "@/pages/landlord-dashboard-page";
-import { MessagesPage } from "@/pages/messages-page";
+import { AuthPage } from "@/pages/auth-page";
+import { AuthCallbackPage } from "@/pages/auth-callback-page";
 import { NotFoundPage } from "@/pages/not-found-page";
-import { NotificationsPage } from "@/pages/notifications-page";
-import { OpportunityDetailPage } from "@/pages/opportunity-detail-page";
-import { ProfilePage } from "@/pages/profile-page";
-import { SavedOpportunitiesPage } from "@/pages/saved-opportunities-page";
-import { SavedPropertiesPage } from "@/pages/saved-properties-page";
-import { PropertiesPage } from "@/pages/properties-page";
-import { SearchPage } from "@/pages/search-page";
-import { StudyHubPage } from "@/pages/study/StudyHubPage";
-import { NoteEditorPage } from "@/pages/study/NoteEditorPage";
-import { NoteViewPage } from "@/pages/study/NoteViewPage";
-import { PublicLibraryPage } from "@/pages/study/PublicLibraryPage";
-import { PublicNotePage } from "@/pages/study/PublicNotePage";
-import { StudyGroupsPage } from "@/pages/study/StudyGroupsPage";
-import { StudyGroupPage } from "@/pages/study/StudyGroupPage";
-import { NewStudyGroupPage } from "@/pages/study/NewStudyGroupPage";
-import { PeersPage } from "@/pages/study/PeersPage";
-import { PeerProfilePage } from "@/pages/study/PeerProfilePage";
-import { StudyMessagesPage } from "@/pages/study/MessagesPage";
-import { ConversationPage } from "@/pages/study/ConversationPage";
-import { MyCoursesPage } from "@/pages/study/MyCoursesPage";
-import { RentOverviewPage } from "@/pages/rent/RentOverviewPage";
-import { RentNewPage } from "@/pages/rent/RentNewPage";
-import { RentAgreementDetailPage } from "@/pages/rent/RentAgreementDetailPage";
-import { RentPaymentDetailPage } from "@/pages/rent/RentPaymentDetailPage";
-import { HouseholdIndexPage } from "@/pages/household/HouseholdIndexPage";
-import { HouseholdNewPage } from "@/pages/household/HouseholdNewPage";
-import { HouseholdJoinPage } from "@/pages/household/HouseholdJoinPage";
-import { HouseholdDashboardPage } from "@/pages/household/HouseholdDashboardPage";
-import { ExpensesListPage } from "@/pages/household/ExpensesListPage";
-import { ExpenseNewPage } from "@/pages/household/ExpenseNewPage";
-import { ExpenseDetailPage } from "@/pages/household/ExpenseDetailPage";
-import { SettleUpPage } from "@/pages/household/SettleUpPage";
-import { SettlementNewPage } from "@/pages/household/SettlementNewPage";
-import { MembersPage } from "@/pages/household/MembersPage";
-import { HouseholdSettingsPage } from "@/pages/household/HouseholdSettingsPage";
-import { DocumentsListPage } from "@/pages/documents/DocumentsListPage";
-import { DocumentNewPage } from "@/pages/documents/DocumentNewPage";
-import { DocumentViewerPage } from "@/pages/documents/DocumentViewerPage";
-import { DocumentEditPage } from "@/pages/documents/DocumentEditPage";
-import { DocumentsExpiringPage } from "@/pages/documents/DocumentsExpiringPage";
-import { DocumentsTrashPage } from "@/pages/documents/DocumentsTrashPage";
-import { DocumentSearchPage } from "@/pages/documents/DocumentSearchPage";
-import { BillsCalculatorPage } from "@/pages/tools/BillsCalculatorPage";
-import { OutagesPage } from "@/pages/tools/OutagesPage";
-import { OutageDetailPage } from "@/pages/tools/OutageDetailPage";
-import { BusesPage } from "@/pages/tools/BusesPage";
-import { BusRouteDetailPage } from "@/pages/tools/BusRouteDetailPage";
-import { GarbagePage } from "@/pages/tools/GarbagePage";
-import { HelpLandingPage } from "@/pages/help/HelpLandingPage";
-import { HelpSearchPage } from "@/pages/help/HelpSearchPage";
-import { HelpCategoryPage } from "@/pages/help/HelpCategoryPage";
-import { HelpArticlePage } from "@/pages/help/HelpArticlePage";
-import { ContactFormPage } from "@/pages/help/ContactFormPage";
-import { MyTicketsPage } from "@/pages/help/MyTicketsPage";
-import { TicketDetailPage } from "@/pages/help/TicketDetailPage";
+
+// ── Lazy page imports ────────────────────────────────────────────────────────
+const AdminPage                = lazy(() => import("@/pages/admin-page").then(m => ({ default: m.AdminPage })));
+const AssistantPage            = lazy(() => import("@/pages/assistant-page").then(m => ({ default: m.AssistantPage })));
+const ChatPage                 = lazy(() => import("@/pages/chat-page").then(m => ({ default: m.ChatPage })));
+const DiscoverPage             = lazy(() => import("@/pages/discover-page").then(m => ({ default: m.DiscoverPage })));
+const DiscoverNotificationsPage= lazy(() => import("@/pages/discover-notifications-page").then(m => ({ default: m.DiscoverNotificationsPage })));
+const DiscoverPreferencesPage  = lazy(() => import("@/pages/discover-preferences-page").then(m => ({ default: m.DiscoverPreferencesPage })));
+const FlatmatesPage            = lazy(() => import("@/pages/flatmates-page").then(m => ({ default: m.FlatmatesPage })));
+const LandlordDashboardPage    = lazy(() => import("@/pages/landlord-dashboard-page").then(m => ({ default: m.LandlordDashboardPage })));
+const MessagesPage             = lazy(() => import("@/pages/messages-page").then(m => ({ default: m.MessagesPage })));
+const NotificationsPage        = lazy(() => import("@/pages/notifications-page").then(m => ({ default: m.NotificationsPage })));
+const OpportunityDetailPage    = lazy(() => import("@/pages/opportunity-detail-page").then(m => ({ default: m.OpportunityDetailPage })));
+const ProfilePage              = lazy(() => import("@/pages/profile-page").then(m => ({ default: m.ProfilePage })));
+const SavedOpportunitiesPage   = lazy(() => import("@/pages/saved-opportunities-page").then(m => ({ default: m.SavedOpportunitiesPage })));
+const SavedPropertiesPage      = lazy(() => import("@/pages/saved-properties-page").then(m => ({ default: m.SavedPropertiesPage })));
+const PropertiesPage           = lazy(() => import("@/pages/properties-page").then(m => ({ default: m.PropertiesPage })));
+const SearchPage               = lazy(() => import("@/pages/search-page").then(m => ({ default: m.SearchPage })));
+const LocationSettingsPage     = lazy(() => import("@/pages/location/LocationSettingsPage").then(m => ({ default: m.LocationSettingsPage })));
+
+// Study
+const StudyHubPage      = lazy(() => import("@/pages/study/StudyHubPage").then(m => ({ default: m.StudyHubPage })));
+const NoteEditorPage    = lazy(() => import("@/pages/study/NoteEditorPage").then(m => ({ default: m.NoteEditorPage })));
+const NoteViewPage      = lazy(() => import("@/pages/study/NoteViewPage").then(m => ({ default: m.NoteViewPage })));
+const PublicLibraryPage = lazy(() => import("@/pages/study/PublicLibraryPage").then(m => ({ default: m.PublicLibraryPage })));
+const PublicNotePage    = lazy(() => import("@/pages/study/PublicNotePage").then(m => ({ default: m.PublicNotePage })));
+const StudyGroupsPage   = lazy(() => import("@/pages/study/StudyGroupsPage").then(m => ({ default: m.StudyGroupsPage })));
+const StudyGroupPage    = lazy(() => import("@/pages/study/StudyGroupPage").then(m => ({ default: m.StudyGroupPage })));
+const NewStudyGroupPage = lazy(() => import("@/pages/study/NewStudyGroupPage").then(m => ({ default: m.NewStudyGroupPage })));
+const PeersPage         = lazy(() => import("@/pages/study/PeersPage").then(m => ({ default: m.PeersPage })));
+const PeerProfilePage   = lazy(() => import("@/pages/study/PeerProfilePage").then(m => ({ default: m.PeerProfilePage })));
+const StudyMessagesPage = lazy(() => import("@/pages/study/MessagesPage").then(m => ({ default: m.StudyMessagesPage })));
+const ConversationPage  = lazy(() => import("@/pages/study/ConversationPage").then(m => ({ default: m.ConversationPage })));
+const MyCoursesPage     = lazy(() => import("@/pages/study/MyCoursesPage").then(m => ({ default: m.MyCoursesPage })));
+
+// Rent
+const RentOverviewPage        = lazy(() => import("@/pages/rent/RentOverviewPage").then(m => ({ default: m.RentOverviewPage })));
+const RentNewPage             = lazy(() => import("@/pages/rent/RentNewPage").then(m => ({ default: m.RentNewPage })));
+const RentAgreementDetailPage = lazy(() => import("@/pages/rent/RentAgreementDetailPage").then(m => ({ default: m.RentAgreementDetailPage })));
+const RentPaymentDetailPage   = lazy(() => import("@/pages/rent/RentPaymentDetailPage").then(m => ({ default: m.RentPaymentDetailPage })));
+
+// Household
+const HouseholdIndexPage     = lazy(() => import("@/pages/household/HouseholdIndexPage").then(m => ({ default: m.HouseholdIndexPage })));
+const HouseholdNewPage       = lazy(() => import("@/pages/household/HouseholdNewPage").then(m => ({ default: m.HouseholdNewPage })));
+const HouseholdJoinPage      = lazy(() => import("@/pages/household/HouseholdJoinPage").then(m => ({ default: m.HouseholdJoinPage })));
+const HouseholdDashboardPage = lazy(() => import("@/pages/household/HouseholdDashboardPage").then(m => ({ default: m.HouseholdDashboardPage })));
+const ExpensesListPage       = lazy(() => import("@/pages/household/ExpensesListPage").then(m => ({ default: m.ExpensesListPage })));
+const ExpenseNewPage         = lazy(() => import("@/pages/household/ExpenseNewPage").then(m => ({ default: m.ExpenseNewPage })));
+const ExpenseDetailPage      = lazy(() => import("@/pages/household/ExpenseDetailPage").then(m => ({ default: m.ExpenseDetailPage })));
+const SettleUpPage           = lazy(() => import("@/pages/household/SettleUpPage").then(m => ({ default: m.SettleUpPage })));
+const SettlementNewPage      = lazy(() => import("@/pages/household/SettlementNewPage").then(m => ({ default: m.SettlementNewPage })));
+const MembersPage            = lazy(() => import("@/pages/household/MembersPage").then(m => ({ default: m.MembersPage })));
+const HouseholdSettingsPage  = lazy(() => import("@/pages/household/HouseholdSettingsPage").then(m => ({ default: m.HouseholdSettingsPage })));
+
+// Documents
+const DocumentsListPage    = lazy(() => import("@/pages/documents/DocumentsListPage").then(m => ({ default: m.DocumentsListPage })));
+const DocumentNewPage      = lazy(() => import("@/pages/documents/DocumentNewPage").then(m => ({ default: m.DocumentNewPage })));
+const DocumentViewerPage   = lazy(() => import("@/pages/documents/DocumentViewerPage").then(m => ({ default: m.DocumentViewerPage })));
+const DocumentEditPage     = lazy(() => import("@/pages/documents/DocumentEditPage").then(m => ({ default: m.DocumentEditPage })));
+const DocumentsExpiringPage= lazy(() => import("@/pages/documents/DocumentsExpiringPage").then(m => ({ default: m.DocumentsExpiringPage })));
+const DocumentsTrashPage   = lazy(() => import("@/pages/documents/DocumentsTrashPage").then(m => ({ default: m.DocumentsTrashPage })));
+const DocumentSearchPage   = lazy(() => import("@/pages/documents/DocumentSearchPage").then(m => ({ default: m.DocumentSearchPage })));
+
+// Tools
+const BillsCalculatorPage = lazy(() => import("@/pages/tools/BillsCalculatorPage").then(m => ({ default: m.BillsCalculatorPage })));
+const OutagesPage         = lazy(() => import("@/pages/tools/OutagesPage").then(m => ({ default: m.OutagesPage })));
+const OutageDetailPage    = lazy(() => import("@/pages/tools/OutageDetailPage").then(m => ({ default: m.OutageDetailPage })));
+const BusesPage           = lazy(() => import("@/pages/tools/BusesPage").then(m => ({ default: m.BusesPage })));
+const BusRouteDetailPage  = lazy(() => import("@/pages/tools/BusRouteDetailPage").then(m => ({ default: m.BusRouteDetailPage })));
+const GarbagePage         = lazy(() => import("@/pages/tools/GarbagePage").then(m => ({ default: m.GarbagePage })));
+
+// Help
+const HelpLandingPage  = lazy(() => import("@/pages/help/HelpLandingPage").then(m => ({ default: m.HelpLandingPage })));
+const HelpSearchPage   = lazy(() => import("@/pages/help/HelpSearchPage").then(m => ({ default: m.HelpSearchPage })));
+const HelpCategoryPage = lazy(() => import("@/pages/help/HelpCategoryPage").then(m => ({ default: m.HelpCategoryPage })));
+const HelpArticlePage  = lazy(() => import("@/pages/help/HelpArticlePage").then(m => ({ default: m.HelpArticlePage })));
+const ContactFormPage  = lazy(() => import("@/pages/help/ContactFormPage").then(m => ({ default: m.ContactFormPage })));
+const MyTicketsPage    = lazy(() => import("@/pages/help/MyTicketsPage").then(m => ({ default: m.MyTicketsPage })));
+const TicketDetailPage = lazy(() => import("@/pages/help/TicketDetailPage").then(m => ({ default: m.TicketDetailPage })));
+
+// ── Route guards ─────────────────────────────────────────────────────────────
 
 function AdminRoute() {
   const { isAdmin, loading } = useAuth();
@@ -93,7 +113,9 @@ function ProtectedLayout() {
   return (
     <SearchProvider>
       <AppShell>
-        <Outlet />
+        <Suspense fallback={<PageSkeleton />}>
+          <Outlet />
+        </Suspense>
       </AppShell>
       <OnboardingTour />
       <LocationGate />
