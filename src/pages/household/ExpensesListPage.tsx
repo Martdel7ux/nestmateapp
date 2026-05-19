@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Plus, Receipt } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AppHeader } from "@/components/layout/app-header";
 import { useAuth } from "@/contexts/auth-context";
 import { useHousehold, useHouseholdMembers, useExpenses } from "@/hooks/use-household";
@@ -33,8 +34,10 @@ export function ExpensesListPage() {
       />
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {isLoading && (
-          <div className="flex justify-center py-8">
-            <div className="h-7 w-7 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-[72px] rounded-2xl" />
+            ))}
           </div>
         )}
         {!isLoading && expenses.length === 0 && (

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Plus, LogIn, ChevronRight, Home } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AppHeader } from "@/components/layout/app-header";
 import { useAuth } from "@/contexts/auth-context";
 import { useHouseholds } from "@/hooks/use-household";
@@ -13,8 +14,9 @@ export function HouseholdIndexPage() {
     return (
       <div className="flex h-full flex-col overflow-hidden">
         <AppHeader title="Household" />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        <div className="flex-1 overflow-y-auto p-5 space-y-3">
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
         </div>
       </div>
     );

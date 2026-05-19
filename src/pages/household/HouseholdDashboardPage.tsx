@@ -1,5 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Plus, ArrowLeftRight, Users, Settings, Receipt } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AppHeader } from "@/components/layout/app-header";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -22,8 +23,11 @@ export function HouseholdDashboardPage() {
     return (
       <div className="flex h-full flex-col overflow-hidden">
         <AppHeader variant="sub-page" title="Household" />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <Skeleton className="h-36 rounded-2xl" />
+          <Skeleton className="h-20 rounded-2xl" />
+          <Skeleton className="h-20 rounded-2xl" />
+          <Skeleton className="h-20 rounded-2xl" />
         </div>
       </div>
     );

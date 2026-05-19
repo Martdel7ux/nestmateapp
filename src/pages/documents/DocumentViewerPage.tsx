@@ -5,6 +5,7 @@ import {
   Download, Edit3, Trash2, Share2, ChevronDown, ChevronUp,
   ExternalLink, Copy, Clock,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AppHeader } from "@/components/layout/app-header";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -89,8 +90,11 @@ export function DocumentViewerPage() {
     return (
       <div className="flex h-full flex-col overflow-hidden">
         <AppHeader variant="sub-page" title="Document" />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="h-7 w-7 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <Skeleton className="h-48 rounded-2xl" />
+          <Skeleton className="h-6 w-2/3 rounded-xl" />
+          <Skeleton className="h-4 w-1/2 rounded-xl" />
+          <Skeleton className="h-24 rounded-2xl" />
         </div>
       </div>
     );

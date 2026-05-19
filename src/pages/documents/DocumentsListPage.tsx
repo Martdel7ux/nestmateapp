@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, FolderOpen, Trash2, Clock } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AppHeader } from "@/components/layout/app-header";
 import { useAuth } from "@/contexts/auth-context";
 import { useDocuments } from "@/hooks/use-documents";
@@ -65,8 +66,10 @@ export function DocumentsListPage() {
         {/* List */}
         <div className="px-4 pb-28 space-y-2">
           {isLoading && (
-            <div className="flex justify-center py-10">
-              <div className="h-7 w-7 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-[72px] rounded-2xl" />
+              ))}
             </div>
           )}
 
