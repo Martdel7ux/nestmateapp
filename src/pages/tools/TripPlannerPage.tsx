@@ -20,15 +20,14 @@ export function TripPlannerPage() {
 
   useEffect(() => {
     if (!navigator.geolocation) { setGpsState("denied"); return; }
-    const id = navigator.geolocation.watchPosition(
+    navigator.geolocation.getCurrentPosition(
       (pos) => {
         setGpsCoords([pos.coords.latitude, pos.coords.longitude]);
         setGpsState("found");
       },
       () => setGpsState("denied"),
-      { timeout: 8_000, maximumAge: 30_000, enableHighAccuracy: true },
+      { timeout: 10_000, maximumAge: 60_000, enableHighAccuracy: true },
     );
-    return () => navigator.geolocation.clearWatch(id);
   }, []);
 
   // ── From field ────────────────────────────────────────────────────────────────

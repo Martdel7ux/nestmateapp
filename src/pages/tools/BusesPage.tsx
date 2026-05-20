@@ -197,7 +197,7 @@ export function BusesPage() {
       <button
         type="button"
         onClick={() => navigate("/tools/buses/plan-trip")}
-        className="fixed bottom-24 right-4 z-30 flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-lg active:scale-95 transition-transform"
+        className="fixed bottom-36 right-4 z-30 flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-lg active:scale-95 transition-transform"
       >
         <Navigation size={15} />
         Plan Trip
