@@ -62,6 +62,28 @@ export interface UserBusFavorite {
   created_at: string;
 }
 
+export interface TripOption {
+  route_id:                  string;
+  route_short_name:          string;
+  route_long_name:           string;
+  route_color:               string;  // hex WITHOUT #
+  route_text_color:          string;
+  from_stop_id:              string;
+  from_stop_name:            string;
+  from_stop_lat:             number;
+  from_stop_lon:             number;
+  from_stop_distance_meters: number;
+  to_stop_id:                string;
+  to_stop_name:              string;
+  to_stop_lat:               number;
+  to_stop_lon:               number;
+  to_stop_distance_meters:   number;
+  departure_time:            string;  // ISO timestamptz
+  arrival_time:              string;
+  trip_duration_minutes:     number;
+  stop_count:                number;
+}
+
 export interface GtfsStats {
   routes:         number;
   stops:          number;

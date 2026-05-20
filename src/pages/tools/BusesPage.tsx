@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { Search, Star, Bus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, Star, Bus, Navigation } from "lucide-react";
 import { useGtfsRoutes, useBusFavorites, useNextArrivals, useGtfsStop, useToggleBusFavorite } from "@/hooks/use-gtfs";
 import { BusRouteCard } from "@/components/features/tools/buses/BusRouteCard";
 import { AppHeader } from "@/components/layout/app-header";
@@ -79,6 +80,8 @@ function FavoriteStopRow({
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export function BusesPage() {
+  const navigate = useNavigate();
+
   const [tab,       setTab]       = useState<Tab>("routes");
   const [query,     setQuery]     = useState("");
   const [sheetStop, setSheetStop] = useState<{ id: string; name: string } | null>(null);
@@ -189,6 +192,16 @@ export function BusesPage() {
           ))}
         </div>
       )}
+
+      {/* Plan Trip FAB */}
+      <button
+        type="button"
+        onClick={() => navigate("/tools/buses/plan-trip")}
+        className="fixed bottom-24 right-4 z-30 flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-lg active:scale-95 transition-transform"
+      >
+        <Navigation size={15} />
+        Plan Trip
+      </button>
 
       {/* Stop arrivals bottom sheet */}
       {sheetStop && (

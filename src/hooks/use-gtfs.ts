@@ -6,7 +6,7 @@ import {
   fetchGtfsStop, searchGtfsStops,
   fetchNextArrivals, fetchRoutesAtStop,
   fetchUserBusFavorites, addBusFavorite, removeBusFavorite,
-  fetchGtfsStats,
+  fetchGtfsStats, planDirectTrip,
 } from '@/lib/gtfs-api';
 
 export const gtfsKeys = {
@@ -130,6 +130,20 @@ export function useToggleBusFavorite() {
       return isFav ? removeBusFavorite(user.id, stopId) : addBusFavorite(user.id, stopId);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: gtfsKeys.favorites() }),
+  });
+}
+
+// ── Trip planner ──────────────────────────────────────────────────────────────
+
+export function useTripPlanner(
+  from: [number, number] | null,
+  to:   [number, number] | null,
+) {
+  return useQuery({
+    queryKey: ['gtfs', 'trip-planner', from, to],
+    queryFn:  () => planDirectTrip(from![0], from![1], to![0], to![1]),
+    enabled:  !!from && !!to,
+    staleTime: 60 * 1000, // 1 min — results change as buses depart
   });
 }
 

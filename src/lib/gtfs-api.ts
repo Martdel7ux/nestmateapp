@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase';
 import type {
   GtfsRoute, GtfsStop, GtfsStopWithSeq, GtfsShapePoint,
   NextArrival, RouteAtStop, RouteDirection,
-  UserBusFavorite, GtfsStats,
+  UserBusFavorite, GtfsStats, TripOption,
 } from '@/types/gtfs';
 
 function sb() {
@@ -136,6 +136,28 @@ export async function removeBusFavorite(userId: string, stopId: string): Promise
     .eq('user_id', userId)
     .eq('stop_id', stopId);
   if (error) throw error;
+}
+
+// ── Trip planner ──────────────────────────────────────────────────────────────
+
+export async function planDirectTrip(
+  fromLat: number,
+  fromLon: number,
+  toLat:   number,
+  toLon:   number,
+  maxWalkMeters: number = 500,
+  limit:         number = 5,
+): Promise<TripOption[]> {
+  const { data, error } = await sb().rpc('plan_direct_trip', {
+    p_from_lat:        fromLat,
+    p_from_lon:        fromLon,
+    p_to_lat:          toLat,
+    p_to_lon:          toLon,
+    p_max_walk_meters: maxWalkMeters,
+    p_limit:           limit,
+  });
+  if (error) throw error;
+  return (data ?? []) as TripOption[];
 }
 
 // ── Admin stats ───────────────────────────────────────────────────────────────
