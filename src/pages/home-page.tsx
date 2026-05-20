@@ -1,5 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
-import { MapPin, UsersRound, Sparkles, KeyRound, GraduationCap, AlertCircle, Clock, Wallet, FolderOpen } from "lucide-react";
+import {
+  MapPin, UsersRound, BookOpen, Bus, Sparkles,
+  Wallet, FolderOpen, ChevronRight,
+  KeyRound,
+} from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useData } from "@/contexts/data-context";
 import { useAuth } from "@/contexts/auth-context";
@@ -8,276 +12,286 @@ import { LandlordHome } from "@/components/features/landlord/landlord-home";
 import { UpcomingEvents } from "@/components/features/home/UpcomingEvents";
 import { useUpcomingRentPayment } from "@/hooks/use-rent";
 import { ExpiringSoonStrip } from "@/components/features/documents/ExpiringSoonStrip";
-import { LocalToolsSection } from "@/components/features/tools/LocalToolsSection";
 import { LocationConfirmationBanner } from "@/components/features/location/LocationConfirmationBanner";
-import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
-// ── Action tile ───────────────────────────────────────────────────────────
+// ── My Stuff list row ─────────────────────────────────────────────────────────
 
-interface ActionTileProps {
+interface StuffRowProps {
   to: string;
   icon: LucideIcon;
   label: string;
-  color: string;
-  ariaLabel: string;
+  subtitle: string;
+  badge?: { text: string; variant: "warning" | "danger" };
 }
 
-const preloadTile: Partial<Record<string, () => unknown>> = {
-  "/flatmates":  () => import("@/pages/flatmates-page"),
-  "/assistant":  () => import("@/pages/assistant-page"),
-  "/properties": () => import("@/pages/properties-page"),
-  "/study":      () => import("@/pages/study/StudyHubPage"),
-  "/rent":       () => import("@/pages/rent/RentOverviewPage"),
-  "/documents":  () => import("@/pages/documents/DocumentsListPage"),
-  "/household":  () => import("@/pages/household/HouseholdIndexPage"),
-};
-
-function ActionTile({ to, icon: Icon, label, color, ariaLabel }: ActionTileProps) {
+function StuffRow({ to, icon: Icon, label, subtitle, badge }: StuffRowProps) {
   const reduced = useReducedMotion();
   return (
-    <motion.div
-      whileTap={reduced ? undefined : { scale: 0.96 }}
-      transition={{ duration: 0.1 }}
-      className="flex-shrink-0"
-    >
+    <motion.div whileTap={reduced ? undefined : { scale: 0.985 }} transition={{ duration: 0.1 }}>
       <Link
         to={to}
-        aria-label={ariaLabel}
-        onPointerEnter={() => preloadTile[to]?.()}
-        onTouchStart={() => preloadTile[to]?.()}
-        className="flex flex-col justify-between rounded-[20px] p-3.5 focus-visible:outline-2 focus-visible:outline-primary hover:brightness-105 transition-[filter] duration-150"
-        style={{ width: "108px", height: "108px", background: color }}
+        className="flex items-center gap-3.5 rounded-[18px] px-4 py-3.5
+          bg-[var(--glass-fill)] border border-[var(--glass-border)]
+          hover:brightness-105 active:brightness-95 transition-[filter] duration-150"
       >
-        {/* Icon badge */}
-        <div
-          className="flex h-9 w-9 items-center justify-center rounded-full"
-          style={{ background: "rgba(255,255,255,0.25)" }}
-        >
-          <Icon size={18} strokeWidth={1.8} className="text-white" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-foreground/[0.06]">
+          <Icon size={18} strokeWidth={1.8} className="text-foreground/70" />
         </div>
-        {/* Label */}
-        <p className="text-[12px] font-semibold leading-tight text-white/95 line-clamp-2">{label}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground">{label}</p>
+          <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
+        </div>
+        {badge && (
+          <span className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold ${
+            badge.variant === "danger"
+              ? "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
+              : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+          }`}>
+            {badge.text}
+          </span>
+        )}
+        <ChevronRight size={14} className="shrink-0 text-muted-foreground/50" />
       </Link>
     </motion.div>
   );
 }
 
-// ── Action tile definitions ───────────────────────────────────────────────
+// ── Rent row (dynamic) ────────────────────────────────────────────────────────
 
-const ACTIONS: ActionTileProps[] = [
-  {
-    to:        "/flatmates",
-    icon:      UsersRound,
-    label:     "Flatmates",
-    color:     "var(--action-flatmates)",
-    ariaLabel: "Open Flatmates",
-  },
-  {
-    to:        "/assistant",
-    icon:      Sparkles,
-    label:     "Ask NestmateAI",
-    color:     "var(--action-ai)",
-    ariaLabel: "Open AI Assistant",
-  },
-  {
-    to:        "/properties",
-    icon:      KeyRound,
-    label:     "Properties",
-    color:     "var(--action-property)",
-    ariaLabel: "Open Properties",
-  },
-  {
-    to:        "/study",
-    icon:      GraduationCap,
-    label:     "Study Hub",
-    color:     "var(--action-study)",
-    ariaLabel: "Open Study Hub",
-  },
-  {
-    to:        "/rent",
-    icon:      Wallet,
-    label:     "Rent",
-    color:     "var(--action-flatmates)",
-    ariaLabel: "Open Rent",
-  },
-  {
-    to:        "/documents",
-    icon:      FolderOpen,
-    label:     "Documents",
-    color:     "var(--action-study)",
-    ariaLabel: "Open Documents",
-  },
-  {
-    to:        "/household",
-    icon:      Wallet,
-    label:     "Bill Spliting",
-    color:     "var(--action-property)",
-    ariaLabel: "Open Bills & Household",
-  },
-];
-
-// ── Page ─────────────────────────────────────────────────────────────────
-
-function RentChip({ userId }: { userId: string }) {
+function RentStuffRow({ userId }: { userId: string }) {
   const navigate = useNavigate();
   const { data: payment } = useUpcomingRentPayment(userId);
-  if (!payment) return null;
 
-  const due   = new Date(payment.due_date);
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const days  = Math.round((due.getTime() - today.getTime()) / 86400000);
-  if (days > 7 && payment.status !== "late") return null;
+  const subtitle = (() => {
+    if (!payment) return "No upcoming payments";
+    const due   = new Date(payment.due_date);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const days  = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+    const amount = `€${Number(payment.amount).toFixed(0)}`;
+    if (payment.status === "late" || days < 0) return `${amount} · Overdue`;
+    if (days === 0) return `${amount} · Due today`;
+    if (days === 1) return `${amount} · Due tomorrow`;
+    return `${amount} · Due in ${days} days`;
+  })();
 
-  const overdue = days < 0 || payment.status === "late";
-  const label   = overdue
-    ? `Overdue by ${Math.abs(days)} day${Math.abs(days) !== 1 ? "s" : ""}`
-    : days === 0 ? "Due today"
-    : days === 1 ? "Due tomorrow"
-    : `Due in ${days} days`;
-  const amount  = `€${Number(payment.amount).toFixed(2)}`;
+  const badge = (() => {
+    if (!payment) return undefined;
+    const due   = new Date(payment.due_date);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const days  = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+    if (payment.status === "late" || days < 0) return { text: "Overdue", variant: "danger" as const };
+    if (days <= 7) return { text: "Due soon", variant: "warning" as const };
+    return undefined;
+  })();
 
   return (
-    <motion.button
-      type="button"
-      onClick={() => navigate(`/rent/payments/${payment.id}`)}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3, duration: 0.3 }}
-      className={cn(
-        "w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left active:scale-[0.98] transition-transform",
-        overdue ? "bg-rose-50 dark:bg-rose-900/20" : "bg-amber-50 dark:bg-amber-900/20"
-      )}
+    <motion.div
+      whileTap={{ scale: 0.985 }}
+      transition={{ duration: 0.1 }}
+      onClick={() => payment ? navigate(`/rent/payments/${payment.id}`) : navigate("/rent")}
     >
-      {overdue
-        ? <AlertCircle size={16} className="text-rose-500 shrink-0" />
-        : <Clock size={16} className="text-amber-500 shrink-0" />
-      }
-      <div className="flex-1 min-w-0">
-        <span className={cn("text-sm font-semibold", overdue ? "text-rose-600 dark:text-rose-400" : "text-amber-700 dark:text-amber-400")}>
-          Rent {label}
-        </span>
-        <span className="text-sm text-muted-foreground"> · {amount}</span>
+      <div
+        className="flex items-center gap-3.5 rounded-[18px] px-4 py-3.5 cursor-pointer
+          bg-[var(--glass-fill)] border border-[var(--glass-border)]
+          hover:brightness-105 active:brightness-95 transition-[filter] duration-150"
+      >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-foreground/[0.06]">
+          <Wallet size={18} strokeWidth={1.8} className="text-foreground/70" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground">Rent</p>
+          <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
+        </div>
+        {badge && (
+          <span className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold ${
+            badge.variant === "danger"
+              ? "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
+              : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+          }`}>
+            {badge.text}
+          </span>
+        )}
+        <ChevronRight size={14} className="shrink-0 text-muted-foreground/50" />
       </div>
-      <span className="text-xs font-semibold text-primary shrink-0">Mark paid →</span>
-    </motion.button>
+    </motion.div>
   );
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export function HomePage() {
   const { snapshot } = useData();
-  const { user } = useAuth();
+  const { user }     = useAuth();
+  const reduced      = useReducedMotion();
 
   if (snapshot.profile.user_type === "landlord") return <LandlordHome />;
 
   const firstName = snapshot.profile.full_name?.split(" ")[0] ?? "there";
-  const hour = new Date().getHours();
-  const greeting =
+  const hour      = new Date().getHours();
+  const greeting  =
     hour >= 5 && hour < 12 ? "Good morning" :
     hour >= 12 && hour < 18 ? "Good afternoon" :
     "Good evening";
-  const userCity = snapshot.profile.city;
+  const userCity  = snapshot.profile.city;
+
 
   return (
     <div className="relative min-h-dvh [overflow-x:clip]">
       {/* Ambient background blobs */}
       <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden>
         <div className="absolute inset-0 bg-[var(--bg-base)]" />
-        <div
-          className="absolute -left-[20%] -top-[10%] h-[48vh] w-[48vh] rounded-full blur-[90px]"
-          style={{ background: "var(--ambient-primary)" }}
-        />
-        <div
-          className="absolute -right-[15%] top-[18%] h-[44vh] w-[44vh] rounded-full blur-[90px]"
-          style={{ background: "var(--ambient-secondary)" }}
-        />
-        <div
-          className="absolute bottom-[8%] left-[5%] h-[40vh] w-[40vh] rounded-full blur-[90px]"
-          style={{ background: "var(--ambient-accent)" }}
-        />
-        <div
-          className="bg-noise absolute inset-0"
-          style={{ opacity: "var(--grain-opacity)" }}
-        />
+        <div className="absolute -left-[20%] -top-[10%] h-[48vh] w-[48vh] rounded-full blur-[90px]"
+          style={{ background: "var(--ambient-primary)" }} />
+        <div className="absolute -right-[15%] top-[18%] h-[44vh] w-[44vh] rounded-full blur-[90px]"
+          style={{ background: "var(--ambient-secondary)" }} />
+        <div className="absolute bottom-[8%] left-[5%] h-[40vh] w-[40vh] rounded-full blur-[90px]"
+          style={{ background: "var(--ambient-accent)" }} />
+        <div className="bg-noise absolute inset-0" style={{ opacity: "var(--grain-opacity)" }} />
       </div>
 
-      {/* Sticky header — search + bell, no title */}
+      {/* Sticky header */}
       <AppHeader variant="home" title="" right={{ type: "notifications" }} />
 
-      {/* Blur veil — sits just below the header (z-39), blurs content as it scrolls up */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-x-0 top-0 z-[39]"
+      {/* Blur veil below header */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[39]"
         style={{
           height: "calc(72px + env(safe-area-inset-top))",
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
           maskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
           WebkitMaskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
-        }}
-      />
+        }} />
 
-      <div className="space-y-7 px-5 pb-32 pt-4">
+      <div className="space-y-6 px-5 pb-32 pt-4">
 
-        {/* ── Welcome block ── */}
-        <div>
-          <motion.div
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.35 }}
-          >
-            <p className="text-[11px] font-medium text-muted-foreground mb-0.5">{greeting}</p>
-            <h1 className="text-[32px] font-light leading-[1.15] tracking-tight text-foreground">
-              Welcome, {firstName}
-            </h1>
-            <p className="mt-1 text-[18px] font-light leading-snug text-muted-foreground">
-              What do you want to do?
-            </p>
-            {userCity && (
-              <div className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground/60">
-                <MapPin size={10} />
-                <span>{userCity}, Cyprus</span>
-              </div>
-            )}
-          </motion.div>
-        </div>
-
-        {/* ── Actions ── */}
+        {/* ── Greeting ── */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12, duration: 0.35 }}
+          initial={{ opacity: 0, x: -16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.35 }}
         >
-          <p className="mb-3 text-[14px] font-semibold text-foreground">Actions</p>
-          {/* Horizontal scroll row — extend past page gutter for peek effect */}
-          <div className="-mx-5">
-            <div className="flex gap-3 overflow-x-auto px-5 pb-1 scrollbar-none snap-x snap-mandatory">
-              {ACTIONS.map((action, i) => (
-                <motion.div
-                  key={action.to}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.18 + i * 0.07, duration: 0.3 }}
-                  className="snap-start"
-                >
-                  <ActionTile {...action} />
-                </motion.div>
-              ))}
+          <p className="text-[11px] font-medium text-muted-foreground mb-0.5">{greeting}</p>
+          <h1 className="text-[30px] font-light leading-[1.15] tracking-tight text-foreground">
+            Welcome, {firstName}
+          </h1>
+          {userCity && (
+            <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground/60">
+              <MapPin size={10} />
+              <span>{userCity}, Cyprus</span>
             </div>
+          )}
+        </motion.div>
+
+        {/* ── Hero card — property search ── */}
+        <motion.div
+          initial={reduced ? undefined : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.35 }}
+        >
+          <Link
+            to="/properties"
+            className="block relative overflow-hidden rounded-[24px] p-6 active:scale-[0.98] transition-transform"
+            style={{ background: "var(--action-property)", minHeight: "156px" }}
+          >
+            {/* Glow blob */}
+            <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" aria-hidden />
+            <div className="relative flex flex-col justify-between h-full">
+              <div>
+                <p className="text-white/70 text-[12px] font-medium mb-1 uppercase tracking-wider">
+                  Find your place
+                </p>
+                <h2 className="text-white text-[22px] font-semibold leading-snug">
+                  200+ properties<br />in Nicosia
+                </h2>
+              </div>
+              <div className="mt-5">
+                <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm">
+                  <KeyRound size={14} />
+                  Browse properties
+                </span>
+              </div>
+            </div>
+          </Link>
+        </motion.div>
+
+        {/* ── Quick access 2×2 ── */}
+        <motion.div
+          initial={reduced ? undefined : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18, duration: 0.35 }}
+        >
+          <p className="mb-3 text-[14px] font-semibold text-foreground">Quick access</p>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Flatmates — green */}
+            <motion.div whileTap={reduced ? undefined : { scale: 0.96 }} transition={{ duration: 0.1 }}>
+              <Link to="/flatmates" className="flex flex-col items-center text-center rounded-[20px] p-5 shadow-sm active:brightness-95 transition-[filter]"
+                style={{ background: "linear-gradient(135deg, #97C459 0%, #639922 100%)" }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/25 backdrop-blur-sm mb-2.5">
+                  <UsersRound size={22} strokeWidth={2} className="text-white" />
+                </div>
+                <span className="text-sm font-medium text-white">Flatmates</span>
+              </Link>
+            </motion.div>
+
+            {/* Nestmate AI — purple */}
+            <motion.div whileTap={reduced ? undefined : { scale: 0.96 }} transition={{ duration: 0.1 }}>
+              <Link to="/assistant" className="flex flex-col items-center text-center rounded-[20px] p-5 shadow-sm active:brightness-95 transition-[filter]"
+                style={{ background: "linear-gradient(135deg, #AFA9EC 0%, #7F77DD 100%)" }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/25 backdrop-blur-sm mb-2.5">
+                  <Sparkles size={22} strokeWidth={2} className="text-white" />
+                </div>
+                <span className="text-sm font-medium text-white">Nestmate AI</span>
+              </Link>
+            </motion.div>
+
+            {/* Study Hub — teal */}
+            <motion.div whileTap={reduced ? undefined : { scale: 0.96 }} transition={{ duration: 0.1 }}>
+              <Link to="/study" className="flex flex-col items-center text-center rounded-[20px] p-5 shadow-sm active:brightness-95 transition-[filter]"
+                style={{ background: "linear-gradient(135deg, #5DCAA5 0%, #1D9E75 100%)" }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/25 backdrop-blur-sm mb-2.5">
+                  <BookOpen size={22} strokeWidth={2} className="text-white" />
+                </div>
+                <span className="text-sm font-medium text-white">Study Hub</span>
+              </Link>
+            </motion.div>
+
+            {/* Buses — blue */}
+            <motion.div whileTap={reduced ? undefined : { scale: 0.96 }} transition={{ duration: 0.1 }}>
+              <Link to="/tools/buses" className="flex flex-col items-center text-center rounded-[20px] p-5 shadow-sm active:brightness-95 transition-[filter]"
+                style={{ background: "linear-gradient(135deg, #85B7EB 0%, #378ADD 100%)" }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/25 backdrop-blur-sm mb-2.5">
+                  <Bus size={22} strokeWidth={2} className="text-white" />
+                </div>
+                <span className="text-sm font-medium text-white">Buses</span>
+              </Link>
+            </motion.div>
           </div>
         </motion.div>
 
         {/* ── Location confirmation banner ── */}
         <LocationConfirmationBanner />
 
-        {/* ── Rent chip ── */}
-        {user && <RentChip userId={user.id} />}
+        {/* ── My Stuff ── */}
+        <motion.div
+          initial={reduced ? undefined : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.26, duration: 0.35 }}
+        >
+          <p className="mb-3 text-[14px] font-semibold text-foreground">My stuff</p>
+          <div className="space-y-2.5">
+            {user && <RentStuffRow userId={user.id} />}
+            <StuffRow
+              to="/documents"
+              icon={FolderOpen}
+              label="Documents"
+              subtitle="Passport, insurance, contracts"
+            />
+          </div>
+        </motion.div>
 
-        {/* ── Document expiry strip ── */}
+        {/* ── Expiring documents strip ── */}
         <ExpiringSoonStrip />
-
-        {/* ── Local Tools strip ── */}
-        <LocalToolsSection />
 
         {/* ── Upcoming Events ── */}
         <UpcomingEvents />
