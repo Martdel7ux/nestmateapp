@@ -1,128 +1,20 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   MapPin, UsersRound, BookOpen, Bus, Sparkles,
-  Wallet, FolderOpen, ChevronRight,
   KeyRound,
 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useData } from "@/contexts/data-context";
-import { useAuth } from "@/contexts/auth-context";
 import { AppHeader } from "@/components/layout/app-header";
 import { LandlordHome } from "@/components/features/landlord/landlord-home";
 import { UpcomingEvents } from "@/components/features/home/UpcomingEvents";
-import { useUpcomingRentPayment } from "@/hooks/use-rent";
 import { ExpiringSoonStrip } from "@/components/features/documents/ExpiringSoonStrip";
 import { LocationConfirmationBanner } from "@/components/features/location/LocationConfirmationBanner";
-import type { LucideIcon } from "lucide-react";
-
-// ── My Stuff list row ─────────────────────────────────────────────────────────
-
-interface StuffRowProps {
-  to: string;
-  icon: LucideIcon;
-  label: string;
-  subtitle: string;
-  badge?: { text: string; variant: "warning" | "danger" };
-}
-
-function StuffRow({ to, icon: Icon, label, subtitle, badge }: StuffRowProps) {
-  const reduced = useReducedMotion();
-  return (
-    <motion.div whileTap={reduced ? undefined : { scale: 0.985 }} transition={{ duration: 0.1 }}>
-      <Link
-        to={to}
-        className="flex items-center gap-3.5 rounded-[18px] px-4 py-3.5
-          bg-[var(--glass-fill)] border border-[var(--glass-border)]
-          hover:brightness-105 active:brightness-95 transition-[filter] duration-150"
-      >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-foreground/[0.06]">
-          <Icon size={18} strokeWidth={1.8} className="text-foreground/70" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">{label}</p>
-          <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
-        </div>
-        {badge && (
-          <span className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold ${
-            badge.variant === "danger"
-              ? "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
-              : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-          }`}>
-            {badge.text}
-          </span>
-        )}
-        <ChevronRight size={14} className="shrink-0 text-muted-foreground/50" />
-      </Link>
-    </motion.div>
-  );
-}
-
-// ── Rent row (dynamic) ────────────────────────────────────────────────────────
-
-function RentStuffRow({ userId }: { userId: string }) {
-  const navigate = useNavigate();
-  const { data: payment } = useUpcomingRentPayment(userId);
-
-  const subtitle = (() => {
-    if (!payment) return "No upcoming payments";
-    const due   = new Date(payment.due_date);
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const days  = Math.round((due.getTime() - today.getTime()) / 86_400_000);
-    const amount = `€${Number(payment.amount).toFixed(0)}`;
-    if (payment.status === "late" || days < 0) return `${amount} · Overdue`;
-    if (days === 0) return `${amount} · Due today`;
-    if (days === 1) return `${amount} · Due tomorrow`;
-    return `${amount} · Due in ${days} days`;
-  })();
-
-  const badge = (() => {
-    if (!payment) return undefined;
-    const due   = new Date(payment.due_date);
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const days  = Math.round((due.getTime() - today.getTime()) / 86_400_000);
-    if (payment.status === "late" || days < 0) return { text: "Overdue", variant: "danger" as const };
-    if (days <= 7) return { text: "Due soon", variant: "warning" as const };
-    return undefined;
-  })();
-
-  return (
-    <motion.div
-      whileTap={{ scale: 0.985 }}
-      transition={{ duration: 0.1 }}
-      onClick={() => payment ? navigate(`/rent/payments/${payment.id}`) : navigate("/rent")}
-    >
-      <div
-        className="flex items-center gap-3.5 rounded-[18px] px-4 py-3.5 cursor-pointer
-          bg-[var(--glass-fill)] border border-[var(--glass-border)]
-          hover:brightness-105 active:brightness-95 transition-[filter] duration-150"
-      >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-foreground/[0.06]">
-          <Wallet size={18} strokeWidth={1.8} className="text-foreground/70" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">Rent</p>
-          <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
-        </div>
-        {badge && (
-          <span className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold ${
-            badge.variant === "danger"
-              ? "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
-              : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-          }`}>
-            {badge.text}
-          </span>
-        )}
-        <ChevronRight size={14} className="shrink-0 text-muted-foreground/50" />
-      </div>
-    </motion.div>
-  );
-}
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export function HomePage() {
   const { snapshot } = useData();
-  const { user }     = useAuth();
   const reduced      = useReducedMotion();
 
   if (snapshot.profile.user_type === "landlord") return <LandlordHome />;
@@ -271,24 +163,6 @@ export function HomePage() {
 
         {/* ── Location confirmation banner ── */}
         <LocationConfirmationBanner />
-
-        {/* ── My Stuff ── */}
-        <motion.div
-          initial={reduced ? undefined : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.26, duration: 0.35 }}
-        >
-          <p className="mb-3 text-[14px] font-semibold text-foreground">My stuff</p>
-          <div className="space-y-2.5">
-            {user && <RentStuffRow userId={user.id} />}
-            <StuffRow
-              to="/documents"
-              icon={FolderOpen}
-              label="Documents"
-              subtitle="Passport, insurance, contracts"
-            />
-          </div>
-        </motion.div>
 
         {/* ── Expiring documents strip ── */}
         <ExpiringSoonStrip />
