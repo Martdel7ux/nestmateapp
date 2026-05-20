@@ -49,6 +49,7 @@
     "adm-zip": "^0.5.17",
     "autoprefixer": "^10.4.20",
     "papaparse": "^5.5.3",
+    "playwright": "^1.60.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.6.2",
