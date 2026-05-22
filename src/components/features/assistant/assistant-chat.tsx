@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Sparkles, SendHorizontal } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 
 export interface AssistantChatRef {
   setInput: (value: string) => void;
@@ -278,6 +279,7 @@ What would you like to know?`;
 // ── Stream parser ─────────────────────────────────────────────────────────────
 async function streamEdgeFunction(
   messages: Message[],
+  accessToken: string | undefined,
   onChunk: (text: string) => void,
   onDone: () => void
 ) {
@@ -286,7 +288,7 @@ async function streamEdgeFunction(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      Authorization: `Bearer ${accessToken ?? SUPABASE_ANON_KEY}`,
       apikey: SUPABASE_ANON_KEY ?? "",
     },
     body: JSON.stringify({ messages }),
@@ -323,12 +325,12 @@ async function streamEdgeFunction(
 
 // ── Suggested questions ───────────────────────────────────────────────────────
 const suggestions = [
+  "When is my rent due?",
+  "Do I have any expiring documents?",
+  "How do I split bills with my flatmates?",
   "What's the average rent in Nicosia?",
-  "What documents do I need for a student visa?",
+  "How do I find a flatmate on NestMate?",
   "What should I check in a rental contract?",
-  "Best areas to live near UCY?",
-  "How much does a student spend per month?",
-  "Erasmus accommodation tips",
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -336,12 +338,13 @@ const starter: Message[] = [
   {
     role: "assistant",
     content:
-      "## Welcome to NestMate AI 👋\n\nI'm your Cyprus student accommodation expert. Ask me anything about:\n- Rent prices across all cities\n- Student visas & residence permits\n- Rental contracts & tenant rights\n- Cost of living & utilities\n- Best neighbourhoods near your university\n- Erasmus & short-term stays\n\nWhat would you like to know?",
+      "## Hi, I'm Nestmate AI\n\nI can help with three things:\n\n**Your personal situation** — rent due dates, expiring documents, flatmate balances\n\n**Cyprus student life** — rent prices, visas, contracts, cost of living, neighbourhoods\n\n**Using NestMate** — how to split bills, upload documents, find flatmates, plan bus routes\n\nWhat would you like to know?",
   },
 ];
 
 export const AssistantChat = forwardRef<AssistantChatRef, { initialPrompt?: string }>(
 function AssistantChat({ initialPrompt }, ref) {
+  const { session } = useAuth();
   const [messages, setMessages] = useState<Message[]>(starter);
   const [draft, setDraft] = useState(initialPrompt ?? "");
   const [streaming, setStreaming] = useState(false);
@@ -373,8 +376,12 @@ function AssistantChat({ initialPrompt }, ref) {
 
     if (SUPABASE_URL && SUPABASE_ANON_KEY) {
       try {
+        // Anthropic requires the first message to be from the user.
+        // Strip the synthetic welcome message before sending.
+        const apiHistory = history.filter((m, i) => !(i === 0 && m.role === "assistant"));
         await streamEdgeFunction(
-          history,
+          apiHistory,
+          session?.access_token,
           (chunk) => {
             setMessages((prev) => {
               const updated = [...prev];

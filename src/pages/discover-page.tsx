@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Bookmark, Lightbulb, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { AppHeader } from "@/components/layout/app-header";
 import { OpportunityCard } from "@/components/features/discover/opportunity-card";
 import { OpportunityFiltersBar } from "@/components/features/discover/opportunity-filters";
@@ -8,11 +9,13 @@ import { NotificationBell } from "@/components/features/discover/notification-be
 import { SuggestEventModal } from "@/components/features/discover/SuggestEventModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOpportunities } from "@/hooks/use-opportunities";
+import { useScrolled } from "@/hooks/use-scrolled";
 import type { OpportunityFilters } from "@/types/discover";
 
 export function DiscoverPage() {
   const [filters, setFilters]   = useState<OpportunityFilters>({});
   const [showSuggest, setShowSuggest] = useState(false);
+  const isCollapsed = useScrolled(50);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useOpportunities(filters);
 
@@ -38,26 +41,37 @@ export function DiscoverPage() {
       {showSuggest && <SuggestEventModal onClose={() => setShowSuggest(false)} />}
       <AppHeader
         title="Discover"
+        universalSearch={false}
         right={{
           type: "custom",
           element: (
-            <div className="flex items-center gap-1.5">
-              <NotificationBell />
-              <Link
-                to="/discover/saved"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-background/60 dark:bg-slate-800/60 shadow-sm text-foreground hover:bg-muted transition-colors"
-                aria-label="Saved opportunities"
-              >
-                <Bookmark size={18} />
-              </Link>
-              <Link
-                to="/discover/preferences"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-background/60 dark:bg-slate-800/60 shadow-sm text-foreground hover:bg-muted transition-colors"
-                aria-label="Discover preferences"
-              >
-                <Settings size={18} />
-              </Link>
-            </div>
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.div
+                  className="flex items-center gap-1.5"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                >
+                  <NotificationBell />
+                  <Link
+                    to="/discover/saved"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--glass-fill)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm text-foreground hover:brightness-110 transition-colors"
+                    aria-label="Saved opportunities"
+                  >
+                    <Bookmark size={18} />
+                  </Link>
+                  <Link
+                    to="/discover/preferences"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--glass-fill)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm text-foreground hover:brightness-110 transition-colors"
+                    aria-label="Discover preferences"
+                  >
+                    <Settings size={18} />
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
           ),
         }}
       />

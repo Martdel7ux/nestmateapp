@@ -34,6 +34,7 @@ const SavedPropertiesPage      = lazy(() => import("@/pages/saved-properties-pag
 const PropertiesPage           = lazy(() => import("@/pages/properties-page").then(m => ({ default: m.PropertiesPage })));
 const SearchPage               = lazy(() => import("@/pages/search-page").then(m => ({ default: m.SearchPage })));
 const LocationSettingsPage     = lazy(() => import("@/pages/location/LocationSettingsPage").then(m => ({ default: m.LocationSettingsPage })));
+const ToolsPage                = lazy(() => import("@/pages/tools-page").then(m => ({ default: m.ToolsPage })));
 
 // Study
 const StudyHubPage      = lazy(() => import("@/pages/study/StudyHubPage").then(m => ({ default: m.StudyHubPage })));
@@ -142,6 +143,7 @@ export function AppRouter() {
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/messages/:matchId" element={<ChatPage />} />
           <Route path="/assistant" element={<AssistantPage />} />
+          <Route path="/tools" element={<ToolsPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/discover" element={<DiscoverPage />} />

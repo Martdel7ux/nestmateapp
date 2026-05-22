@@ -5,10 +5,9 @@ import { AppHeader } from "@/components/layout/app-header";
 import { useI18n } from "@/contexts/i18n-context";
 import {
   Camera, Check, ChevronRight, Eye, EyeOff,
-  FolderOpen, Heart, HelpCircle, Key, Laptop, LogOut, MapPin, Moon, Pencil,
-  ShieldCheck, Sparkles, Sun, Trash2, University, User, Wallet, X
+  Heart, HelpCircle, Key, Laptop, LogOut, MapPin, Moon, Pencil,
+  ShieldCheck, Sparkles, Sun, Trash2, University, User, X
 } from "lucide-react";
-import { useUpcomingRentPayment } from "@/hooks/use-rent";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { VerificationUpload } from "@/components/features/verification/verification-upload";
@@ -49,35 +48,12 @@ const PRESET_AVATARS = [
 
 export function ProfilePage() {
   const { snapshot, updateProfile, toggleSavedProperty } = useData();
-  const { user, signOut, updatePassword, deleteAccount } = useAuth();
+  const { signOut, updatePassword, deleteAccount } = useAuth();
   const { theme, setTheme } = useTheme();
   const { t, language, setLanguage } = useI18n();
   const navigate = useNavigate();
   const profile = snapshot.profile;
   const isLandlord = profile.user_type === "landlord";
-
-  // Rent (My Stuff)
-  const { data: rentPayment } = useUpcomingRentPayment(user?.id ?? "");
-  const rentSubtitle = (() => {
-    if (!rentPayment) return "No upcoming payments";
-    const due   = new Date(rentPayment.due_date);
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const days  = Math.round((due.getTime() - today.getTime()) / 86_400_000);
-    const amount = `€${Number(rentPayment.amount).toFixed(0)}`;
-    if (rentPayment.status === "late" || days < 0) return `${amount} · Overdue`;
-    if (days === 0) return `${amount} · Due today`;
-    if (days === 1) return `${amount} · Due tomorrow`;
-    return `${amount} · Due in ${days} days`;
-  })();
-  const rentBadge = (() => {
-    if (!rentPayment) return undefined;
-    const due   = new Date(rentPayment.due_date);
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const days  = Math.round((due.getTime() - today.getTime()) / 86_400_000);
-    if (rentPayment.status === "late" || days < 0) return { text: "Overdue", variant: "danger" as const };
-    if (days <= 7) return { text: "Due soon", variant: "warning" as const };
-    return undefined;
-  })();
 
   // Edit mode
   const [editing, setEditing] = useState(false);
@@ -191,9 +167,34 @@ export function ProfilePage() {
   if (isLandlord) return <LandlordProfileView />;
 
   return (
-    <>
-      <AppHeader title="Profile" right={{ type: "none" }} />
-      <div className="space-y-5 px-5 pt-4">
+    <div className="relative min-h-dvh [overflow-x:clip]">
+
+      {/* Ambient background blobs */}
+      <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden>
+        <div className="absolute inset-0 bg-[var(--bg-base)]" />
+        <div className="absolute -left-[20%] -top-[10%] h-[48vh] w-[48vh] rounded-full blur-[90px]"
+          style={{ background: "var(--ambient-primary)" }} />
+        <div className="absolute -right-[15%] top-[18%] h-[44vh] w-[44vh] rounded-full blur-[90px]"
+          style={{ background: "var(--ambient-secondary)" }} />
+        <div className="absolute bottom-[8%] left-[5%] h-[40vh] w-[40vh] rounded-full blur-[90px]"
+          style={{ background: "var(--ambient-accent)" }} />
+        <div className="bg-noise absolute inset-0" style={{ opacity: "var(--grain-opacity)" }} />
+      </div>
+
+      {/* Sticky header */}
+      <AppHeader variant="home" title="Profile" right={{ type: "none" }} universalSearch={false} />
+
+      {/* Blur veil below header */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[39]"
+        style={{
+          height: "calc(72px + env(safe-area-inset-top))",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          maskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
+        }} />
+
+      <div className="space-y-5 px-5 pb-32 pt-4">
 
       {/* ── New-user profile completion prompt ── */}
       <AnimatePresence>
@@ -526,57 +527,6 @@ export function ProfilePage() {
       {/* ── Landlord verification ── */}
       {isLandlord && <VerificationUpload />}
 
-      {/* ── My stuff ── */}
-      <Card className="space-y-3">
-        <h3 className="font-display text-base font-bold">My stuff</h3>
-        <div className="space-y-2.5">
-          {/* Rent */}
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => rentPayment ? navigate(`/rent/payments/${rentPayment.id}`) : navigate("/rent")}
-            onKeyDown={(e) => e.key === "Enter" && (rentPayment ? navigate(`/rent/payments/${rentPayment.id}`) : navigate("/rent"))}
-            className="flex items-center gap-3.5 rounded-[18px] px-4 py-3.5 cursor-pointer
-              bg-foreground/[0.03] border border-border
-              hover:bg-foreground/[0.06] active:bg-foreground/[0.08] transition-colors duration-150"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-foreground/[0.06]">
-              <Wallet size={18} strokeWidth={1.8} className="text-foreground/70" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">Rent</p>
-              <p className="text-xs text-muted-foreground truncate mt-0.5">{rentSubtitle}</p>
-            </div>
-            {rentBadge && (
-              <span className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold ${
-                rentBadge.variant === "danger"
-                  ? "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
-                  : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-              }`}>
-                {rentBadge.text}
-              </span>
-            )}
-            <ChevronRight size={14} className="shrink-0 text-muted-foreground/50" />
-          </div>
-          {/* Documents */}
-          <Link
-            to="/documents"
-            className="flex items-center gap-3.5 rounded-[18px] px-4 py-3.5
-              bg-foreground/[0.03] border border-border
-              hover:bg-foreground/[0.06] active:bg-foreground/[0.08] transition-colors duration-150"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-foreground/[0.06]">
-              <FolderOpen size={18} strokeWidth={1.8} className="text-foreground/70" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">Documents</p>
-              <p className="text-xs text-muted-foreground truncate mt-0.5">Passport, insurance, contracts</p>
-            </div>
-            <ChevronRight size={14} className="shrink-0 text-muted-foreground/50" />
-          </Link>
-        </div>
-      </Card>
-
       {/* ── Notification settings ── */}
       <NotificationSettings />
 
@@ -794,6 +744,6 @@ export function ProfilePage() {
 
       <div className="h-4" />
     </div>
-    </>
+    </div>
   );
 }

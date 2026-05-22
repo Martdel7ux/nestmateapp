@@ -3,6 +3,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
+  GraduationCap,
   Home,
   MessageCircle,
   ShieldCheck,
@@ -16,7 +17,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useI18n } from "@/contexts/i18n-context";
 import { useData } from "@/contexts/data-context";
 
-const icons: Record<string, LucideIcon> = { Home, Compass, MessageCircle, ShieldCheck, User };
+const icons: Record<string, LucideIcon> = { Home, Compass, GraduationCap, MessageCircle, ShieldCheck, User };
 
 // Preload page chunk on hover / touch so it's ready before the tap completes
 const preloadMap: Partial<Record<string, () => unknown>> = {
@@ -31,13 +32,15 @@ const preloadMap: Partial<Record<string, () => unknown>> = {
   "/documents": () => import("@/pages/documents/DocumentsListPage"),
   "/study":     () => import("@/pages/study/StudyHubPage"),
   "/properties":() => import("@/pages/properties-page"),
+  "/tools":     () => import("@/pages/tools-page"),
 };
 
 const studentNavItems = [
-  { key: "navHome",      path: "/",          icon: "Home" },
-  { key: "navDiscover",  path: "/discover",  icon: "Compass" },
-  { key: "navMessages",  path: "/messages",  icon: "MessageCircle" },
-  { key: "navProfile",   path: "/profile",   icon: "User" },
+  { key: "navHome",        path: "/",        icon: "Home",           label: "Home" },
+  { key: "navDiscover",    path: "/discover",icon: "Compass",        label: "Discover" },
+  { key: "navStudentLife", path: "/tools",   icon: "GraduationCap",  label: "Essentials" },
+  { key: "navMessages",    path: "/messages",icon: "MessageCircle",  label: "Messages" },
+  { key: "navProfile",     path: "/profile", icon: "User",           label: "Profile" },
 ] as const;
 
 const landlordNavItems = [

@@ -8,7 +8,7 @@ export function NotificationBell() {
   return (
     <Link
       to="/discover/notifications"
-      className="relative flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground transition-colors"
+      className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[var(--glass-fill)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm text-foreground hover:brightness-110 transition-colors"
     >
       <Bell size={20} />
       {unread > 0 && (

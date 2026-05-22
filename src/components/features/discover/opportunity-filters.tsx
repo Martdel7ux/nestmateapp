@@ -27,9 +27,9 @@ export function OpportunityFiltersBar({ filters, onChange }: Props) {
     onChange({ ...filters, location_type: filters.location_type === l ? null : l });
 
   return (
-    <div className="space-y-2 px-4">
+    <div className="space-y-2 px-4 pt-3">
       {/* Search */}
-      <div className="flex items-center gap-2 rounded-2xl bg-muted px-3 py-2">
+      <div className="flex items-center gap-2 rounded-2xl bg-[var(--glass-fill)] border border-[var(--glass-border)] [backdrop-filter:blur(20px)_saturate(180%)] [-webkit-backdrop-filter:blur(20px)_saturate(180%)] px-3 py-2">
         <Search size={15} className="shrink-0 text-muted-foreground" />
         <input
           value={filters.query ?? ""}
@@ -55,7 +55,7 @@ export function OpportunityFiltersBar({ filters, onChange }: Props) {
               "shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
               filters.type === value
                 ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                : "border-[var(--glass-border)] bg-[var(--glass-fill)] [backdrop-filter:blur(20px)_saturate(180%)] [-webkit-backdrop-filter:blur(20px)_saturate(180%)] text-muted-foreground hover:border-primary/50"
             )}
           >
             {label}
@@ -74,7 +74,7 @@ export function OpportunityFiltersBar({ filters, onChange }: Props) {
               "shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
               filters.location_type === value
                 ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                : "border-[var(--glass-border)] bg-[var(--glass-fill)] [backdrop-filter:blur(20px)_saturate(180%)] [-webkit-backdrop-filter:blur(20px)_saturate(180%)] text-muted-foreground hover:border-primary/50"
             )}
           >
             {label}
