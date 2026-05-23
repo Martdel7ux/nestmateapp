@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import {
-  UsersRound, BookOpen, Bus, Sparkles, ChevronRight,
+  BookOpen, Bus, Sparkles, ChevronRight,
   Wallet, FolderOpen, Receipt,
 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -11,14 +11,6 @@ import { useUpcomingRentPayment } from "@/hooks/use-rent";
 // ── Static tools ──────────────────────────────────────────────────────────────
 
 const TOOLS = [
-  {
-    id: "flatmates",
-    label: "Flatmates",
-    subtitle: "Find students to share with",
-    icon: UsersRound,
-    path: "/flatmates",
-    style: { background: "linear-gradient(135deg, #97C459 0%, #639922 100%)" },
-  },
   {
     id: "study",
     label: "Study Hub",
