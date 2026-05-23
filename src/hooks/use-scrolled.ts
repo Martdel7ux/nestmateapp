@@ -11,29 +11,34 @@ export function useScrolled(threshold = 8) {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    // Always reset on mount so we never inherit stale position from previous route
     setIsScrolled(false);
 
-    // Window scroll — default-layout pages
-    const onWindowScroll = () => {
-      setIsScrolled(window.scrollY > threshold);
+    let rafId: number | null = null;
+
+    const update = (value: boolean) => {
+      if (rafId !== null) return; // already scheduled
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        setIsScrolled(value);
+      });
     };
 
-    // Captured scroll — full-height pages with inner scroll containers.
-    // capture: true lets us receive scroll events from any descendant element.
-    // We filter to containers taller than 200px so small nested scrollables
-    // (chat threads, dropdowns, code blocks) don't incorrectly trigger the header.
+    const onWindowScroll = () => {
+      update(window.scrollY > threshold);
+    };
+
     const onCapturedScroll = (e: Event) => {
       const el = e.target as HTMLElement;
       if (!el || el === document.documentElement || el === document.body) return;
       if (el.clientHeight < 200) return;
-      setIsScrolled(el.scrollTop > threshold);
+      update(el.scrollTop > threshold);
     };
 
     window.addEventListener("scroll", onWindowScroll, { passive: true });
     document.addEventListener("scroll", onCapturedScroll, { passive: true, capture: true });
 
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       window.removeEventListener("scroll", onWindowScroll);
       document.removeEventListener("scroll", onCapturedScroll, { capture: true });
     };

@@ -39,7 +39,7 @@ export function OpportunityCard({ opportunity: opp }: { opportunity: Opportunity
     >
       {opp.image_url && (
         <div className="h-36 overflow-hidden bg-muted">
-          <img src={opp.image_url} alt={opp.title} className="h-full w-full object-cover" />
+          <img src={opp.image_url} alt={opp.title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
         </div>
       )}
       <div className="p-4">

@@ -23,6 +23,8 @@ export function PropertyCard({
           <img
             src={property.image_urls[0]}
             alt={property.title}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover transition duration-500 hover:scale-105"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = "none";

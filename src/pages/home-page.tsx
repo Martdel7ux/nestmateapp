@@ -28,6 +28,8 @@ function CompactPropertyCard({
           <img
             src={property.image_urls[0]}
             alt={property.title}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover"
           />
         ) : (

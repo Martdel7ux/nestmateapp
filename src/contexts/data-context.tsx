@@ -193,8 +193,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase
           .from("properties")
           .select("*, owner:profiles!owner_id(*)")
-          .order("created_at", { ascending: false }),
-        supabase.from("flatmate_listings").select("*, profile:profiles!user_id(*)").eq("is_approved", true),
+          .order("created_at", { ascending: false })
+          .limit(300),
+        supabase.from("flatmate_listings").select("*, profile:profiles!user_id(*)").eq("is_approved", true).limit(200),
         supabase
           .from("matches")
           .select("*")
@@ -203,10 +204,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
           .from("notifications")
           .select("*")
           .eq("recipient_id", userId)
-          .order("created_at", { ascending: false }),
+          .order("created_at", { ascending: false })
+          .limit(50),
         supabase
           .from("landlord_verifications")
-          .select("*, profile:profiles!landlord_id(*)"),
+          .select("*, profile:profiles!landlord_id(*)")
+          .limit(100),
         supabase.from("property_saves").select("property_id").eq("user_id", userId),
         supabase.from("swipes").select("*").eq("swiper_id", userId)
       ]);
@@ -218,7 +221,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
               .from("messages")
               .select("*")
               .in("match_id", matchIds)
-              .order("created_at", { ascending: true })
+              .order("created_at", { ascending: false })
+              .limit(300)
           : { data: [] };
 
       // Generate signed URLs so verification doc images display correctly (private bucket)
@@ -284,7 +288,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         flatmates,
         matches,
         swipes,
-        messages: (msgsData ?? []) as unknown as Message[],
+        messages: ((msgsData ?? []) as unknown as Message[]).reverse(),
         notifications: (notifsData ?? []) as unknown as NotificationItem[],
         verifications: verificationsWithUrls as unknown as LandlordVerification[],
         stats: {
@@ -370,7 +374,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         return false;
       return true;
     });
-  }, [flatmateFilters, snapshot.flatmates, snapshot.profile]);
+  }, [flatmateFilters, snapshot.flatmates, snapshot.swipes, user?.id, myFlatmateListing]);
 
   const value = useMemo<DataContextValue>(
     () => ({
