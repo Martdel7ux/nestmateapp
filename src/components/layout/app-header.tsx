@@ -143,10 +143,10 @@ export function AppHeader({
             <ArrowLeft size={18} />
           </button>
 
-          <div className={`w-full transition-[padding,font-size,color,opacity] duration-300 ease-in-out
+          <div className={`w-full transition-all duration-300 ease-in-out
             ${isCollapsed ? "pl-0" : "pl-11"}`}>
             <p className={`truncate font-semibold text-foreground leading-snug
-              transition-[padding,font-size,color,opacity] duration-300 ease-in-out
+              transition-all duration-300 ease-in-out
               ${isCollapsed ? "text-[15px] text-center" : "text-[18px] text-left"}`}>
               {title}
             </p>
@@ -224,7 +224,7 @@ export function AppHeader({
     >
       {showSearch ? (
         /* ── Has search bar (most top-level pages + home) ────────────────────── */
-        <div className={`relative flex items-center gap-2 transition-[padding,font-size,color,opacity] duration-300 ease-in-out
+        <div className={`relative flex items-center gap-2 transition-all duration-300 ease-in-out
           ${isCollapsed ? "justify-center" : ""}`}>
           {hasTitle && (
             <h1 className="truncate text-[15px] font-bold text-foreground leading-snug pr-1">
@@ -262,7 +262,7 @@ export function AppHeader({
       ) : (
         /* ── No search bar — large title collapses (Essentials, etc.) ─────────── */
         <div className="relative">
-          <h1 className={`text-foreground transition-[padding,font-size,color,opacity] duration-300 ease-in-out
+          <h1 className={`text-foreground transition-all duration-300 ease-in-out
             ${isCollapsed
               ? "text-[17px] font-semibold text-center block"
               : "font-display text-3xl font-bold truncate text-left"}`}>

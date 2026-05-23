@@ -14,12 +14,14 @@ export function useScrolled(threshold = 8) {
     setIsScrolled(false);
 
     let rafId: number | null = null;
+    let nextValue = false;
 
     const update = (value: boolean) => {
-      if (rafId !== null) return; // already scheduled
+      nextValue = value;
+      if (rafId !== null) return; // rAF already pending; it will use nextValue
       rafId = requestAnimationFrame(() => {
         rafId = null;
-        setIsScrolled(value);
+        setIsScrolled(nextValue);
       });
     };
 
