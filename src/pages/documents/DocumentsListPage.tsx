@@ -29,18 +29,10 @@ export function DocumentsListPage() {
         right={{
           type: "custom",
           element: (
-            <div className="flex items-center gap-2">
-              <button type="button" onClick={() => navigate("/documents/search")}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-foreground">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                </svg>
-              </button>
-              <button type="button" onClick={() => navigate("/documents/new")}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <Plus size={16} />
-              </button>
-            </div>
+            <button type="button" onClick={() => navigate("/documents/new")}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Plus size={16} />
+            </button>
           ),
         }}
       />
@@ -49,11 +41,11 @@ export function DocumentsListPage() {
         {/* Quick-links */}
         <div className="flex gap-2 px-4 pt-4 pb-2">
           <button type="button" onClick={() => navigate("/documents/expiring")}
-            className="flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+            className="flex items-center gap-1.5 rounded-full border border-amber-400/50 bg-[var(--glass-fill)] [backdrop-filter:blur(20px)_saturate(180%)] [-webkit-backdrop-filter:blur(20px)_saturate(180%)] px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:brightness-110 transition-all">
             <Clock size={11} /> Expiring
           </button>
           <button type="button" onClick={() => navigate("/documents/trash")}
-            className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+            className="flex items-center gap-1.5 rounded-full border border-[var(--glass-border)] bg-[var(--glass-fill)] [backdrop-filter:blur(20px)_saturate(180%)] [-webkit-backdrop-filter:blur(20px)_saturate(180%)] px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:brightness-110 transition-all">
             <Trash2 size={11} /> Trash
           </button>
         </div>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Search, UsersRound, Building2 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -6,6 +7,7 @@ import { AppHeader } from "@/components/layout/app-header";
 import { LandlordHome } from "@/components/features/landlord/landlord-home";
 import { ExpiringSoonStrip } from "@/components/features/documents/ExpiringSoonStrip";
 import { LocationConfirmationBanner } from "@/components/features/location/LocationConfirmationBanner";
+import { PropertyDetailModal } from "@/components/features/properties/property-detail-modal";
 import { currency } from "@/lib/utils";
 import type { Property } from "@/types/supabase";
 
@@ -66,6 +68,7 @@ function CompactPropertyCard({
 export function HomePage() {
   const { snapshot, toggleSavedProperty } = useData();
   const reduced = useReducedMotion();
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
   if (snapshot.profile.user_type === "landlord") return <LandlordHome />;
 
@@ -106,6 +109,8 @@ export function HomePage() {
           maskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
           WebkitMaskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
         }} />
+
+      <PropertyDetailModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />
 
       <div className="space-y-6 px-5 pb-32 pt-4">
 
@@ -181,13 +186,13 @@ export function HomePage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {featuredProperties.map((property: Property) => (
-                <Link key={property.id} to="/properties">
+                <div key={property.id} onClick={() => setSelectedProperty(property)} className="cursor-pointer">
                   <CompactPropertyCard
                     property={property}
                     saved={savedIds.has(property.id)}
                     onToggle={() => toggleSavedProperty(property)}
                   />
-                </Link>
+                </div>
               ))}
             </div>
           </motion.div>

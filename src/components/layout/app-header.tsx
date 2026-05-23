@@ -77,7 +77,7 @@ export function AppHeader({
         <button
           type="button"
           onClick={() => setSearching(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-background/60 dark:bg-slate-800/60 shadow-sm transition hover:bg-muted"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--glass-fill)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm transition hover:brightness-110"
           aria-label="Search conversations"
         >
           <Search size={18} className="text-foreground" />
@@ -138,7 +138,7 @@ export function AppHeader({
             type="button"
             onClick={handleBack}
             aria-label="Go back"
-            className="absolute left-0 z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted transition hover:bg-muted/80 active:scale-95"
+            className="absolute left-0 z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--glass-fill)] border border-[var(--glass-border)] backdrop-blur-md transition hover:brightness-110 active:scale-95"
           >
             <ArrowLeft size={18} />
           </button>

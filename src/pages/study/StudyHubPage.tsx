@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { AppHeader } from "@/components/layout/app-header";
+import { useScrolled } from "@/hooks/use-scrolled";
 import { MyNotesPage } from "./MyNotesPage";
 import { PublicLibraryPage } from "./PublicLibraryPage";
 import { StudyGroupsPage } from "./StudyGroupsPage";
@@ -19,21 +21,34 @@ const TABS: { value: Tab; label: string }[] = [
 
 export function StudyHubPage() {
   const [activeTab, setActiveTab] = useState<Tab>("notes");
+  const isCollapsed = useScrolled(50);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <AppHeader
         title="Study Hub"
+        universalSearch={!isCollapsed}
         right={{
           type: "custom",
           element: (
-            <Link
-              to="/study/messages"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-background/60 dark:bg-slate-800/60 shadow-sm text-foreground hover:bg-muted transition-colors"
-              aria-label="Study messages"
-            >
-              <MessageCircle size={18} />
-            </Link>
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                >
+                  <Link
+                    to="/study/messages"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--glass-fill)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm text-foreground hover:brightness-110 transition-colors"
+                    aria-label="Study messages"
+                  >
+                    <MessageCircle size={18} />
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
           ),
         }}
       >
@@ -48,7 +63,7 @@ export function StudyHubPage() {
                 "shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all",
                 activeTab === value
                   ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-background/60 text-muted-foreground hover:text-foreground"
+                  : "bg-[var(--glass-fill)] border border-[var(--glass-border)] [backdrop-filter:blur(20px)_saturate(180%)] [-webkit-backdrop-filter:blur(20px)_saturate(180%)] text-muted-foreground hover:text-foreground"
               )}
             >
               {label}

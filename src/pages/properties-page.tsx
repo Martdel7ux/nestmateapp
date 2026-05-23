@@ -205,9 +205,35 @@ export function PropertiesPage() {
   return (
     <>
       <PropertyDetailModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />
-      <AppHeader title="Properties" right={{ type: "notifications" }} />
 
-      <div className="space-y-7 pb-4">
+      <div className="relative min-h-dvh [overflow-x:clip]">
+
+        {/* Ambient background blobs */}
+        <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden>
+          <div className="absolute inset-0 bg-[var(--bg-base)]" />
+          <div className="absolute -left-[20%] -top-[10%] h-[48vh] w-[48vh] rounded-full blur-[90px]"
+            style={{ background: "var(--ambient-primary)" }} />
+          <div className="absolute -right-[15%] top-[18%] h-[44vh] w-[44vh] rounded-full blur-[90px]"
+            style={{ background: "var(--ambient-secondary)" }} />
+          <div className="absolute bottom-[8%] left-[5%] h-[40vh] w-[40vh] rounded-full blur-[90px]"
+            style={{ background: "var(--ambient-accent)" }} />
+          <div className="bg-noise absolute inset-0" style={{ opacity: "var(--grain-opacity)" }} />
+        </div>
+
+        {/* Sticky header */}
+        <AppHeader variant="home" title="Properties" right={{ type: "notifications" }} universalSearch={false} />
+
+        {/* Blur veil below header */}
+        <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[39]"
+          style={{
+            height: "calc(72px + env(safe-area-inset-top))",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            maskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
+          }} />
+
+      <div className="space-y-7 pb-32 pt-4">
 
       {/* ── Search + Filter ── */}
       <motion.div
@@ -493,7 +519,8 @@ export function PropertiesPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>{/* /content */}
+      </div>{/* /ambient wrapper */}
     </>
   );
 }

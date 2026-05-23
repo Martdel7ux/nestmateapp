@@ -72,8 +72,8 @@ const config: Config = {
         glass: "var(--glass-shadow)"
       },
       fontFamily: {
-        display: ['"Playfair Display"', "serif"],
-        sans: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"]
+        display: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"]
       },
       backgroundImage: {
         "mesh-light":

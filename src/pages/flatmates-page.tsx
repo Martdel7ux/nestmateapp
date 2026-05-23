@@ -52,7 +52,7 @@ export function FlatmatesPage() {
               className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
                 showFilters
                   ? "border-primary bg-primary/5 text-primary"
-                  : "border-border bg-background/60 dark:bg-slate-800/60 hover:bg-muted"
+                  : "border-[var(--glass-border)] bg-[var(--glass-fill)] [backdrop-filter:blur(20px)_saturate(180%)] [-webkit-backdrop-filter:blur(20px)_saturate(180%)] hover:brightness-110"
               }`}
             >
               <Filter size={13} />

@@ -66,7 +66,7 @@ export function NoteFiltersBar({
                 "shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
                 filters.visibility === value
                   ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                  : "border-[var(--glass-border)] bg-[var(--glass-fill)] [backdrop-filter:blur(20px)_saturate(180%)] [-webkit-backdrop-filter:blur(20px)_saturate(180%)] text-muted-foreground hover:border-primary/50"
               )}
             >
               {label}

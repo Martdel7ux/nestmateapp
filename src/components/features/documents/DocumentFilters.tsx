@@ -28,7 +28,7 @@ export function DocumentFilters({ filters, onChange }: Props) {
             "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold border transition-all",
             !filters.category
               ? "bg-primary text-primary-foreground border-primary"
-              : "bg-background border-border text-muted-foreground"
+              : "bg-[var(--glass-fill)] [backdrop-filter:blur(20px)_saturate(180%)] [-webkit-backdrop-filter:blur(20px)_saturate(180%)] border-[var(--glass-border)] text-muted-foreground"
           )}
         >
           All
@@ -42,7 +42,7 @@ export function DocumentFilters({ filters, onChange }: Props) {
               "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold border transition-all whitespace-nowrap",
               filters.category === cat
                 ? "bg-primary text-primary-foreground border-primary"
-                : "bg-background border-border text-muted-foreground"
+                : "bg-[var(--glass-fill)] [backdrop-filter:blur(20px)_saturate(180%)] [-webkit-backdrop-filter:blur(20px)_saturate(180%)] border-[var(--glass-border)] text-muted-foreground"
             )}
           >
             {CATEGORY_LABELS[cat]}

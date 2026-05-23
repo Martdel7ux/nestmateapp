@@ -163,6 +163,7 @@ html {
 
 body {
   @apply min-h-dvh font-sans antialiased;
+  font-feature-settings: 'tnum' 1;
   background-color: var(--bg-base);
   color: var(--text-p);
   margin: 0;
