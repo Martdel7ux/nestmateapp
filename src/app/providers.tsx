@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import { I18nProvider } from "@/contexts/i18n-context";
 import { AuthProvider } from "@/contexts/auth-context";
 import { DataProvider } from "@/contexts/data-context";
+import { OnboardingProvider } from "@/features/onboarding/hooks/useOnboarding";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -25,8 +26,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <DataProvider>
-              {children}
-              <Toaster richColors position="top-center" />
+              <OnboardingProvider>
+                {children}
+                <Toaster richColors position="top-center" />
+              </OnboardingProvider>
             </DataProvider>
           </AuthProvider>
         </QueryClientProvider>

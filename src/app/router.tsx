@@ -7,8 +7,18 @@ import { LocationGate } from "@/components/features/location/LocationGate";
 import { SearchProvider } from "@/contexts/search-context";
 import { UniversalSearchOverlay } from "@/features/search/components/UniversalSearchOverlay";
 import { useAuth } from "@/contexts/auth-context";
+import { useData } from "@/contexts/data-context";
 import { supabase } from "@/lib/supabase";
 import { PageSkeleton } from "@/components/layout/PageSkeleton";
+import { useOnboarding } from "@/features/onboarding/hooks/useOnboarding";
+
+// Onboarding pages (not lazy — critical first-run path)
+import { WelcomeSplash } from "@/features/onboarding/pages/WelcomeSplash";
+import { IntroSlides } from "@/features/onboarding/pages/IntroSlides";
+import { UserTypeSelection } from "@/features/onboarding/pages/UserTypeSelection";
+import { StudentPersonalization } from "@/features/onboarding/pages/StudentPersonalization";
+import { LandlordPersonalization } from "@/features/onboarding/pages/LandlordPersonalization";
+import { CompletionScreen } from "@/features/onboarding/pages/CompletionScreen";
 
 // ── Static imports (always needed immediately) ──────────────────────────────
 import { HomePage } from "@/pages/home-page";
@@ -106,11 +116,29 @@ function AdminRoute() {
   return <Outlet />;
 }
 
+function OnboardingProtectedLayout() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (supabase && !user) return <Navigate to="/auth" replace />;
+  return (
+    <Suspense fallback={null}>
+      <Outlet />
+    </Suspense>
+  );
+}
+
 function ProtectedLayout() {
   const { user, loading } = useAuth();
+  const { isComplete } = useOnboarding();
+  const { dataLoading } = useData();
 
   if (loading) return null;
   if (supabase && !user) return <Navigate to="/auth" replace />;
+
+  // Wait for profile data before deciding — prevents flashing onboarding for existing users
+  if (!isComplete && dataLoading) return null;
+
+  if (!isComplete) return <Navigate to="/onboarding/welcome" replace />;
 
   return (
     <SearchProvider>
@@ -133,6 +161,17 @@ export function AppRouter() {
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
+
+        {/* Onboarding — auth-gated but no AppShell */}
+        <Route element={<OnboardingProtectedLayout />}>
+          <Route path="/onboarding/welcome" element={<WelcomeSplash />} />
+          <Route path="/onboarding/intro" element={<IntroSlides />} />
+          <Route path="/onboarding/user-type" element={<UserTypeSelection />} />
+          <Route path="/onboarding/student" element={<StudentPersonalization />} />
+          <Route path="/onboarding/landlord" element={<LandlordPersonalization />} />
+          <Route path="/onboarding/complete" element={<CompletionScreen />} />
+        </Route>
+
         <Route element={<ProtectedLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/properties" element={<PropertiesPage />} />
