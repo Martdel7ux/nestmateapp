@@ -18,6 +18,7 @@ import type {
 interface OnboardingContextValue {
   data: OnboardingData;
   isComplete: boolean;
+  loaded: boolean;
   setUserType: (type: OnboardingUserType) => void;
   patchStudentPrefs: (prefs: Partial<StudentPreferences>) => void;
   patchLandlordPrefs: (prefs: Partial<LandlordPreferences>) => void;
@@ -48,10 +49,18 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { snapshot, dataLoading } = useData();
   const [data, setData] = useState<OnboardingData>({});
+  // `loaded` becomes true once the localStorage read for the current user has run.
+  // ProtectedLayout waits for this before deciding whether to redirect.
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (!user) { setData({}); return; }
+    if (!user) {
+      setData({});
+      setLoaded(true);
+      return;
+    }
     setData(readData(user.id));
+    setLoaded(true);
   }, [user?.id]);
 
   // Auto-skip onboarding for users who aren't first-timers:
@@ -117,6 +126,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       value={{
         data,
         isComplete: Boolean(data.completedAt),
+        loaded,
         setUserType,
         patchStudentPrefs,
         patchLandlordPrefs,
