@@ -25,7 +25,7 @@ const OPTIONS = [
     Icon: GraduationCap,
     gradient: "linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%)",
     title: "Use student tools",
-    body: "Study Hub, buses, bills — I have housing sorted",
+    body: "Study Hub, buses and bills. My housing is sorted.",
   },
   {
     type: "landlord" as OnboardingUserType,
@@ -55,7 +55,7 @@ export function UserTypeSelection() {
           transition={{ duration: 0.35 }}
           className="mb-7"
         >
-          <h2 className="text-[26px] font-semibold text-foreground">I'm here to…</h2>
+          <h2 className="text-[26px] font-semibold text-foreground">What brings you here?</h2>
           <p className="mt-1 text-[14px] text-muted-foreground">
             This helps us personalise your experience
           </p>

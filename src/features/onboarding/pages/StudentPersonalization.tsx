@@ -16,9 +16,9 @@ const UNIVERSITIES = [
 ];
 
 const CITIES = ["Nicosia", "Limassol", "Larnaca", "Paphos", "Any city"];
-const BUDGETS = ["€200 – €300", "€300 – €450", "€450 – €600", "€600+"];
+const BUDGETS = ["€200 to €300", "€300 to €450", "€450 to €600", "€600+"];
 const BEDROOMS = ["1 bedroom", "2 bedrooms", "3+ bedrooms"];
-const RENTS = ["€200 – €300 /mo", "€300 – €450 /mo", "€450 – €600 /mo", "€600+ /mo"];
+const RENTS = ["€200 to €300/mo", "€300 to €450/mo", "€450 to €600/mo", "€600+/mo"];
 
 function FieldSelect({
   label, value, onChange, options, placeholder,

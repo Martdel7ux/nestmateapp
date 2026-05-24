@@ -5,7 +5,7 @@ import { Sparkles } from "lucide-react";
 import { OnboardingLayout } from "../components/OnboardingLayout";
 import { useOnboarding } from "../hooks/useOnboarding";
 
-const PROPERTY_COUNTS = ["1 property", "2 properties", "3–5 properties", "6–10 properties", "10+ properties"];
+const PROPERTY_COUNTS = ["1 property", "2 properties", "3 to 5 properties", "6 to 10 properties", "10+ properties"];
 const LOCATIONS = ["Nicosia", "Limassol", "Larnaca", "Paphos", "Multiple cities", "Other"];
 
 function FieldSelect({
@@ -32,7 +32,7 @@ function FieldSelect({
   );
 }
 
-const PRO_COUNTS = new Set(["3–5 properties", "6–10 properties", "10+ properties"]);
+const PRO_COUNTS = new Set(["3 to 5 properties", "6 to 10 properties", "10+ properties"]);
 
 export function LandlordPersonalization() {
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ export function LandlordPersonalization() {
               <div>
                 <p className="text-[13px] font-semibold text-foreground">You qualify for NestMate Pro</p>
                 <p className="mt-0.5 text-[12px] text-muted-foreground">
-                  Bulk listing tools, priority placement and analytics — we'll reach out after setup.
+                  Bulk listing tools, priority placement and analytics. We'll reach out after setup.
                 </p>
               </div>
             </motion.div>

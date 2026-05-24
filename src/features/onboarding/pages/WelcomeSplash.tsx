@@ -48,7 +48,7 @@ export function WelcomeSplash() {
           Welcome, {firstName}
         </h1>
         <p className="mt-2 text-[15px] text-muted-foreground">
-          Let's get you set up — it only takes a minute
+          Let's get you set up. It only takes a minute.
         </p>
       </motion.div>
 

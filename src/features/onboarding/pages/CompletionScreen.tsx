@@ -21,7 +21,7 @@ const CTA_LABEL: Record<string, string> = {
 
 const SUBTITLE: Record<string, string> = {
   student_housing: "We'll surface properties that match your preferences.",
-  student_flatmates: "Your profile is ready — start connecting with students.",
+  student_flatmates: "Your profile is ready. Start connecting with students.",
   student_tools: "Head to the tools hub and explore everything NestMate offers.",
   landlord: "Your landlord dashboard is ready. Start listing your properties.",
 };

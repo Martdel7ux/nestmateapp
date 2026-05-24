@@ -54,16 +54,26 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setData(readData(user.id));
   }, [user?.id]);
 
-  // Auto-complete for existing users who already have profile data set
+  // Auto-skip onboarding for users who aren't first-timers:
+  // accounts older than 7 days, or accounts that already have profile data set.
   useEffect(() => {
     if (!user || dataLoading) return;
-    const profile = snapshot.profile;
-    if (!profile?.university && !profile?.city) return;
     const stored = readData(user.id);
     if (stored.completedAt) return;
-    const completed = { ...stored, completedAt: new Date().toISOString() };
-    writeData(user.id, completed);
-    setData(completed);
+
+    const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
+    const accountAgeMs = Date.now() - createdAt;
+    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+    const isExistingAccount = accountAgeMs > SEVEN_DAYS_MS;
+
+    const profile = snapshot.profile;
+    const hasProfileData = !!(profile?.university || profile?.city);
+
+    if (isExistingAccount || hasProfileData) {
+      const completed = { ...stored, completedAt: new Date().toISOString() };
+      writeData(user.id, completed);
+      setData(completed);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, dataLoading]);
 

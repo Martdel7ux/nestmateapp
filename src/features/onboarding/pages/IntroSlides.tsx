@@ -22,7 +22,7 @@ const SLIDES = [
     Icon: GraduationCap,
     gradient: "linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%)",
     title: "Student essentials",
-    body: "Study Hub, bus routes, bill calculators and AI assistant — all in one place.",
+    body: "Study Hub, bus routes, bill calculators and AI assistant. All in one place.",
   },
 ] as const;
 
