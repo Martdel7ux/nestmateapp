@@ -7,7 +7,6 @@ import { LocationGate } from "@/components/features/location/LocationGate";
 import { SearchProvider } from "@/contexts/search-context";
 import { UniversalSearchOverlay } from "@/features/search/components/UniversalSearchOverlay";
 import { useAuth } from "@/contexts/auth-context";
-import { useData } from "@/contexts/data-context";
 import { supabase } from "@/lib/supabase";
 import { PageSkeleton } from "@/components/layout/PageSkeleton";
 import { useOnboarding } from "@/features/onboarding/hooks/useOnboarding";
@@ -130,17 +129,13 @@ function OnboardingProtectedLayout() {
 function ProtectedLayout() {
   const { user, loading } = useAuth();
   const { isComplete, loaded: onboardingLoaded } = useOnboarding();
-  const { dataLoading } = useData();
 
   if (loading) return null;
   if (supabase && !user) return <Navigate to="/auth" replace />;
 
-  // Wait for localStorage read to complete before deciding — prevents redirect
-  // on the first render before the persisted completedAt flag is loaded.
+  // Wait until localStorage read + profile check are both done before deciding.
+  // This prevents redirecting to onboarding before completedAt is confirmed absent.
   if (!onboardingLoaded) return null;
-
-  // Wait for profile data before deciding — prevents flashing onboarding for existing users
-  if (!isComplete && dataLoading) return null;
 
   if (!isComplete) return <Navigate to="/onboarding/welcome" replace />;
 

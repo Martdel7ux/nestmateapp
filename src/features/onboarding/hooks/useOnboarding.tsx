@@ -18,6 +18,8 @@ import type {
 interface OnboardingContextValue {
   data: OnboardingData;
   isComplete: boolean;
+  /** True once ALL checks (localStorage + profile) have resolved. ProtectedLayout
+   *  must wait for this before making any redirect decision. */
   loaded: boolean;
   setUserType: (type: OnboardingUserType) => void;
   patchStudentPrefs: (prefs: Partial<StudentPreferences>) => void;
@@ -49,40 +51,47 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { snapshot, dataLoading } = useData();
   const [data, setData] = useState<OnboardingData>({});
-  // `loaded` becomes true once the localStorage read for the current user has run.
-  // ProtectedLayout waits for this before deciding whether to redirect.
   const [loaded, setLoaded] = useState(false);
 
+  // Phase 1: read from localStorage as soon as we know the user.
+  // If completedAt is already set we're done — mark loaded immediately.
+  // If not, hold off and let Phase 2 finish the check before marking loaded.
   useEffect(() => {
+    setLoaded(false);
     if (!user) {
       setData({});
       setLoaded(true);
       return;
     }
-    setData(readData(user.id));
-    setLoaded(true);
+    const stored = readData(user.id);
+    setData(stored);
+    if (stored.completedAt) {
+      setLoaded(true);
+    }
+    // else: Phase 2 will set loaded once it has profile data
   }, [user?.id]);
 
-  // Auto-skip onboarding for users who aren't first-timers:
-  // accounts older than 7 days, or accounts that already have profile data set.
+  // Phase 2: once profile data is available, decide whether to auto-skip onboarding
+  // (existing / old accounts). Then — and only then — mark loaded so the router acts.
   useEffect(() => {
     if (!user || dataLoading) return;
+
     const stored = readData(user.id);
-    if (stored.completedAt) return;
 
-    const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
-    const accountAgeMs = Date.now() - createdAt;
-    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-    const isExistingAccount = accountAgeMs > SEVEN_DAYS_MS;
+    if (!stored.completedAt) {
+      const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
+      const isOldAccount = Date.now() - createdAt > 7 * 24 * 60 * 60 * 1000;
+      const hasProfileData = !!(snapshot.profile?.university || snapshot.profile?.city);
 
-    const profile = snapshot.profile;
-    const hasProfileData = !!(profile?.university || profile?.city);
-
-    if (isExistingAccount || hasProfileData) {
-      const completed = { ...stored, completedAt: new Date().toISOString() };
-      writeData(user.id, completed);
-      setData(completed);
+      if (isOldAccount || hasProfileData) {
+        const completed = { ...stored, completedAt: new Date().toISOString() };
+        writeData(user.id, completed);
+        setData(completed);
+      }
     }
+
+    // All checks done — router may now act.
+    setLoaded(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, dataLoading]);
 
