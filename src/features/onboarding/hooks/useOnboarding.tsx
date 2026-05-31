@@ -60,7 +60,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setLoaded(false);
     if (!user) {
       setData({});
-      setLoaded(true);
+      // Do NOT set loaded=true here. ProtectedLayout redirects to /auth for
+      // unauthenticated users before it ever checks `loaded`, so leaving it
+      // false prevents a premature onboarding redirect while auth is resolving.
       return;
     }
     const stored = readData(user.id);
