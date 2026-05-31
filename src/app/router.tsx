@@ -1,7 +1,6 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { AppShell } from "@/components/layout/app-shell";
-import { OnboardingTour } from "@/components/features/profile/onboarding-tour";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 import { LocationGate } from "@/components/features/location/LocationGate";
 import { SearchProvider } from "@/contexts/search-context";
@@ -146,8 +145,7 @@ function ProtectedLayout() {
           <Outlet />
         </Suspense>
       </AppShell>
-      <OnboardingTour />
-      <LocationGate />
+<LocationGate />
       <UniversalSearchOverlay />
     </SearchProvider>
   );
