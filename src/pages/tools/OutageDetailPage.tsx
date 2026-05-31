@@ -3,6 +3,7 @@ import { Zap, MapPin, Clock, AlertTriangle } from "lucide-react";
 import { AppHeader } from "@/components/layout/app-header";
 import { useOutage } from "@/hooks/use-tools";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/contexts/i18n-context";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("en-GB", {
@@ -20,6 +21,7 @@ function formatDuration(starts: string, ends: string): string {
 
 export function OutageDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { t }  = useI18n();
   const { data: outage, isLoading } = useOutage(id);
 
   if (isLoading || !outage) {
@@ -55,7 +57,7 @@ export function OutageDetailPage() {
           }
           <div>
             <p className={cn("text-sm font-bold", ongoing ? "text-rose-600 dark:text-rose-400" : "text-amber-700 dark:text-amber-400")}>
-              {ongoing ? "Power cut is currently ongoing" : future ? "Scheduled power cut" : "Completed"}
+              {ongoing ? t("outageOngoing") : future ? t("outageScheduled") : t("outageCompleted")}
             </p>
             {ongoing && (
               <p className="text-xs text-muted-foreground">
@@ -71,7 +73,7 @@ export function OutageDetailPage() {
             <div className="flex items-center gap-3 px-4 py-3">
               <MapPin size={15} className="text-muted-foreground shrink-0" />
               <div>
-                <p className="text-xs text-muted-foreground">Area</p>
+                <p className="text-xs text-muted-foreground">{t("outageArea")}</p>
                 <p className="text-sm font-semibold text-foreground capitalize">
                   {outage.area}{outage.district ? `, ${outage.district.charAt(0).toUpperCase() + outage.district.slice(1)}` : ""}
                 </p>
@@ -82,7 +84,7 @@ export function OutageDetailPage() {
           <div className="flex items-center gap-3 px-4 py-3">
             <Clock size={15} className="text-muted-foreground shrink-0" />
             <div>
-              <p className="text-xs text-muted-foreground">Start</p>
+              <p className="text-xs text-muted-foreground">{t("outageStart")}</p>
               <p className="text-sm font-semibold text-foreground">{formatDateTime(outage.starts_at)}</p>
             </div>
           </div>
@@ -90,7 +92,7 @@ export function OutageDetailPage() {
           <div className="flex items-center gap-3 px-4 py-3">
             <Clock size={15} className="text-muted-foreground shrink-0" />
             <div>
-              <p className="text-xs text-muted-foreground">End · Duration</p>
+              <p className="text-xs text-muted-foreground">{t("outageEnd")}</p>
               <p className="text-sm font-semibold text-foreground">
                 {formatDateTime(outage.ends_at)} · {formatDuration(outage.starts_at, outage.ends_at)}
               </p>
@@ -99,7 +101,7 @@ export function OutageDetailPage() {
 
           {outage.reason && (
             <div className="px-4 py-3">
-              <p className="text-xs text-muted-foreground mb-1">Reason</p>
+              <p className="text-xs text-muted-foreground mb-1">{t("outageReason")}</p>
               <p className="text-sm text-foreground">{outage.reason}</p>
             </div>
           )}
@@ -108,7 +110,7 @@ export function OutageDetailPage() {
         {/* Affected streets */}
         {outage.streets.length > 0 && (
           <div className="rounded-2xl border border-border bg-background/60 p-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Affected streets</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{t("outageStreets")}</p>
             <div className="flex flex-wrap gap-1.5">
               {outage.streets.map((street, i) => (
                 <span key={i} className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground">
@@ -122,7 +124,7 @@ export function OutageDetailPage() {
         {outage.source_url && (
           <a href={outage.source_url} target="_blank" rel="noreferrer"
             className="block text-center text-xs text-primary font-semibold py-2">
-            View on EAC website →
+            {t("outageViewEAC")}
           </a>
         )}
       </div>

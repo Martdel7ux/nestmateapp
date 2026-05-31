@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useI18n } from "@/contexts/i18n-context";
 import { Bus, ArrowLeftRight } from "lucide-react";
 import { AppHeader } from "@/components/layout/app-header";
 import { StopArrivalsSheet } from "@/components/features/tools/buses/StopArrivalsSheet";
@@ -18,6 +19,7 @@ const BusRouteMap = lazy(() =>
 export function BusRouteDetailPage() {
   const { routeId } = useParams<{ routeId: string }>();
 
+  const { t } = useI18n();
   const [direction,  setDirection]  = useState(0);
   const [sheetStop,  setSheetStop]  = useState<{ id: string; name: string } | null>(null);
 
@@ -122,7 +124,7 @@ export function BusRouteDetailPage() {
         {/* Stop list */}
         <div className="px-4 space-y-0">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-            {stops.length > 0 ? `${stops.length} Stops` : 'Stops'}
+            {stops.length > 0 ? `${stops.length} ${t("busRouteStops")}` : t("busRouteStops")}
           </p>
 
           {stopsLoading && (
@@ -137,7 +139,7 @@ export function BusRouteDetailPage() {
           {!stopsLoading && stops.length === 0 && (
             <div className="flex flex-col items-center gap-3 py-10 text-center">
               <Bus size={32} className="text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">No stop data available</p>
+              <p className="text-sm text-muted-foreground">{t("busRouteNoData")}</p>
             </div>
           )}
 
@@ -200,7 +202,7 @@ export function BusRouteDetailPage() {
 
         {stops.length > 0 && (
           <p className="text-xs text-muted-foreground text-center px-4 pt-4 pb-2">
-            Tap any stop to see next arrivals
+            {t("busRouteTapStop")}
           </p>
         )}
       </div>

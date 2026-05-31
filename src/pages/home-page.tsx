@@ -10,6 +10,7 @@ import { LocationConfirmationBanner } from "@/components/features/location/Locat
 import { PropertyDetailModal } from "@/components/features/properties/property-detail-modal";
 import { currency } from "@/lib/utils";
 import type { Property } from "@/types/supabase";
+import { useI18n } from "@/contexts/i18n-context";
 
 // ── Compact property card (home grid only) ────────────────────────────────────
 
@@ -70,6 +71,7 @@ function CompactPropertyCard({
 export function HomePage() {
   const { snapshot, toggleSavedProperty } = useData();
   const reduced = useReducedMotion();
+  const { t } = useI18n();
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
   if (snapshot.profile.user_type === "landlord") return <LandlordHome />;
@@ -77,9 +79,9 @@ export function HomePage() {
   const firstName = snapshot.profile.full_name?.split(" ")[0] ?? "there";
   const hour      = new Date().getHours();
   const greeting  =
-    hour >= 5 && hour < 12 ? "Good morning" :
-    hour >= 12 && hour < 18 ? "Good afternoon" :
-    "Good evening";
+    hour >= 5 && hour < 12 ? t("homeGoodMorning") :
+    hour >= 12 && hour < 18 ? t("homeGoodAfternoon") :
+    t("homeGoodEvening");
   const userCity  = snapshot.profile.city;
 
   const featuredProperties = snapshot.featuredProperties.slice(0, 4);
@@ -124,7 +126,7 @@ export function HomePage() {
         >
           <p className="text-[11px] font-medium text-muted-foreground mb-0.5">{greeting}</p>
           <h1 className="text-[30px] font-light leading-[1.15] tracking-tight text-foreground">
-            Welcome, {firstName}
+            {t("homeWelcome", { name: firstName })}
           </h1>
           {userCity && (
             <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground/60">
@@ -147,25 +149,25 @@ export function HomePage() {
             <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" aria-hidden />
             <div className="relative">
               <p className="text-white/70 text-[12px] font-medium mb-1 uppercase tracking-wider">
-                Find your home
+                {t("homeFindYourHome")}
               </p>
               <h2 className="text-white text-[22px] font-semibold leading-snug mb-1.5">
-                Student housing<br />in Cyprus
+                {t("homeStudentHousingTitle")}
               </h2>
               <p className="text-white/75 text-[13px] mb-5">
-                200+ verified properties • Connect with landlords
+                {t("homeStudentHousingDesc")}
               </p>
               <div className="flex gap-2.5">
                 <Link to="/properties" className="flex-1">
                   <span className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-white/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm">
                     <Search size={14} />
-                    Search
+                    {t("homeSearch")}
                   </span>
                 </Link>
                 <Link to="/flatmates" className="flex-1">
                   <span className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-white/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm">
                     <UsersRound size={14} />
-                    Flatmates
+                    {t("homeFlatmates")}
                   </span>
                 </Link>
               </div>
@@ -181,9 +183,9 @@ export function HomePage() {
             transition={{ delay: 0.18, duration: 0.35 }}
           >
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-[14px] font-semibold text-foreground">Top Properties</p>
+              <p className="text-[14px] font-semibold text-foreground">{t("homeTopProperties")}</p>
               <Link to="/properties" className="text-[12px] font-medium text-primary">
-                View all →
+                {t("homeViewAll")}
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-3">

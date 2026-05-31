@@ -6,9 +6,11 @@ import { useAuth } from "@/contexts/auth-context";
 import { useRentAgreements, useRentPayments } from "@/hooks/use-rent";
 import { RentDueCard } from "@/components/features/rent/RentDueCard";
 import { RentPaymentRow } from "@/components/features/rent/RentPaymentRow";
+import { useI18n } from "@/contexts/i18n-context";
 
 function AgreementSection({ agreementId, currency }: { agreementId: string; currency: string }) {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const { data: payments = [] } = useRentPayments(agreementId);
   const upcoming = payments.filter((p) => p.status !== "paid" && p.status !== "skipped").slice(0, 1);
   const history  = payments.filter((p) => p.status === "paid" || p.status === "late" || p.status === "skipped");
@@ -18,7 +20,7 @@ function AgreementSection({ agreementId, currency }: { agreementId: string; curr
       {upcoming.map((p) => <RentDueCard key={p.id} payment={p} />)}
       {history.length > 0 && (
         <div className="space-y-2 mt-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">History</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">{t("rentHistory")}</p>
           {history.map((p) => (
             <RentPaymentRow key={p.id} payment={p}
               onClick={() => navigate(`/rent/payments/${p.id}`)} />
@@ -32,12 +34,13 @@ function AgreementSection({ agreementId, currency }: { agreementId: string; curr
 export function RentOverviewPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const { data: agreements = [], isLoading } = useRentAgreements(user?.id);
 
   if (isLoading) {
     return (
       <div className="flex h-full flex-col overflow-hidden">
-        <AppHeader title="Rent" />
+        <AppHeader title={t("rentTitle")} />
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           <Skeleton className="h-40 rounded-2xl" />
           <Skeleton className="h-20 rounded-2xl" />
@@ -51,7 +54,7 @@ export function RentOverviewPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <AppHeader
-        title="Rent"
+        title={t("rentTitle")}
         right={{
           type: "custom",
           element: (
@@ -69,14 +72,14 @@ export function RentOverviewPage() {
               <FileText size={36} className="text-primary" />
             </div>
             <div className="space-y-1">
-              <p className="font-bold text-foreground">No rent agreements yet</p>
+              <p className="font-bold text-foreground">{t("rentNoAgreements")}</p>
               <p className="text-sm text-muted-foreground max-w-xs">
-                Set up your rent once and get reminders before each due date.
+                {t("rentSetupDesc")}
               </p>
             </div>
             <button type="button" onClick={() => navigate("/rent/new")}
               className="rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground">
-              Set up Rent
+              {t("rentSetUp")}
             </button>
           </div>
         ) : (
@@ -87,7 +90,7 @@ export function RentOverviewPage() {
                   {ag.landlord_name ?? "Rent agreement"}
                 </p>
                 <button type="button" onClick={() => navigate(`/rent/${ag.id}`)}
-                  className="text-xs text-primary font-semibold">Settings</button>
+                  className="text-xs text-primary font-semibold">{t("rentSettings")}</button>
               </div>
               <AgreementSection agreementId={ag.id} currency={ag.currency} />
             </div>

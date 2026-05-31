@@ -8,25 +8,27 @@ import {
   useDiscoverPreferences,
   useUpdateDiscoverPreferences,
 } from "@/hooks/use-discover-preferences";
+import { useI18n } from "@/contexts/i18n-context";
 import type { OppNotifyFrequency, OpportunityType } from "@/types/discover";
 
-const TYPE_OPTIONS: { value: OpportunityType; label: string }[] = [
-  { value: "event", label: "Events" },
-  { value: "job", label: "Jobs" },
-  { value: "internship", label: "Internships" },
-  { value: "volunteering", label: "Volunteering" },
-];
-
-const FREQ_OPTIONS: { value: OppNotifyFrequency; label: string }[] = [
-  { value: "instant", label: "Instantly" },
-  { value: "daily", label: "Daily digest" },
-  { value: "weekly", label: "Weekly digest" },
-];
-
 export function DiscoverPreferencesPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { data: prefs, isLoading } = useDiscoverPreferences();
   const { mutate, isPending } = useUpdateDiscoverPreferences();
+
+  const TYPE_OPTIONS: { value: OpportunityType; label: string }[] = [
+    { value: "event", label: t("preferencesEvents") },
+    { value: "job", label: t("preferencesJobs") },
+    { value: "internship", label: t("preferencesInternships") },
+    { value: "volunteering", label: t("preferencesVolunteering") },
+  ];
+
+  const FREQ_OPTIONS: { value: OppNotifyFrequency; label: string }[] = [
+    { value: "instant", label: t("preferencesInstantly") },
+    { value: "daily", label: t("preferencesDaily") },
+    { value: "weekly", label: t("preferencesWeekly") },
+  ];
 
   const [types, setTypes] = useState<OpportunityType[]>([
     "event",
@@ -65,17 +67,17 @@ export function DiscoverPreferencesPage() {
       },
       {
         onSuccess: () => {
-          toast.success("Preferences saved");
+          toast.success(t("preferencesSaved"));
           navigate(-1);
         },
-        onError: () => toast.error("Failed to save preferences"),
+        onError: () => toast.error(t("preferencesError")),
       }
     );
   };
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <AppHeader variant="sub-page" title="Preferences" right={{ type: "none" }} />
+      <AppHeader variant="sub-page" title={t("preferencesTitle")} right={{ type: "none" }} />
 
       <div className="flex-1 overflow-y-auto rounded-t-3xl bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
         {isLoading ? (
@@ -88,7 +90,7 @@ export function DiscoverPreferencesPage() {
           <div className="p-5 space-y-6 pb-32">
             {/* Interested types */}
             <section>
-              <h2 className="mb-3 font-semibold">I'm interested in</h2>
+              <h2 className="mb-3 font-semibold">{t("preferencesInterestedIn")}</h2>
               <div className="flex flex-wrap gap-2">
                 {TYPE_OPTIONS.map(({ value, label }) => (
                   <button
@@ -111,8 +113,8 @@ export function DiscoverPreferencesPage() {
             {/* Remote OK */}
             <section className="flex items-center justify-between">
               <div>
-                <p className="font-semibold">Include remote opportunities</p>
-                <p className="text-sm text-muted-foreground">Show remote jobs & events</p>
+                <p className="font-semibold">{t("preferencesRemote")}</p>
+                <p className="text-sm text-muted-foreground">{t("preferencesRemoteDesc")}</p>
               </div>
               <button
                 type="button"
@@ -133,10 +135,10 @@ export function DiscoverPreferencesPage() {
 
             {/* Notifications */}
             <section>
-              <h2 className="mb-3 font-semibold">Notifications</h2>
+              <h2 className="mb-3 font-semibold">{t("preferencesNotifications")}</h2>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm">Email notifications</p>
+                  <p className="text-sm">{t("preferencesEmail")}</p>
                   <button
                     type="button"
                     onClick={() => setNotifyEmail(!notifyEmail)}
@@ -154,7 +156,7 @@ export function DiscoverPreferencesPage() {
                   </button>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm">In-app notifications</p>
+                  <p className="text-sm">{t("preferencesInApp")}</p>
                   <button
                     type="button"
                     onClick={() => setNotifyInApp(!notifyInApp)}
@@ -176,7 +178,7 @@ export function DiscoverPreferencesPage() {
 
             {/* Frequency */}
             <section>
-              <h2 className="mb-3 font-semibold">Notification frequency</h2>
+              <h2 className="mb-3 font-semibold">{t("preferencesFrequency")}</h2>
               <div className="space-y-2">
                 {FREQ_OPTIONS.map(({ value, label }) => (
                   <button
@@ -210,7 +212,7 @@ export function DiscoverPreferencesPage() {
           disabled={isPending}
           className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-glow disabled:opacity-60"
         >
-          {isPending ? "Saving…" : "Save Preferences"}
+          {isPending ? t("preferencesSaving") : t("preferencesSave")}
         </button>
       </div>
     </div>

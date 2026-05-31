@@ -4,14 +4,16 @@ import { AppHeader } from "@/components/layout/app-header";
 import { OpportunityCard } from "@/components/features/discover/opportunity-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSavedOpportunities } from "@/hooks/use-saved-opportunities";
+import { useI18n } from "@/contexts/i18n-context";
 
 export function SavedOpportunitiesPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { data, isLoading } = useSavedOpportunities();
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <AppHeader variant="sub-page" title="Saved Opportunities" right={{ type: "none" }} />
+      <AppHeader variant="sub-page" title={t("savedOppsTitle")} right={{ type: "none" }} />
 
       <div className="flex-1 overflow-y-auto rounded-t-3xl bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
         <div className="p-4 space-y-3">
@@ -24,9 +26,9 @@ export function SavedOpportunitiesPage() {
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                 <Bookmark size={28} className="text-muted-foreground" />
               </div>
-              <p className="font-semibold">No saved opportunities</p>
+              <p className="font-semibold">{t("savedOppsEmpty")}</p>
               <p className="text-sm text-muted-foreground">
-                Tap the bookmark icon on any opportunity to save it here.
+                {t("savedOppsInstruction")}
               </p>
             </div>
           ) : (

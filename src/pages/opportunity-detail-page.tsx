@@ -14,13 +14,14 @@ import { SaveButton } from "@/components/features/discover/save-button";
 import { ShareButton } from "@/components/features/discover/share-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOpportunity } from "@/hooks/use-opportunity";
+import { useI18n } from "@/contexts/i18n-context";
 import type { OpportunityType } from "@/types/discover";
 
-const typeConfig: Record<OpportunityType, { label: string; Icon: typeof Calendar }> = {
-  event: { label: "Event", Icon: Calendar },
-  job: { label: "Job", Icon: Briefcase },
-  internship: { label: "Internship", Icon: Building2 },
-  volunteering: { label: "Volunteering", Icon: Users },
+const typeConfig: Record<OpportunityType, { labelKey: string; Icon: typeof Calendar }> = {
+  event: { labelKey: "opportunityEvent", Icon: Calendar },
+  job: { labelKey: "opportunityJob", Icon: Briefcase },
+  internship: { labelKey: "opportunityInternship", Icon: Building2 },
+  volunteering: { labelKey: "opportunityVolunteer", Icon: Users },
 };
 
 function formatDateTime(iso: string) {
@@ -47,6 +48,7 @@ function salaryLabel(min?: number | null, max?: number | null, currency = "EUR")
 }
 
 export function OpportunityDetailPage() {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: opp, isLoading } = useOpportunity(id ?? "");
@@ -67,15 +69,16 @@ export function OpportunityDetailPage() {
   if (!opp) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 text-center p-8">
-        <p className="font-semibold">Opportunity not found</p>
+        <p className="font-semibold">{t("opportunityNotFound")}</p>
         <button type="button" onClick={() => navigate(-1)} className="text-sm text-primary">
-          Go back
+          {t("opportunityGoBack")}
         </button>
       </div>
     );
   }
 
-  const { label, Icon } = typeConfig[opp.type];
+  const { labelKey, Icon } = typeConfig[opp.type];
+  const label = t(labelKey as Parameters<typeof t>[0]);
   const salary = salaryLabel(opp.salary_min, opp.salary_max, opp.salary_currency ?? "EUR");
 
   return (
@@ -155,7 +158,7 @@ export function OpportunityDetailPage() {
           {opp.ends_at && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock size={14} className="shrink-0 text-primary" />
-              <span>Until {formatDateTime(opp.ends_at)}</span>
+              <span>{t("opportunityUntil", { date: formatDateTime(opp.ends_at) })}</span>
             </div>
           )}
         </div>
@@ -177,7 +180,7 @@ export function OpportunityDetailPage() {
         {/* Description */}
         {opp.description && (
           <div className="mt-5">
-            <h2 className="mb-2 font-semibold">About this opportunity</h2>
+            <h2 className="mb-2 font-semibold">{t("opportunityAbout")}</h2>
             <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
               {opp.description}
             </p>
@@ -192,7 +195,7 @@ export function OpportunityDetailPage() {
             rel="noopener noreferrer"
             className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-glow"
           >
-            Apply / View Details
+            {t("opportunityApply")}
             <ExternalLink size={15} />
           </a>
         )}

@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useI18n } from "@/contexts/i18n-context";
 import { Star, Clock, RefreshCw, Bus } from "lucide-react";
 import { AppHeader } from "@/components/layout/app-header";
 import {
@@ -9,6 +10,7 @@ import { routeBgColor, routeTextColor, formatMinutesUntil } from "@/types/gtfs";
 import { cn } from "@/lib/utils";
 
 export function BusStopPage() {
+  const { t } = useI18n();
   const { stopId }   = useParams<{ stopId: string }>();
   const navigate     = useNavigate();
 
@@ -31,7 +33,7 @@ export function BusStopPage() {
         <AppHeader variant="sub-page" title="Bus Stop" />
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
           <Bus size={40} className="text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">Stop not found</p>
+          <p className="text-sm text-muted-foreground">{t("busStopNotFound")}</p>
         </div>
       </div>
     );
@@ -76,7 +78,7 @@ export function BusStopPage() {
         {routes.length > 0 && (
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-              Routes at this stop
+              {t("busStopRoutes")}
             </p>
             <div className="flex flex-wrap gap-2">
               {routes.map((r) => (
@@ -103,7 +105,7 @@ export function BusStopPage() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Next Arrivals
+              {t("busStopNextArrivals")}
             </p>
             <button
               type="button"
@@ -111,7 +113,7 @@ export function BusStopPage() {
               className="flex items-center gap-1 text-xs text-primary font-semibold"
             >
               <RefreshCw size={11} />
-              {lastUpdated ? `Updated ${lastUpdated}` : 'Refresh'}
+              {lastUpdated ? `Updated ${lastUpdated}` : t("busStopRefresh")}
             </button>
           </div>
 
@@ -124,8 +126,8 @@ export function BusStopPage() {
           {!arrivLoading && arrivals.length === 0 && (
             <div className="flex flex-col items-center gap-3 py-10 text-center rounded-2xl border border-dashed border-border">
               <Clock size={32} className="text-muted-foreground/40" />
-              <p className="text-sm font-medium text-muted-foreground">No more buses today</p>
-              <p className="text-xs text-muted-foreground/70">Check back tomorrow</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("busesNoMoreToday")}</p>
+              <p className="text-xs text-muted-foreground/70">{t("busStopCheckTomorrow")}</p>
             </div>
           )}
 

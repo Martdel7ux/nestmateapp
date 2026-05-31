@@ -4,8 +4,10 @@ import { AppHeader } from "@/components/layout/app-header";
 import { toast } from "sonner";
 import { CourseSelect } from "@/components/features/study/CourseSelect";
 import { useCreateStudyGroup } from "@/hooks/use-study-groups";
+import { useI18n } from "@/contexts/i18n-context";
 
 export function NewStudyGroupPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { mutate: createGroup, isPending } = useCreateStudyGroup();
 
@@ -31,7 +33,7 @@ export function NewStudyGroupPage() {
       },
       {
         onSuccess: (group) => {
-          toast.success("Group created!");
+          toast.success(t("studyGroupCreated"));
           navigate(`/study/groups/${group.id}`);
         },
         onError: () => toast.error("Failed to create group"),
@@ -39,9 +41,14 @@ export function NewStudyGroupPage() {
     );
   };
 
+  const PRIVACY_OPTIONS = [
+    { label: t("studyGroupPrivate"), value: true, desc: t("studyGroupByInvite") },
+    { label: t("studyGroupPublic"), value: false, desc: t("studyGroupAnyoneJoin") },
+  ];
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <AppHeader variant="sub-page" title="Create Study Group" right={{ type: "none" }} />
+      <AppHeader variant="sub-page" title={t("studyGroupCreate")} right={{ type: "none" }} />
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
@@ -49,12 +56,12 @@ export function NewStudyGroupPage() {
           {/* Name */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">
-              Group Name *
+              {t("studyGroupNameLabel")}
             </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. CS-101 Study Crew"
+              placeholder={t("studyGroupNamePh")}
               required
               className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
@@ -63,12 +70,12 @@ export function NewStudyGroupPage() {
           {/* Description */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">
-              Description
+              {t("studyGroupDesc")}
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What is this group about?"
+              placeholder={t("studyGroupDescPh")}
               rows={3}
               className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
@@ -77,7 +84,7 @@ export function NewStudyGroupPage() {
           {/* Course */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">
-              Course (optional)
+              {t("studyGroupCourseOpt")}
             </label>
             <CourseSelect
               value={courseId}
@@ -88,14 +95,11 @@ export function NewStudyGroupPage() {
 
           {/* Privacy toggle */}
           <div>
-            <p className="mb-2 text-sm font-medium text-foreground">Privacy</p>
+            <p className="mb-2 text-sm font-medium text-foreground">{t("studyGroupPrivacy")}</p>
             <div className="flex gap-3">
-              {[
-                { label: "Private", value: true, desc: "Members by invitation" },
-                { label: "Public", value: false, desc: "Anyone can join" },
-              ].map((opt) => (
+              {PRIVACY_OPTIONS.map((opt) => (
                 <label
-                  key={opt.label}
+                  key={String(opt.value)}
                   className="flex-1 cursor-pointer rounded-xl border border-border px-4 py-3 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
                 >
                   <input
@@ -115,7 +119,7 @@ export function NewStudyGroupPage() {
           {/* Max members slider */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-sm font-medium text-foreground">Max Members</label>
+              <label className="text-sm font-medium text-foreground">{t("studyGroupMaxMembers")}</label>
               <span className="text-sm font-semibold text-primary">{maxMembers}</span>
             </div>
             <input
@@ -138,7 +142,7 @@ export function NewStudyGroupPage() {
             disabled={isPending}
             className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-60"
           >
-            {isPending ? "Creating…" : "Create Group"}
+            {isPending ? t("studyGroupCreating") : t("studyGroupCreateBtn")}
           </button>
         </div>
       </form>

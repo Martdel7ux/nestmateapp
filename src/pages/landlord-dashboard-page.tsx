@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { useData } from "@/contexts/data-context";
+import { useI18n } from "@/contexts/i18n-context";
 import { cities } from "@/lib/constants";
 import { currency } from "@/lib/utils";
 import type { City, Property } from "@/types/supabase";
@@ -29,6 +30,7 @@ interface PropertyFields {
 }
 
 function usePropertyFields(defaults?: Partial<PropertyFields>) {
+  const { t } = useI18n();
   const [title, setTitle] = useState(defaults?.title ?? "");
   const [city, setCity] = useState<City>(defaults?.city ?? "Nicosia");
   const [address, setAddress] = useState(defaults?.address ?? "");
@@ -62,7 +64,7 @@ function usePropertyFields(defaults?: Partial<PropertyFields>) {
 
   const isValid = () => {
     if (!title || !address || !price || !phone || !email) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("landlordFillAllFields"));
       return false;
     }
     return true;
@@ -80,25 +82,26 @@ function PropertyFormBody({
   setters,
   generateDescription,
 }: ReturnType<typeof usePropertyFields>) {
+  const { t } = useI18n();
   const { title, city, address, price, bedrooms, bathrooms, availableTo, description, phone, email, images } = fields;
   const { setTitle, setCity, setAddress, setPrice, setBedrooms, setBathrooms, setAvailableTo, setDescription, setPhone, setEmail, setImages, photoRef, handlePhotoFiles } = setters;
 
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <label className="text-sm font-medium">Property title *</label>
-        <Input placeholder="e.g. Sunlit studio near campus" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <label className="text-sm font-medium">{t("landlordPropertyTitle")}</label>
+        <Input placeholder={t("landlordPropertyTitlePh")} value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">City *</label>
+          <label className="text-sm font-medium">{t("landlordPropertyCity")}</label>
           <Select value={city} onChange={(e) => setCity(e.target.value as City)}>
             {cities.map((c) => <option key={c} value={c}>{c}</option>)}
           </Select>
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Available to *</label>
+          <label className="text-sm font-medium">{t("landlordAvailableTo")}</label>
           <Select value={availableTo} onChange={(e) => setAvailableTo(e.target.value as "erasmus" | "full_time")}>
             <option value="full_time">Full-time</option>
             <option value="erasmus">Erasmus</option>
@@ -107,50 +110,50 @@ function PropertyFormBody({
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-sm font-medium">Street / area *</label>
-        <Input placeholder="e.g. Aglantzia, Nicosia" value={address} onChange={(e) => setAddress(e.target.value)} />
+        <label className="text-sm font-medium">{t("landlordPropertyAddress")}</label>
+        <Input placeholder={t("landlordPropertyAddressPh")} value={address} onChange={(e) => setAddress(e.target.value)} />
       </div>
 
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Rent (€/mo) *</label>
+          <label className="text-sm font-medium">{t("landlordPropertyRent")}</label>
           <Input type="number" placeholder="500" value={price} onChange={(e) => setPrice(e.target.value)} />
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Bedrooms</label>
+          <label className="text-sm font-medium">{t("landlordPropertyBedrooms")}</label>
           <Input type="number" min="0" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} />
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Bathrooms</label>
+          <label className="text-sm font-medium">{t("landlordPropertyBathrooms")}</label>
           <Input type="number" min="0" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Phone *</label>
+          <label className="text-sm font-medium">{t("landlordPropertyPhone")}</label>
           <Input placeholder="+357 99 000000" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium">Email *</label>
+          <label className="text-sm font-medium">{t("landlordPropertyEmail")}</label>
           <Input type="email" placeholder="you@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
       </div>
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Description</label>
+          <label className="text-sm font-medium">{t("landlordPropertyDesc")}</label>
           <button
             type="button"
             onClick={generateDescription}
             className="flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
           >
-            <Sparkles size={11} /> AI generate
+            <Sparkles size={11} /> {t("landlordAIGenerate")}
           </button>
         </div>
         <textarea
           rows={3}
-          placeholder="Describe your property…"
+          placeholder={t("landlordPropertyDescPh")}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full rounded-2xl border border-border bg-card/80 px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -159,7 +162,7 @@ function PropertyFormBody({
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Photos</label>
+          <label className="text-sm font-medium">{t("landlordPropertyPhotos")}</label>
           <span className="text-xs text-muted-foreground">{images.length}/5</span>
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -175,7 +178,7 @@ function PropertyFormBody({
               </button>
               {i === 0 && (
                 <span className="absolute bottom-1.5 left-1.5 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
-                  Cover
+                  {t("landlordPropertyCover")}
                 </span>
               )}
             </div>
@@ -187,7 +190,7 @@ function PropertyFormBody({
               className="flex aspect-square flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-border text-muted-foreground transition hover:border-primary/50 hover:text-primary"
             >
               <ImagePlus size={20} />
-              <span className="text-[10px] font-medium">Add photo</span>
+              <span className="text-[10px] font-medium">{t("landlordPropertyAddPhoto")}</span>
             </button>
           )}
         </div>
@@ -254,6 +257,7 @@ function SheetWrapper({ title, subtitle, onClose, children }: {
 
 // ── Add property sheet ────────────────────────────────────────────────────────
 function AddPropertySheet({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
   const { createProperty } = useData();
   const form = usePropertyFields();
   const { fields, imageFiles, isValid } = form;
@@ -277,15 +281,16 @@ function AddPropertySheet({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <SheetWrapper title="Add Property" subtitle="Fill in your listing details" onClose={onClose}>
+    <SheetWrapper title={t("landlordAddProperty")} subtitle="Fill in your listing details" onClose={onClose}>
       <PropertyFormBody {...form} />
-      <Button className="w-full" size="lg" onClick={() => { void handleSubmit(); }}>Submit for Review</Button>
+      <Button className="w-full" size="lg" onClick={() => { void handleSubmit(); }}>{t("landlordSubmitReview")}</Button>
     </SheetWrapper>
   );
 }
 
 // ── Edit property sheet ───────────────────────────────────────────────────────
 function EditPropertySheet({ property, onClose }: { property: Property; onClose: () => void }) {
+  const { t } = useI18n();
   const { updateProperty } = useData();
   const form = usePropertyFields({
     title: property.title,
@@ -321,14 +326,14 @@ function EditPropertySheet({ property, onClose }: { property: Property; onClose:
       },
       imageFiles
     );
-    toast.success("Property updated.");
+    toast.success(t("landlordPropertyUpdated"));
     onClose();
   };
 
   return (
-    <SheetWrapper title="Edit Property" subtitle="Update your listing details" onClose={onClose}>
+    <SheetWrapper title={t("landlordEditProperty")} subtitle="Update your listing details" onClose={onClose}>
       <PropertyFormBody {...form} />
-      <Button className="w-full" size="lg" onClick={() => { void handleSave(); }}>Save Changes</Button>
+      <Button className="w-full" size="lg" onClick={() => { void handleSave(); }}>{t("landlordSaveChanges")}</Button>
     </SheetWrapper>
   );
 }
@@ -345,9 +350,10 @@ function PropertyCard({
   onToggleVisibility: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useI18n();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const statusLabel = !property.is_approved ? "Pending review" : property.is_visible ? "Active" : "Hidden";
+  const statusLabel = !property.is_approved ? t("landlordStatusPending") : property.is_visible ? t("landlordStatusActive") : t("landlordStatusHidden");
   const statusClass = !property.is_approved
     ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
     : property.is_visible
@@ -383,7 +389,7 @@ function PropertyCard({
         </div>
 
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1"><Eye size={13} />{property.views_count ?? 0} views</span>
+          <span className="flex items-center gap-1"><Eye size={13} />{property.views_count ?? 0} {t("landlordViews")}</span>
           <span className="flex items-center gap-1"><Bed size={13} />{property.bedrooms} bed</span>
           <span className="flex items-center gap-1"><Bath size={13} />{property.bathrooms} bath</span>
           <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs capitalize">
@@ -402,7 +408,7 @@ function PropertyCard({
             }`}
           >
             {property.is_visible ? <EyeOff size={13} /> : <Eye size={13} />}
-            {property.is_visible ? "Hide" : "Show"}
+            {property.is_visible ? t("landlordHide") : t("landlordShow")}
           </button>
 
           <button
@@ -411,7 +417,7 @@ function PropertyCard({
             className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border py-2 text-xs font-medium text-muted-foreground transition hover:border-primary/40 hover:text-primary"
           >
             <Pencil size={13} />
-            Edit
+            {t("landlordEdit")}
           </button>
 
           {confirmDelete ? (
@@ -421,14 +427,14 @@ function PropertyCard({
                 onClick={() => setConfirmDelete(false)}
                 className="flex-1 rounded-xl border border-border py-2 text-xs font-medium"
               >
-                Cancel
+                {t("landlordCancel")}
               </button>
               <button
                 type="button"
                 onClick={() => { setConfirmDelete(false); onDelete(); }}
                 className="flex-1 rounded-xl bg-destructive py-2 text-xs font-medium text-destructive-foreground"
               >
-                Confirm
+                {t("landlordConfirm")}
               </button>
             </div>
           ) : (
@@ -448,6 +454,7 @@ function PropertyCard({
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export function LandlordDashboardPage() {
+  const { t } = useI18n();
   const { snapshot, togglePropertyVisibility, deleteProperty } = useData();
   const [addOpen, setAddOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
@@ -462,10 +469,10 @@ export function LandlordDashboardPage() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold">My Properties</h1>
+          <h1 className="font-display text-2xl font-bold">{t("landlordTitle")}</h1>
           <p className="text-sm text-muted-foreground">
             {myProperties.length === 0
-              ? "No listings yet"
+              ? t("landlordNoListings")
               : `${myProperties.length} listing${myProperties.length !== 1 ? "s" : ""}`}
           </p>
         </div>
@@ -474,7 +481,7 @@ export function LandlordDashboardPage() {
           onClick={() => setAddOpen(true)}
           className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-glow transition active:scale-95"
         >
-          <Plus size={15} /> Add listing
+          <Plus size={15} /> {t("landlordAddListing")}
         </button>
       </div>
 
@@ -485,15 +492,15 @@ export function LandlordDashboardPage() {
             <Home size={24} className="text-muted-foreground" />
           </div>
           <div>
-            <p className="font-semibold">No properties yet</p>
-            <p className="mt-0.5 text-sm text-muted-foreground px-6">Add your first listing to start attracting students.</p>
+            <p className="font-semibold">{t("landlordNoListings")}</p>
+            <p className="mt-0.5 text-sm text-muted-foreground px-6">{t("landlordNoPropertiesDesc")}</p>
           </div>
           <button
             type="button"
             onClick={() => setAddOpen(true)}
             className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-glow"
           >
-            <Plus size={15} /> Add first property
+            <Plus size={15} /> {t("landlordAddFirstProperty")}
           </button>
         </div>
       ) : (
@@ -506,7 +513,7 @@ export function LandlordDashboardPage() {
               onToggleVisibility={() => togglePropertyVisibility(property.id)}
               onDelete={() => {
                 deleteProperty(property.id);
-                toast.success("Property deleted.");
+                toast.success(t("landlordPropertyDeleted"));
               }}
             />
           ))}

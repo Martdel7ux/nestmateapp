@@ -5,8 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConversationListItemRow } from "@/components/features/study/ConversationListItem";
 import { useConversations } from "@/hooks/use-conversations";
 import type { StudyMessageConvType } from "@/types/study";
+import { useI18n } from "@/contexts/i18n-context";
 
 export function StudyMessagesPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { data: conversations = [], isLoading } = useConversations();
 
@@ -16,7 +18,7 @@ export function StudyMessagesPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <AppHeader variant="sub-page" title="Study Messages" right={{ type: "none" }} />
+      <AppHeader variant="sub-page" title={t("studyMessages")} right={{ type: "none" }} />
 
       {/* List */}
       <div className="flex-1 overflow-y-auto rounded-t-3xl bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
@@ -35,9 +37,9 @@ export function StudyMessagesPage() {
         ) : conversations.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-24 text-center px-8">
             <MessageCircle size={40} className="text-muted-foreground/40" />
-            <p className="font-semibold text-foreground">No conversations yet</p>
+            <p className="font-semibold text-foreground">{t("studyNoConversations")}</p>
             <p className="text-sm text-muted-foreground">
-              Message a peer or join a study group to start chatting
+              {t("studyStartChatting")}
             </p>
           </div>
         ) : (

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Avatar } from "@/components/ui/avatar";
 import { useData } from "@/contexts/data-context";
 import { useAuth } from "@/contexts/auth-context";
+import { useI18n } from "@/contexts/i18n-context";
 import { usePresence } from "@/hooks/use-presence";
 import { supabase } from "@/lib/supabase";
 import type { FlatmateListing, Profile } from "@/types/supabase";
@@ -19,6 +20,7 @@ function ProfileSheet({ profile, listing, onClose }: {
   listing: FlatmateListing | null;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const hasFlat = listing?.housing_status === "has_flat";
   const tags = listing
     ? [
@@ -57,7 +59,7 @@ function ProfileSheet({ profile, listing, onClose }: {
           {listing && (
             <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-sm">
               {hasFlat ? <Home size={12} className="text-sky-400" /> : <Search size={12} className="text-amber-400" />}
-              <span className="text-xs font-semibold text-white">{hasFlat ? "Has a flat" : "Seeking a flat"}</span>
+              <span className="text-xs font-semibold text-white">{hasFlat ? t("chatHasFlat") : t("chatSeekingFlat")}</span>
             </div>
           )}
           <div className="absolute bottom-0 inset-x-0 p-4">
@@ -97,13 +99,14 @@ function AttachmentBubble({ url, type, isMine }: {
   type: "image" | "video" | "file" | "audio" | null | undefined;
   isMine: boolean;
 }) {
+  const { t } = useI18n();
   if (type === "image") return <img src={url} alt="attachment" className="max-w-[220px] rounded-2xl object-cover shadow-sm" />;
   if (type === "video") return <video controls src={url} className="max-w-[220px] rounded-2xl shadow-sm" />;
   if (type === "audio") return <audio controls src={url} className="max-w-[220px]" />;
   return (
     <a href={url} target="_blank" rel="noopener noreferrer"
       className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium underline ${isMine ? "text-primary-foreground/80" : "text-primary"}`}>
-      <File size={16} /> Download file
+      <File size={16} /> {t("chatDownload")}
     </a>
   );
 }
@@ -116,6 +119,7 @@ export function ChatPage() {
   const backTo = (location.state as { from?: string } | null)?.from ?? "/messages";
   const { snapshot, sendMessage, markMessagesRead, blockUser, unblockUser, blockedUserIds } = useData();
   const { user } = useAuth();
+  const { t } = useI18n();
   const onlineUserIds = usePresence(user?.id);
 
   const [draft, setDraft] = useState("");
@@ -161,7 +165,7 @@ export function ChatPage() {
         const ext = file.name.split(".").pop() ?? "bin";
         const path = `chat/${matchId}/${crypto.randomUUID()}.${ext}`;
         const { error } = await supabase.storage.from("property-images").upload(path, file, { upsert: false });
-        if (error) { toast.error("Upload failed. Please try again."); return; }
+        if (error) { toast.error(t("chatUploadFailed")); return; }
         const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
         sendMessage(matchId, "", urlData.publicUrl, type);
       } else {
@@ -198,7 +202,7 @@ export function ChatPage() {
       setRecordingTime(0);
       timerRef.current = setInterval(() => setRecordingTime((t) => t + 1), 1000);
     } catch {
-      toast.error("Microphone access denied");
+      toast.error(t("chatMicDenied"));
     }
   };
 
@@ -213,7 +217,7 @@ export function ChatPage() {
   if (!match || !otherProfile) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Conversation not found.</p>
+        <p className="text-muted-foreground">{t("chatNotFound")}</p>
       </div>
     );
   }
@@ -243,7 +247,7 @@ export function ChatPage() {
           <div>
             <p className="font-semibold leading-tight">{otherProfile.full_name}</p>
             <p className="text-xs text-muted-foreground">
-              {isOnline ? "Online now" : otherProfile.city ? `${otherProfile.city} · Tap to view` : "Tap to view profile"}
+              {isOnline ? t("chatOnline") : otherProfile.city ? `${otherProfile.city} · ${t("chatTapToView")}` : t("chatTapToView")}
             </p>
           </div>
         </button>
@@ -266,15 +270,15 @@ export function ChatPage() {
                 >
                   {isBlocked ? (
                     <button type="button"
-                      onClick={() => { setMenuOpen(false); if (otherId) { unblockUser(otherId); toast.success("User unblocked"); } }}
+                      onClick={() => { setMenuOpen(false); if (otherId) { unblockUser(otherId); toast.success(t("chatUserUnblocked")); } }}
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-muted transition">
-                      Unblock user
+                      {t("chatUnblock")}
                     </button>
                   ) : (
                     <button type="button"
                       onClick={() => { setMenuOpen(false); setBlockConfirm(true); }}
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/5 transition">
-                      Block user
+                      {t("chatBlock")}
                     </button>
                   )}
                 </motion.div>
@@ -287,7 +291,7 @@ export function ChatPage() {
       {/* ── Blocked banner ── */}
       {isBlocked && (
         <div className="shrink-0 bg-destructive/10 px-4 py-2 text-center text-xs font-medium text-destructive">
-          You have blocked this user. Their conversation is hidden from your inbox.
+          {t("chatBlockedBanner")}
         </div>
       )}
 
@@ -298,9 +302,9 @@ export function ChatPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
               <BedDouble size={24} className="text-primary" />
             </div>
-            <p className="font-semibold">You matched!</p>
+            <p className="font-semibold">{t("chatYouMatched")}</p>
             <p className="text-sm text-muted-foreground px-6">
-              Say hello to {otherProfile.full_name} and start the conversation.
+              {t("chatSayHello", { name: otherProfile.full_name })}
             </p>
           </div>
         )}
@@ -333,7 +337,7 @@ export function ChatPage() {
                   </div>
                 )}
                 <p className={`text-[10px] text-muted-foreground ${isMine ? "text-right pr-1" : "pl-1"}`}>
-                  {time} {isMine && (msg.read ? "· Read" : "· Sent")}
+                  {time} {isMine && (msg.read ? `· ${t("chatRead")}` : `· ${t("chatSent")}`)}
                 </p>
               </div>
             </div>
@@ -342,7 +346,7 @@ export function ChatPage() {
 
         {uploading && (
           <div className="flex justify-end">
-            <div className="rounded-2xl bg-primary/20 px-4 py-3 text-xs text-primary animate-pulse">Uploading…</div>
+            <div className="rounded-2xl bg-primary/20 px-4 py-3 text-xs text-primary animate-pulse">{t("chatUploading")}</div>
           </div>
         )}
       </div>
@@ -355,7 +359,7 @@ export function ChatPage() {
               <div className="flex flex-1 items-center gap-3 rounded-full border border-destructive/50 bg-destructive/5 px-4 py-2.5">
                 <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-destructive" />
                 <span className="text-sm font-medium text-destructive">{fmt(recordingTime)}</span>
-                <span className="text-xs text-muted-foreground">Recording…</span>
+                <span className="text-xs text-muted-foreground">{t("chatRecording")}</span>
               </div>
               <button type="button" onClick={stopRecording}
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive text-white shadow-glow transition active:scale-95">
@@ -382,15 +386,15 @@ export function ChatPage() {
                       >
                         <button type="button" onClick={() => { setAttachOpen(false); imageInputRef.current?.click(); }}
                           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted transition">
-                          <Image size={16} className="text-primary" /> Photo / Video
+                          <Image size={16} className="text-primary" /> {t("chatPhotoVideo")}
                         </button>
                         <button type="button" onClick={() => { setAttachOpen(false); fileInputRef.current?.click(); }}
                           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted transition">
-                          <File size={16} className="text-amber-500" /> File
+                          <File size={16} className="text-amber-500" /> {t("chatFile")}
                         </button>
                         <button type="button" onClick={() => { setAttachOpen(false); startRecording(); }}
                           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted transition">
-                          <Mic size={16} className="text-rose-500" /> Voice note
+                          <Mic size={16} className="text-rose-500" /> {t("chatVoiceNote")}
                         </button>
                       </motion.div>
                     </>
@@ -402,7 +406,7 @@ export function ChatPage() {
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder={`Message ${otherProfile.full_name.split(" ")[0]}…`}
+                placeholder={t("chatMessagePh", { name: otherProfile.full_name.split(" ")[0] })}
                 className="flex-1 rounded-full border border-border bg-muted/50 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
 
@@ -447,19 +451,19 @@ export function ChatPage() {
               <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 mx-auto">
                 <MicOff size={22} className="text-destructive" />
               </div>
-              <h3 className="mt-3 text-center font-display text-xl font-bold">Block {otherProfile.full_name}?</h3>
+              <h3 className="mt-3 text-center font-display text-xl font-bold">{t("chatBlockTitle", { name: otherProfile.full_name })}</h3>
               <p className="mt-2 text-center text-sm text-muted-foreground">
-                Their conversation will be hidden from your inbox. You can unblock them anytime.
+                {t("chatBlockDesc")}
               </p>
               <div className="mt-5 flex gap-3">
                 <button type="button" onClick={() => setBlockConfirm(false)}
                   className="flex-1 rounded-2xl border border-border py-3 text-sm font-semibold transition hover:bg-muted">
-                  Cancel
+                  {t("chatCancel")}
                 </button>
                 <button type="button"
                   onClick={() => { if (otherId) { blockUser(otherId); navigate("/messages"); } }}
                   className="flex-1 rounded-2xl bg-destructive py-3 text-sm font-semibold text-white transition active:scale-95">
-                  Block
+                  {t("chatBlockBtn")}
                 </button>
               </div>
             </motion.div>

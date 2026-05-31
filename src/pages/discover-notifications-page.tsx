@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDiscoverNotifications } from "@/hooks/use-discover-notifications";
+import { useI18n } from "@/contexts/i18n-context";
 
 function timeLabel(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -19,6 +20,7 @@ function timeLabel(iso: string) {
 }
 
 export function DiscoverNotificationsPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { data: notifications, isLoading, markRead } = useDiscoverNotifications();
 
@@ -28,7 +30,7 @@ export function DiscoverNotificationsPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <AppHeader variant="sub-page" title="Discover Notifications" right={{ type: "none" }} />
+      <AppHeader variant="sub-page" title={t("discoverNotifTitle")} right={{ type: "none" }} />
 
       <div className="flex-1 overflow-y-auto rounded-t-3xl bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
         {isLoading ? (
@@ -42,9 +44,9 @@ export function DiscoverNotificationsPage() {
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
               <Bell size={28} className="text-muted-foreground" />
             </div>
-            <p className="font-semibold">No notifications yet</p>
+            <p className="font-semibold">{t("discoverNotifEmpty")}</p>
             <p className="text-sm text-muted-foreground">
-              We'll notify you when new opportunities match your preferences.
+              {t("discoverNotifDesc")}
             </p>
           </div>
         ) : (

@@ -10,9 +10,11 @@ import { SuggestEventModal } from "@/components/features/discover/SuggestEventMo
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOpportunities } from "@/hooks/use-opportunities";
 import { useScrolled } from "@/hooks/use-scrolled";
+import { useI18n } from "@/contexts/i18n-context";
 import type { OpportunityFilters } from "@/types/discover";
 
 export function DiscoverPage() {
+  const { t } = useI18n();
   const [filters, setFilters]   = useState<OpportunityFilters>({});
   const [showSuggest, setShowSuggest] = useState(false);
   const isCollapsed = useScrolled(50);
@@ -58,14 +60,14 @@ export function DiscoverPage() {
                   <Link
                     to="/discover/saved"
                     className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--glass-fill)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm text-foreground hover:brightness-110 transition-colors"
-                    aria-label="Saved opportunities"
+                    aria-label={t("discoverSaved")}
                   >
                     <Bookmark size={18} />
                   </Link>
                   <Link
                     to="/discover/preferences"
                     className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--glass-fill)] border border-[var(--glass-border)] backdrop-blur-md shadow-sm text-foreground hover:brightness-110 transition-colors"
-                    aria-label="Discover preferences"
+                    aria-label={t("discoverPreferences")}
                   >
                     <Settings size={18} />
                   </Link>
@@ -90,8 +92,8 @@ export function DiscoverPage() {
             ))
           ) : opportunities.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-24 text-center">
-              <p className="font-semibold text-foreground">No opportunities found</p>
-              <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
+              <p className="font-semibold text-foreground">{t("discoverNoResults")}</p>
+              <p className="text-sm text-muted-foreground">{t("discoverAdjustFilters")}</p>
             </div>
           ) : (
             opportunities.map((opp) => (
@@ -112,7 +114,7 @@ export function DiscoverPage() {
               className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-4 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
             >
               <Lightbulb size={15} />
-              Know an event we're missing? Suggest it
+              {t("discoverSuggestEvent")}
             </button>
           )}
         </div>

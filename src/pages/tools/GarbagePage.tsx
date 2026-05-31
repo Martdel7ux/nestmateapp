@@ -8,6 +8,7 @@ import { useGarbageSchedules, useGarbageSchedule } from "@/hooks/use-tools";
 import { ScheduleDisplay } from "@/components/features/tools/garbage/ScheduleDisplay";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/contexts/i18n-context";
 
 const inputCls = "w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40";
 
@@ -26,6 +27,7 @@ const CITY_TO_KEY: Record<string, string> = {
 export function GarbagePage() {
   const { user }         = useAuth();
   const { snapshot }     = useData();
+  const { t }            = useI18n();
   const userCity         = CITY_TO_KEY[snapshot.profile.city ?? ""] ?? "nicosia";
   const userArea         = snapshot.profile.area ?? "";
 
@@ -53,7 +55,7 @@ export function GarbagePage() {
         .eq("id", user.id);
       if (error) throw error;
       setReminderOn(next);
-      toast.success(next ? "Reminder set — we'll notify you the evening before collection." : "Reminder turned off.");
+      toast.success(next ? t("garbageReminderSet") : t("garbageReminderOff"));
     } catch (err) {
       toast.error((err as Error).message);
     } finally {
@@ -65,12 +67,12 @@ export function GarbagePage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <AppHeader variant="sub-page" title="Garbage Collection" />
+      <AppHeader variant="sub-page" title={t("garbageTitle")} />
 
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-28 space-y-5">
         {/* City picker */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">City</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{t("billsCity")}</p>
           <div className="grid grid-cols-2 gap-2">
             {CITIES.map((c) => (
               <button key={c.value} type="button"
@@ -87,9 +89,9 @@ export function GarbagePage() {
 
         {/* Area picker */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Neighbourhood</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{t("garbageNeighbourhood")}</p>
           <select value={area} onChange={(e) => setArea(e.target.value)} className={inputCls}>
-            <option value="">— Select your area —</option>
+            <option value="">{t("garbageSelectArea")}</option>
             {areas.map((a) => (
               <option key={a} value={a}>{a}</option>
             ))}
@@ -102,7 +104,7 @@ export function GarbagePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-base font-bold text-foreground">{schedule.area}</p>
-                <p className="text-xs text-muted-foreground capitalize">{schedule.city} Municipality</p>
+                <p className="text-xs text-muted-foreground capitalize">{schedule.city} {t("garbageMunicipality")}</p>
               </div>
 
               {/* Reminder toggle */}
@@ -114,8 +116,8 @@ export function GarbagePage() {
                     : "bg-muted border-border text-muted-foreground"
                 )}>
                 {reminderOn
-                  ? <><Bell size={11} /> Reminded</>
-                  : <><BellOff size={11} /> Remind me</>
+                  ? <><Bell size={11} /> {t("garbageReminded")}</>
+                  : <><BellOff size={11} /> {t("garbageRemindMe")}</>
                 }
               </button>
             </div>

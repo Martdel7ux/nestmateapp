@@ -7,35 +7,9 @@ import { motion, useReducedMotion } from "framer-motion";
 import { AppHeader } from "@/components/layout/app-header";
 import { useAuth } from "@/contexts/auth-context";
 import { useUpcomingRentPayment } from "@/hooks/use-rent";
+import { useI18n } from "@/contexts/i18n-context";
 
 // ── Static tools ──────────────────────────────────────────────────────────────
-
-const TOOLS = [
-  {
-    id: "study",
-    label: "Study Hub",
-    subtitle: "Share notes & find study peers",
-    icon: BookOpen,
-    path: "/study",
-    style: { background: "linear-gradient(135deg, #5DCAA5 0%, #1D9E75 100%)" },
-  },
-  {
-    id: "buses",
-    label: "Buses",
-    subtitle: "Trip planner & live arrivals",
-    icon: Bus,
-    path: "/tools/buses",
-    style: { background: "linear-gradient(135deg, #85B7EB 0%, #378ADD 100%)" },
-  },
-  {
-    id: "ai",
-    label: "Nestmate AI",
-    subtitle: "Your personal assistant",
-    icon: Sparkles,
-    path: "/assistant",
-    style: { background: "linear-gradient(135deg, #AFA9EC 0%, #7F77DD 100%)" },
-  },
-] as const;
 
 const ROW_CLASS =
   "flex items-center gap-4 rounded-[18px] px-4 py-3.5 " +
@@ -46,18 +20,19 @@ const ROW_CLASS =
 
 function RentRow({ userId }: { userId: string }) {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const { data: payment } = useUpcomingRentPayment(userId);
 
   const subtitle = (() => {
-    if (!payment) return "No upcoming payments";
+    if (!payment) return t("toolsNoPayments");
     const due   = new Date(payment.due_date);
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const days  = Math.round((due.getTime() - today.getTime()) / 86_400_000);
     const amount = `€${Number(payment.amount).toFixed(0)}`;
-    if (payment.status === "late" || days < 0) return `${amount} · Overdue`;
-    if (days === 0) return `${amount} · Due today`;
-    if (days === 1) return `${amount} · Due tomorrow`;
-    return `${amount} · Due in ${days} days`;
+    if (payment.status === "late" || days < 0) return `${amount} · ${t("toolsOverdue")}`;
+    if (days === 0) return `${amount} · ${t("toolsDueToday")}`;
+    if (days === 1) return `${amount} · ${t("toolsDueTomorrow")}`;
+    return `${amount} · ${t("toolsDueInDays", { days })}`;
   })();
 
   const badge = (() => {
@@ -65,8 +40,8 @@ function RentRow({ userId }: { userId: string }) {
     const due   = new Date(payment.due_date);
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const days  = Math.round((due.getTime() - today.getTime()) / 86_400_000);
-    if (payment.status === "late" || days < 0) return { text: "Overdue", variant: "danger" as const };
-    if (days <= 7) return { text: "Due soon", variant: "warning" as const };
+    if (payment.status === "late" || days < 0) return { text: t("toolsOverdue"), variant: "danger" as const };
+    if (days <= 7) return { text: t("toolsDueSoon"), variant: "warning" as const };
     return undefined;
   })();
 
@@ -83,7 +58,7 @@ function RentRow({ userId }: { userId: string }) {
         <Wallet size={22} strokeWidth={1.8} className="text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-foreground">Rent</p>
+        <p className="text-sm font-semibold text-foreground">{t("toolsRent")}</p>
         <p className="text-xs text-muted-foreground mt-0.5 truncate">{subtitle}</p>
       </div>
       {badge && (
@@ -105,6 +80,34 @@ function RentRow({ userId }: { userId: string }) {
 export function ToolsPage() {
   const { user } = useAuth();
   const reduced  = useReducedMotion();
+  const { t } = useI18n();
+
+  const TOOLS = [
+    {
+      id: "study",
+      label: t("toolsStudyHub"),
+      subtitle: t("toolsStudyHubDesc"),
+      icon: BookOpen,
+      path: "/study",
+      style: { background: "linear-gradient(135deg, #5DCAA5 0%, #1D9E75 100%)" },
+    },
+    {
+      id: "buses",
+      label: t("toolsBuses"),
+      subtitle: t("toolsBusesDesc"),
+      icon: Bus,
+      path: "/tools/buses",
+      style: { background: "linear-gradient(135deg, #85B7EB 0%, #378ADD 100%)" },
+    },
+    {
+      id: "ai",
+      label: t("toolsAI"),
+      subtitle: t("toolsAIDesc"),
+      icon: Sparkles,
+      path: "/assistant",
+      style: { background: "linear-gradient(135deg, #AFA9EC 0%, #7F77DD 100%)" },
+    },
+  ] as const;
 
   return (
     <div className="relative min-h-dvh [overflow-x:clip]">
@@ -122,7 +125,7 @@ export function ToolsPage() {
       </div>
 
       {/* Sticky header */}
-      <AppHeader variant="home" title="Essentials" universalSearch={false} />
+      <AppHeader variant="home" title={t("toolsEssentials")} universalSearch={false} />
 
       {/* Blur veil below header */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[39]"
@@ -142,7 +145,7 @@ export function ToolsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <p className="mb-3 text-[13px] font-semibold text-muted-foreground uppercase tracking-wide">Personal</p>
+          <p className="mb-3 text-[13px] font-semibold text-muted-foreground uppercase tracking-wide">{t("toolsPersonal")}</p>
           <div className="space-y-3">
             {user && (
               <motion.div
@@ -165,8 +168,8 @@ export function ToolsPage() {
                     <FolderOpen size={22} strokeWidth={1.8} className="text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground">Documents</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Passport, insurance, contracts</p>
+                    <p className="text-sm font-semibold text-foreground">{t("toolsDocuments")}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t("toolsDocumentsDesc")}</p>
                   </div>
                   <ChevronRight size={14} className="shrink-0 text-muted-foreground/50" />
                 </div>
@@ -184,8 +187,8 @@ export function ToolsPage() {
                     <Receipt size={22} strokeWidth={1.8} className="text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground">Bill Splitting</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Expenses, balances, settle up</p>
+                    <p className="text-sm font-semibold text-foreground">{t("toolsBillSplitting")}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t("toolsBillSplittingDesc")}</p>
                   </div>
                   <ChevronRight size={14} className="shrink-0 text-muted-foreground/50" />
                 </div>
@@ -200,7 +203,7 @@ export function ToolsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08, duration: 0.3 }}
         >
-          <p className="mb-3 text-[13px] font-semibold text-muted-foreground uppercase tracking-wide">Student tools</p>
+          <p className="mb-3 text-[13px] font-semibold text-muted-foreground uppercase tracking-wide">{t("toolsStudentTools")}</p>
           <div className="space-y-3">
             {TOOLS.map((tool, i) => {
               const Icon = tool.icon;

@@ -8,6 +8,7 @@ import { PropertyCard } from "@/components/features/properties/property-card";
 import { PropertyMap } from "@/components/features/properties/property-map";
 import { PropertyDetailModal } from "@/components/features/properties/property-detail-modal";
 import { useData } from "@/contexts/data-context";
+import { useI18n } from "@/contexts/i18n-context";
 import type { Property } from "@/types/supabase";
 
 export function SearchPage() {
@@ -18,6 +19,7 @@ export function SearchPage() {
     snapshot,
     toggleSavedProperty
   } = useData();
+  const { t } = useI18n();
   const [view, setView] = useState<"grid" | "map">("grid");
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
@@ -25,7 +27,7 @@ export function SearchPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Search"
-        title="Browse Cyprus student rentals"
+        title={t("searchTitle")}
         description="Filter by city, price, bedroom count, and student type, or describe what you want naturally."
         action={
           <div className="flex gap-2">

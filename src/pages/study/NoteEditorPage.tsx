@@ -12,21 +12,18 @@ import { useMyStudyGroups } from "@/hooks/use-study-groups";
 import { uploadNoteAttachment } from "@/lib/study-api";
 import { useAuth } from "@/contexts/auth-context";
 import type { NoteVisibility } from "@/types/study";
+import { useI18n } from "@/contexts/i18n-context";
 
 const DRAFT_KEY = "study-note-draft";
 
-type VisibilityOption = { value: NoteVisibility; label: string; desc: string };
-const VISIBILITY_OPTIONS: VisibilityOption[] = [
-  { value: "private", label: "Private", desc: "Only you can see this" },
-  { value: "group", label: "Group", desc: "Share with a study group" },
-  { value: "public", label: "Public", desc: "Visible to all students" },
-];
-
 export function NoteEditorPage() {
+  const { t } = useI18n();
   const { id } = useParams<{ id?: string }>();
   const isEdit = !!id;
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  type VisibilityOption = { value: NoteVisibility; label: string; desc: string };
 
   const { data: existingNote, isLoading: loadingNote } = useNote(id ?? "");
   const { data: myGroups = [] } = useMyStudyGroups();
@@ -140,7 +137,7 @@ export function NoteEditorPage() {
         { id, updates: payload },
         {
           onSuccess: () => {
-            toast.success("Note saved");
+            toast.success(t("noteSaved"));
             navigate(`/study/notes/${id}`);
           },
           onError: () => toast.error("Failed to save"),
@@ -150,7 +147,7 @@ export function NoteEditorPage() {
       createNote(payload as Parameters<typeof createNote>[0], {
         onSuccess: (note) => {
           localStorage.removeItem(DRAFT_KEY);
-          toast.success("Note created");
+          toast.success(t("noteCreated"));
           navigate(`/study/notes/${note.id}`);
         },
         onError: (err) => toast.error((err as Error).message || "Failed to create note"),
@@ -167,11 +164,17 @@ export function NoteEditorPage() {
     );
   }
 
+  const VISIBILITY_OPTIONS: VisibilityOption[] = [
+    { value: "private", label: t("notePrivate"), desc: t("notePrivateDesc") },
+    { value: "group", label: t("noteGroup"), desc: t("noteGroupDesc") },
+    { value: "public", label: t("notePublic"), desc: t("notePublicDesc") },
+  ];
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <AppHeader
         variant="sub-page"
-        title={isEdit ? "Edit Note" : "New Note"}
+        title={isEdit ? t("noteEdit") : t("noteNew")}
         right={{
           type: "custom",
           element: (
@@ -182,7 +185,7 @@ export function NoteEditorPage() {
                 disabled={isSaving}
                 className="rounded-full border border-border px-4 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
               >
-                Draft
+                {t("noteDraft")}
               </button>
               <button
                 type="button"
@@ -190,7 +193,7 @@ export function NoteEditorPage() {
                 disabled={isSaving}
                 className="rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
               >
-                {isSaving ? "Saving…" : "Publish"}
+                {isSaving ? t("noteSaving") : t("notePublish")}
               </button>
             </div>
           ),
@@ -204,7 +207,7 @@ export function NoteEditorPage() {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Note title…"
+            placeholder={t("noteTitlePh")}
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-lg font-semibold outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
           />
 
@@ -213,13 +216,13 @@ export function NoteEditorPage() {
 
           {/* Course select */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Course</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("noteCourse")}</label>
             <CourseSelect value={courseId} onChange={setCourseId} placeholder="No course selected" />
           </div>
 
           {/* Visibility */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Visibility</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("noteVisibility")}</label>
             <div className="space-y-2">
               {VISIBILITY_OPTIONS.map((opt) => (
                 <label
@@ -254,7 +257,7 @@ export function NoteEditorPage() {
                 onChange={(e) => setGroupId(e.target.value || null)}
                 className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
               >
-                <option value="">Select a group…</option>
+                <option value="">{t("noteSelectGroup")}</option>
                 {myGroups.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.name}
@@ -267,7 +270,7 @@ export function NoteEditorPage() {
           {/* Tags */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">
-              Tags (comma-separated)
+              {t("noteTags")}
             </label>
             <input
               value={tagInput}
@@ -301,7 +304,7 @@ export function NoteEditorPage() {
           {/* Attachments */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">
-              Attachments
+              {t("noteAttachments")}
             </label>
             <button
               type="button"
@@ -310,7 +313,7 @@ export function NoteEditorPage() {
               className="flex items-center gap-2 rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
             >
               <Upload size={16} />
-              {uploading ? "Uploading…" : "Upload file"}
+              {uploading ? t("noteUploading") : t("noteUploadFile")}
             </button>
             <input
               ref={fileRef}
@@ -338,7 +341,7 @@ export function NoteEditorPage() {
                       }
                       className="text-xs text-muted-foreground hover:text-destructive"
                     >
-                      Remove
+                      {t("noteRemove")}
                     </button>
                   </div>
                 ))}

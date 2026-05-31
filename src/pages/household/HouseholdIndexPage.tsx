@@ -4,16 +4,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AppHeader } from "@/components/layout/app-header";
 import { useAuth } from "@/contexts/auth-context";
 import { useHouseholds } from "@/hooks/use-household";
+import { useI18n } from "@/contexts/i18n-context";
 
 export function HouseholdIndexPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const { data: households = [], isLoading } = useHouseholds(user?.id);
 
   if (isLoading) {
     return (
       <div className="flex h-full flex-col overflow-hidden">
-        <AppHeader title="Household" />
+        <AppHeader title={t("householdTitle")} />
         <div className="flex-1 overflow-y-auto p-5 space-y-3">
           <Skeleton className="h-28 rounded-2xl" />
           <Skeleton className="h-28 rounded-2xl" />
@@ -25,15 +27,15 @@ export function HouseholdIndexPage() {
   if (households.length === 0) {
     return (
       <div className="flex h-full flex-col overflow-hidden">
-        <AppHeader title="Household" />
+        <AppHeader title={t("householdTitle")} />
         <div className="flex-1 overflow-y-auto p-5 flex flex-col items-center justify-center gap-6">
           <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10">
             <Home size={36} className="text-primary" />
           </div>
           <div className="text-center space-y-2">
-            <h2 className="text-xl font-bold text-foreground">Split bills, stay friends</h2>
+            <h2 className="text-xl font-bold text-foreground">{t("householdSubtitle")}</h2>
             <p className="text-sm text-muted-foreground max-w-xs">
-              Track shared expenses with your housemates and settle up fairly.
+              {t("householdDesc")}
             </p>
           </div>
           <div className="w-full max-w-sm space-y-3">
@@ -43,7 +45,7 @@ export function HouseholdIndexPage() {
               className="w-full flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3.5 font-semibold text-primary-foreground shadow-sm active:scale-[0.97] transition-transform"
             >
               <Plus size={18} />
-              Create a Household
+              {t("householdCreate")}
             </button>
             <button
               type="button"
@@ -51,7 +53,7 @@ export function HouseholdIndexPage() {
               className="w-full flex items-center justify-center gap-2 rounded-2xl border border-border bg-background px-6 py-3.5 font-semibold text-foreground active:scale-[0.97] transition-transform"
             >
               <LogIn size={18} />
-              Join with Invite Code
+              {t("householdJoinCode")}
             </button>
           </div>
         </div>
@@ -62,7 +64,7 @@ export function HouseholdIndexPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <AppHeader
-        title="Household"
+        title={t("householdTitle")}
         right={{
           type: "custom",
           element: (
@@ -101,7 +103,7 @@ export function HouseholdIndexPage() {
           className="w-full flex items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-4 text-sm text-muted-foreground hover:border-primary/50 transition-colors"
         >
           <LogIn size={16} />
-          Join another household
+          {t("householdJoinAnother")}
         </button>
       </div>
     </div>

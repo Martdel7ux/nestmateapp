@@ -13,12 +13,7 @@ import {
   useUpdateUserCourse,
 } from "@/hooks/use-user-courses";
 import type { UserCourse, UserCourseStatus } from "@/types/study";
-
-const STATUS_OPTIONS: { value: UserCourseStatus; label: string }[] = [
-  { value: "currently_taking", label: "Currently Taking" },
-  { value: "completed", label: "Completed" },
-  { value: "planning_to_take", label: "Planning to Take" },
-];
+import { useI18n } from "@/contexts/i18n-context";
 
 interface EditingState {
   courseId: string;
@@ -29,6 +24,14 @@ interface EditingState {
 }
 
 export function MyCoursesPage() {
+  const { t } = useI18n();
+
+  const STATUS_OPTIONS: { value: UserCourseStatus; label: string }[] = [
+    { value: "currently_taking", label: t("coursesCurrent") },
+    { value: "completed", label: t("coursesCompleted") },
+    { value: "planning_to_take", label: t("coursesPlanned") },
+  ];
+
   const { data: userCourses = [], isLoading } = useUserCourses();
   const { mutate: addCourse, isPending: adding } = useAddUserCourse();
   const { mutate: removeCourse } = useRemoveUserCourse();
@@ -48,7 +51,7 @@ export function MyCoursesPage() {
       { courseId: newCourseId, status: newStatus },
       {
         onSuccess: () => {
-          toast.success("Course added");
+          toast.success(t("coursesAdded"));
           setShowAddSheet(false);
           setNewCourseId(null);
           setNewStatus("currently_taking");
@@ -61,7 +64,7 @@ export function MyCoursesPage() {
   const handleRemove = (uc: UserCourse) => {
     if (!confirm(`Remove ${uc.course?.title ?? "this course"}?`)) return;
     removeCourse(uc.course_id, {
-      onSuccess: () => toast.success("Course removed"),
+      onSuccess: () => toast.success(t("coursesRemoved")),
       onError: () => toast.error("Failed to remove course"),
     });
   };
@@ -90,7 +93,7 @@ export function MyCoursesPage() {
       },
       {
         onSuccess: () => {
-          toast.success("Course updated");
+          toast.success(t("coursesUpdated"));
           setEditing(null);
         },
         onError: () => toast.error("Failed to update"),
@@ -102,7 +105,7 @@ export function MyCoursesPage() {
     <div className="flex h-full flex-col overflow-hidden">
       <AppHeader
         variant="sub-page"
-        title="My Courses"
+        title={t("coursesTitle")}
         right={{
           type: "custom",
           element: (
@@ -112,7 +115,7 @@ export function MyCoursesPage() {
               className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
             >
               <Plus size={15} />
-              Add
+              {t("coursesAdd")}
             </button>
           ),
         }}
@@ -130,9 +133,9 @@ export function MyCoursesPage() {
           ) : userCourses.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-24 text-center">
               <BookOpen size={40} className="text-muted-foreground/40" />
-              <p className="font-semibold text-foreground">No courses added yet</p>
+              <p className="font-semibold text-foreground">{t("coursesNone")}</p>
               <p className="text-sm text-muted-foreground">
-                Add your courses to connect with peers and mentors
+                {t("coursesNoneDesc")}
               </p>
             </div>
           ) : (
@@ -156,11 +159,11 @@ export function MyCoursesPage() {
                         )}>
                           {STATUS_OPTIONS.find((s) => s.value === uc.status)?.label}
                         </span>
-                        {uc.grade && <span>Grade: {uc.grade}</span>}
-                        {uc.year && <span>Year: {uc.year}</span>}
+                        {uc.grade && <span>{t("coursesGrade")}: {uc.grade}</span>}
+                        {uc.year && <span>{t("coursesYear")}: {uc.year}</span>}
                         {uc.is_mentor && (
                           <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                            Mentor
+                            {t("coursesMentor")}
                           </span>
                         )}
                       </div>
@@ -200,7 +203,7 @@ export function MyCoursesPage() {
           <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-background px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5 shadow-xl">
             <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-muted" />
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-foreground">Add a Course</h2>
+              <h2 className="font-semibold text-foreground">{t("coursesAddTitle")}</h2>
               <button type="button" onClick={() => setShowAddSheet(false)}>
                 <X size={20} className="text-muted-foreground" />
               </button>
@@ -228,7 +231,7 @@ export function MyCoursesPage() {
                 disabled={adding}
                 className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
               >
-                {adding ? "Adding…" : "Add Course"}
+                {adding ? t("coursesAdding") : t("coursesAddBtn")}
               </button>
             </div>
           </div>
@@ -245,14 +248,14 @@ export function MyCoursesPage() {
           <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-background px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5 shadow-xl">
             <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-muted" />
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-foreground">Edit Course</h2>
+              <h2 className="font-semibold text-foreground">{t("coursesEditTitle")}</h2>
               <button type="button" onClick={() => setEditing(null)}>
                 <X size={20} className="text-muted-foreground" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium">Status</label>
+                <label className="mb-1 block text-sm font-medium">{t("coursesStatus")}</label>
                 <select
                   value={editing.status}
                   onChange={(e) =>
@@ -271,7 +274,7 @@ export function MyCoursesPage() {
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="mb-1 block text-sm font-medium">Grade</label>
+                  <label className="mb-1 block text-sm font-medium">{t("coursesGrade")}</label>
                   <input
                     value={editing.grade}
                     onChange={(e) =>
@@ -284,7 +287,7 @@ export function MyCoursesPage() {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="mb-1 block text-sm font-medium">Year</label>
+                  <label className="mb-1 block text-sm font-medium">{t("coursesYear")}</label>
                   <input
                     value={editing.year}
                     onChange={(e) =>
@@ -309,9 +312,9 @@ export function MyCoursesPage() {
                   className="accent-primary h-4 w-4"
                 />
                 <div>
-                  <p className="text-sm font-medium text-foreground">Offer mentoring</p>
+                  <p className="text-sm font-medium text-foreground">{t("coursesOfferMentoring")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Show as a mentor for this course to other students
+                    {t("coursesMentorDesc")}
                   </p>
                 </div>
               </label>
@@ -320,7 +323,7 @@ export function MyCoursesPage() {
                 onClick={handleSaveEdit}
                 className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground"
               >
-                Save Changes
+                {t("coursesSave")}
               </button>
             </div>
           </div>

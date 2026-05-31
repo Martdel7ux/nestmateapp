@@ -10,8 +10,10 @@ import { usePeers } from "@/hooks/use-peers";
 import { useCourses } from "@/hooks/use-user-courses";
 import { fetchOrCreateDirectConversation } from "@/lib/study-api";
 import { useAuth } from "@/contexts/auth-context";
+import { useI18n } from "@/contexts/i18n-context";
 
 export function PeersPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [courseId, setCourseId] = useState<string | null>(null);
@@ -54,7 +56,7 @@ export function PeersPage() {
         <CourseSelect
           value={courseId}
           onChange={setCourseId}
-          placeholder="Select a course to find peers…"
+          placeholder={t("peersSelectCourse")}
         />
 
         {courseId && (
@@ -65,7 +67,7 @@ export function PeersPage() {
               onChange={(e) => setMentorsOnly(e.target.checked)}
               className="accent-primary"
             />
-            <span className="text-sm font-medium text-foreground">Mentors only</span>
+            <span className="text-sm font-medium text-foreground">{t("peersMentorsOnly")}</span>
           </label>
         )}
       </div>
@@ -78,7 +80,7 @@ export function PeersPage() {
               <Users size={40} className="text-muted-foreground/40" />
               <p className="font-semibold text-foreground">Select a course</p>
               <p className="text-sm text-muted-foreground">
-                Choose a course above to find your study peers
+                {t("peersChooseCourse")}
               </p>
             </div>
           ) : isLoading ? (
@@ -90,11 +92,11 @@ export function PeersPage() {
           ) : filteredPeers.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-24 text-center">
               <Users size={40} className="text-muted-foreground/40" />
-              <p className="font-semibold text-foreground">No peers found</p>
+              <p className="font-semibold text-foreground">{t("peersNoneFound")}</p>
               <p className="text-sm text-muted-foreground">
                 {mentorsOnly
-                  ? "No mentors for this course yet"
-                  : "Be the first to add this course!"}
+                  ? t("peersNoMentors")
+                  : t("peersBeFirst")}
               </p>
             </div>
           ) : (

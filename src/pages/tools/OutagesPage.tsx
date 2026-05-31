@@ -7,9 +7,10 @@ import { useOutages } from "@/hooks/use-tools";
 import { OutageCard } from "@/components/features/tools/outages/OutageCard";
 import type { CyprusDistrict } from "@/types/tools";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/contexts/i18n-context";
 
-const DISTRICTS: { value: CyprusDistrict | "all"; label: string }[] = [
-  { value: "all",       label: "All" },
+const DISTRICTS: { value: CyprusDistrict | "all"; label: string; tKey?: string }[] = [
+  { value: "all",       label: "All",       tKey: "outagesAll" },
   { value: "nicosia",   label: "Nicosia" },
   { value: "limassol",  label: "Limassol" },
   { value: "larnaca",   label: "Larnaca" },
@@ -25,6 +26,7 @@ const CITY_TO_DISTRICT: Record<string, CyprusDistrict> = {
 export function OutagesPage() {
   const navigate     = useNavigate();
   const { snapshot } = useData();
+  const { t }        = useI18n();
   const userDistrict = CITY_TO_DISTRICT[snapshot.profile.city ?? ""] ?? "nicosia";
 
   const [district, setDistrict] = useState<CyprusDistrict | "all">(userDistrict);
@@ -34,7 +36,7 @@ export function OutagesPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <AppHeader variant="sub-page" title="EAC Power Outages" />
+      <AppHeader variant="sub-page" title={t("outagesTitle")} />
 
       <div className="flex-1 overflow-y-auto">
         {/* District filter */}
@@ -49,7 +51,7 @@ export function OutagesPage() {
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background border-border text-muted-foreground"
                 )}>
-                {d.label}
+                {d.tKey ? t(d.tKey as Parameters<typeof t>[0]) : d.label}
               </button>
             ))}
           </div>
@@ -65,7 +67,7 @@ export function OutagesPage() {
           {!isLoading && outages.length === 0 && (
             <div className="flex flex-col items-center gap-3 py-16 text-center">
               <CheckCircle size={36} className="text-emerald-500/60" />
-              <p className="text-sm font-semibold text-foreground">No planned outages</p>
+              <p className="text-sm font-semibold text-foreground">{t("outagesNone")}</p>
               <p className="text-xs text-muted-foreground">
                 No scheduled power cuts in{" "}
                 {district === "all" ? "Cyprus" : district.charAt(0).toUpperCase() + district.slice(1)}{" "}

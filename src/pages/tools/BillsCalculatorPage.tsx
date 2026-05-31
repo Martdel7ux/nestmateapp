@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Lightbulb } from "lucide-react";
+import { useI18n } from "@/contexts/i18n-context";
 import { AppHeader } from "@/components/layout/app-header";
 import { calculateBillEstimate } from "@/utils/billsCalculator";
 import type { BillsInput, BillEstimate, BillRange } from "@/types/tools";
@@ -29,15 +30,16 @@ function BillRow({ label, range }: { label: string; range: BillRange }) {
 }
 
 function SeasonCard({ title, breakdown }: { title: string; breakdown: BillEstimate["summer"] }) {
+  const { t } = useI18n();
   return (
     <div className="rounded-2xl border border-border bg-background/60 p-4">
       <p className="text-sm font-bold text-foreground mb-3">{title}</p>
-      <BillRow label="Electricity (EAC)" range={breakdown.electricity} />
-      <BillRow label="Water"              range={breakdown.water} />
-      <BillRow label="Internet"           range={breakdown.internet} />
+      <BillRow label={t("billsElectricity")} range={breakdown.electricity} />
+      <BillRow label={t("billsWater")}        range={breakdown.water} />
+      <BillRow label={t("billsInternet")}     range={breakdown.internet} />
       <div className="flex justify-between items-center pt-2 mt-1">
-        <span className="text-sm font-bold text-foreground">Total</span>
-        <span className="text-base font-bold text-primary">{fmt(breakdown.total)}/mo</span>
+        <span className="text-sm font-bold text-foreground">{t("billsTotal")}</span>
+        <span className="text-base font-bold text-primary">{fmt(breakdown.total)}{t("billsPerMonth")}</span>
       </div>
     </div>
   );
@@ -57,6 +59,7 @@ function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: bool
 }
 
 export function BillsCalculatorPage() {
+  const { t } = useI18n();
   const [form,     setForm]     = useState<BillsInput>(DEFAULTS);
   const [estimate, setEstimate] = useState<BillEstimate | null>(null);
   const [showHow,  setShowHow]  = useState(false);
@@ -72,19 +75,19 @@ export function BillsCalculatorPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <AppHeader variant="sub-page" title="Summer Bills Calculator" />
+      <AppHeader variant="sub-page" title={t("billsTitle")} />
 
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-28 space-y-5">
         {/* Intro */}
         <div className="rounded-2xl bg-primary/5 px-4 py-3">
           <p className="text-sm text-muted-foreground">
-            Estimate your monthly utility costs as a student in Cyprus. Fill in your flat's details for a realistic breakdown.
+            {t("billsSubtitle")}
           </p>
         </div>
 
         {/* City */}
         <div>
-          <label className={labelCls}>City</label>
+          <label className={labelCls}>{t("billsCity")}</label>
           <div className="grid grid-cols-2 gap-2">
             {(["nicosia","limassol","larnaca","paphos"] as const).map((c) => (
               <button key={c} type="button" onClick={() => set("city", c)}
@@ -99,7 +102,7 @@ export function BillsCalculatorPage() {
         {/* Bedrooms + people */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={labelCls}>Bedrooms</label>
+            <label className={labelCls}>{t("billsBedrooms")}</label>
             <div className="flex gap-1">
               {([1,2,3,4] as const).map((n) => (
                 <button key={n} type="button" onClick={() => set("bedrooms", n)}
@@ -111,7 +114,7 @@ export function BillsCalculatorPage() {
             </div>
           </div>
           <div>
-            <label className={labelCls}>People</label>
+            <label className={labelCls}>{t("billsPeople")}</label>
             <input type="number" min={1} max={6} value={form.people}
               onChange={(e) => set("people", Math.max(1, Math.min(6, parseInt(e.target.value) || 1)))}
               className={inputCls} />
@@ -120,12 +123,12 @@ export function BillsCalculatorPage() {
 
         {/* Floor */}
         <div>
-          <label className={labelCls}>Floor type</label>
+          <label className={labelCls}>{t("billsFloorType")}</label>
           <div className="grid grid-cols-3 gap-2">
             {([
-              ["ground", "Ground floor"],
-              ["upper",  "Upper floor"],
-              ["top",    "Top / under roof"],
+              ["ground", t("billsGroundFloor")],
+              ["upper",  t("billsUpperFloor")],
+              ["top",    t("billsTopFloor")],
             ] as const).map(([v, l]) => (
               <button key={v} type="button" onClick={() => set("floor", v)}
                 className={cn("rounded-2xl py-2.5 text-xs font-semibold border transition-all text-center",
@@ -138,7 +141,7 @@ export function BillsCalculatorPage() {
 
         {/* AC units */}
         <div>
-          <label className={labelCls}>AC units</label>
+          <label className={labelCls}>{t("billsACUnits")}</label>
           <div className="flex gap-2">
             {([0,1,2,3] as const).map((n) => (
               <button key={n} type="button" onClick={() => set("acUnits", n)}
@@ -152,12 +155,12 @@ export function BillsCalculatorPage() {
 
         {/* Hot water */}
         <div>
-          <label className={labelCls}>Hot water</label>
+          <label className={labelCls}>{t("billsHotWater")}</label>
           <div className="grid grid-cols-3 gap-2">
             {([
-              ["electric", "Electric heater"],
-              ["solar",    "Solar (geysir)"],
-              ["gas",      "Gas"],
+              ["electric", t("billsElectricHeater")],
+              ["solar",    t("billsSolar")],
+              ["gas",      t("billsGas")],
             ] as const).map(([v, l]) => (
               <button key={v} type="button" onClick={() => set("hotWater", v)}
                 className={cn("rounded-2xl py-2.5 text-xs font-semibold border transition-all",
@@ -170,12 +173,12 @@ export function BillsCalculatorPage() {
 
         {/* Internet */}
         <div>
-          <label className={labelCls}>Internet</label>
+          <label className={labelCls}>{t("billsInternet")}</label>
           <div className="grid grid-cols-3 gap-2">
             {([
-              ["included",     "Included"],
-              ["not_included", "Not included"],
-              ["unsure",       "Unsure"],
+              ["included",     t("billsIncluded")],
+              ["not_included", t("billsNotIncluded")],
+              ["unsure",       t("billsUnsure")],
             ] as const).map(([v, l]) => (
               <button key={v} type="button" onClick={() => set("internet", v)}
                 className={cn("rounded-2xl py-2.5 text-xs font-semibold border transition-all",
@@ -188,23 +191,23 @@ export function BillsCalculatorPage() {
 
         {/* Appliance toggles */}
         <div className="space-y-3">
-          <Toggle value={form.hasDishwasher}    onChange={(v) => set("hasDishwasher", v)}    label="Has dishwasher" />
-          <Toggle value={form.hasWashingMachine} onChange={(v) => set("hasWashingMachine", v)} label="Has washing machine" />
+          <Toggle value={form.hasDishwasher}    onChange={(v) => set("hasDishwasher", v)}    label={t("billsDishwasher")} />
+          <Toggle value={form.hasWashingMachine} onChange={(v) => set("hasWashingMachine", v)} label={t("billsWashingMachine")} />
         </div>
 
         {/* Calculate */}
         <button type="button" onClick={calculate}
           className="w-full rounded-2xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground">
-          Calculate
+          {t("billsCalculate")}
         </button>
 
         {/* Results */}
         {estimate && (
           <div className="space-y-4">
-            <h2 className="text-base font-bold text-foreground">Your estimated bills</h2>
+            <h2 className="text-base font-bold text-foreground">{t("billsYourEstimate")}</h2>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <SeasonCard title="☀️  Summer (Jun–Sep)" breakdown={estimate.summer} />
-              <SeasonCard title="🌧️  Winter (Nov–Mar)" breakdown={estimate.winter} />
+              <SeasonCard title={t("billsSummer")} breakdown={estimate.summer} />
+              <SeasonCard title={t("billsWinter")} breakdown={estimate.winter} />
             </div>
 
             {/* Tips */}
@@ -224,7 +227,7 @@ export function BillsCalculatorPage() {
               <button type="button"
                 onClick={() => setShowHow((s) => !s)}
                 className="w-full flex items-center justify-between px-4 py-3">
-                <span className="text-sm font-semibold text-foreground">How is this calculated?</span>
+                <span className="text-sm font-semibold text-foreground">{t("billsHowCalc")}</span>
                 {showHow ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
               {showHow && (

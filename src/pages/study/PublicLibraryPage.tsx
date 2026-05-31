@@ -5,8 +5,10 @@ import { NoteCard } from "@/components/features/study/NoteCard";
 import { NoteFiltersBar } from "@/components/features/study/NoteFilters";
 import { usePublicLibrary } from "@/hooks/use-public-library";
 import type { NoteFilters } from "@/types/study";
+import { useI18n } from "@/contexts/i18n-context";
 
 export function PublicLibraryPage() {
+  const { t } = useI18n();
   const [filters, setFilters] = useState<NoteFilters>({ sort: "newest" });
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     usePublicLibrary(filters);
@@ -45,9 +47,9 @@ export function PublicLibraryPage() {
           ) : notes.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-24 text-center">
               <BookOpen size={40} className="text-muted-foreground/40" />
-              <p className="font-semibold text-foreground">No public notes found</p>
+              <p className="font-semibold text-foreground">{t("studyNoPublicNotes")}</p>
               <p className="text-sm text-muted-foreground">
-                Try adjusting your filters
+                {t("studyAdjustFilters")}
               </p>
             </div>
           ) : (

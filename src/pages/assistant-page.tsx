@@ -3,8 +3,10 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Sparkles, ChevronLeft } from "lucide-react";
 import { AppHeader } from "@/components/layout/app-header";
 import { AssistantChat, type AssistantChatRef } from "@/components/features/assistant/assistant-chat";
+import { useI18n } from "@/contexts/i18n-context";
 
 export function AssistantPage() {
+  const { t } = useI18n();
   const [params] = useSearchParams();
   const chatRef  = useRef<AssistantChatRef>(null);
 
@@ -38,7 +40,7 @@ export function AssistantPage() {
       <AppHeader
         variant="sub-page"
         title="NestMate AI"
-        subtitle="Cyprus student accommodation expert"
+        subtitle={t("assistantSubtitle")}
         universalSearch={false}
         right={{
           type: "custom",

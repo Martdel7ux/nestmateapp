@@ -9,24 +9,26 @@ import { MyNotesPage } from "./MyNotesPage";
 import { PublicLibraryPage } from "./PublicLibraryPage";
 import { StudyGroupsPage } from "./StudyGroupsPage";
 import { PeersPage } from "./PeersPage";
+import { useI18n } from "@/contexts/i18n-context";
 
 type Tab = "notes" | "library" | "groups" | "peers";
 
-const TABS: { value: Tab; label: string }[] = [
-  { value: "notes", label: "My Notes" },
-  { value: "library", label: "Library" },
-  { value: "groups", label: "Groups" },
-  { value: "peers", label: "Peers" },
-];
-
 export function StudyHubPage() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<Tab>("notes");
   const isCollapsed = useScrolled(50);
+
+  const TABS: { value: Tab; label: string }[] = [
+    { value: "notes", label: t("studyMyNotes") },
+    { value: "library", label: t("studyLibrary") },
+    { value: "groups", label: t("studyGroups") },
+    { value: "peers", label: t("studyPeers") },
+  ];
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <AppHeader
-        title="Study Hub"
+        title={t("studyHubTitle")}
         universalSearch={!isCollapsed}
         right={{
           type: "custom",

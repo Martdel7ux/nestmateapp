@@ -13,6 +13,7 @@ import { MentorRequestModal } from "@/components/features/study/MentorRequestMod
 import { usePeerProfile } from "@/hooks/use-peer-profile";
 import { useAuth } from "@/contexts/auth-context";
 import { blockStudyUser, fetchOrCreateDirectConversation, reportContent } from "@/lib/study-api";
+import { useI18n } from "@/contexts/i18n-context";
 
 const STATUS_LABELS: Record<string, string> = {
   currently_taking: "Currently Taking",
@@ -21,6 +22,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function PeerProfilePage() {
+  const { t } = useI18n();
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -44,7 +46,7 @@ export function PeerProfilePage() {
     if (!user || !userId) return;
     if (!confirm("Block this user? They won't be able to contact you.")) return;
     await blockStudyUser(user.id, userId);
-    toast.success("User blocked");
+    toast.success(t("peerUserBlocked"));
     navigate(-1);
   };
 
@@ -80,7 +82,7 @@ export function PeerProfilePage() {
   if (!peer) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">User not found</p>
+        <p className="text-muted-foreground">{t("peerNotFound")}</p>
       </div>
     );
   }
@@ -99,7 +101,7 @@ export function PeerProfilePage() {
               type="button"
               onClick={handleReport}
               className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted text-muted-foreground"
-              aria-label="Report user"
+              aria-label={t("peerReport")}
             >
               <Flag size={16} />
             </button>
@@ -127,7 +129,7 @@ export function PeerProfilePage() {
           {/* Bio */}
           {peer.bio && (
             <div>
-              <h3 className="mb-1.5 text-sm font-semibold text-foreground">About</h3>
+              <h3 className="mb-1.5 text-sm font-semibold text-foreground">{t("peerAbout")}</h3>
               <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
                 <ReactMarkdown>{peer.bio}</ReactMarkdown>
               </div>
@@ -142,7 +144,7 @@ export function PeerProfilePage() {
                 onClick={() => void handleMessage()}
                 className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
               >
-                Message
+                {t("peerMessage")}
               </button>
               {peer.is_mentor && mentorCourse?.course && (
                 <button
@@ -155,7 +157,7 @@ export function PeerProfilePage() {
                   }
                   className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground"
                 >
-                  Request mentor
+                  {t("peerRequestMentor")}
                 </button>
               )}
             </div>
@@ -164,7 +166,7 @@ export function PeerProfilePage() {
           {/* Courses */}
           {peer.user_courses && peer.user_courses.length > 0 && (
             <div>
-              <h3 className="mb-2 text-sm font-semibold text-foreground">Courses</h3>
+              <h3 className="mb-2 text-sm font-semibold text-foreground">{t("peerCourses")}</h3>
               <div className="space-y-2">
                 {peer.user_courses.map((uc) => (
                   <div
@@ -180,7 +182,7 @@ export function PeerProfilePage() {
                       </span>
                       {uc.is_mentor && (
                         <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                          Mentor
+                          {t("coursesMentor")}
                         </span>
                       )}
                     </div>
@@ -193,7 +195,7 @@ export function PeerProfilePage() {
           {/* Public notes */}
           {peer.public_notes && peer.public_notes.length > 0 && (
             <div>
-              <h3 className="mb-2 text-sm font-semibold text-foreground">Public Notes</h3>
+              <h3 className="mb-2 text-sm font-semibold text-foreground">{t("peerPublicNotes")}</h3>
               <div className="space-y-3">
                 {peer.public_notes.map((note) => (
                   <NoteCard key={note.id} note={note} />
@@ -210,7 +212,7 @@ export function PeerProfilePage() {
                 onClick={handleBlock}
                 className="w-full rounded-xl border border-destructive/40 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
               >
-                Block this user
+                {t("peerBlock")}
               </button>
             </div>
           )}

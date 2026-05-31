@@ -15,10 +15,12 @@ import { useJoinStudyGroup, useLeaveStudyGroup } from "@/hooks/use-study-groups"
 import { useMessages, useSendMessage } from "@/hooks/use-messages";
 import { useAuth } from "@/contexts/auth-context";
 import { useEffect, useRef } from "react";
+import { useI18n } from "@/contexts/i18n-context";
 
 type GroupTab = "notes" | "members" | "chat";
 
 export function StudyGroupPage() {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -46,16 +48,16 @@ export function StudyGroupPage() {
   const handleJoin = () => {
     if (!id) return;
     joinGroup(id, {
-      onSuccess: () => toast.success("Joined group!"),
+      onSuccess: () => toast.success(t("studyGroupJoined")),
       onError: () => toast.error("Failed to join group"),
     });
   };
 
   const handleLeave = () => {
-    if (!id || !confirm("Leave this group?")) return;
+    if (!id || !confirm(t("studyGroupLeaveConfirm"))) return;
     leaveGroup(id, {
       onSuccess: () => {
-        toast.success("Left group");
+        toast.success(t("studyGroupLeft"));
         navigate("/study/groups");
       },
       onError: () => toast.error("Failed to leave group"),
@@ -84,15 +86,15 @@ export function StudyGroupPage() {
   if (!group) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Group not found</p>
+        <p className="text-muted-foreground">{t("studyGroupNotFound")}</p>
       </div>
     );
   }
 
   const TABS: { value: GroupTab; label: string }[] = [
-    { value: "notes", label: "Notes" },
-    { value: "members", label: "Members" },
-    { value: "chat", label: "Chat" },
+    { value: "notes", label: t("studyGroupNotes") },
+    { value: "members", label: t("studyGroupMembers") },
+    { value: "chat", label: t("studyGroupChat") },
   ];
 
   return (
@@ -110,7 +112,7 @@ export function StudyGroupPage() {
               disabled={leaving}
               className="rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
             >
-              Leave
+              {t("studyGroupLeave")}
             </button>
           ) : (
             <button
@@ -119,7 +121,7 @@ export function StudyGroupPage() {
               disabled={joining}
               className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
             >
-              Join
+              {t("studyGroupJoin")}
             </button>
           ),
         }}
@@ -156,7 +158,7 @@ export function StudyGroupPage() {
                   className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
                 >
                   <Plus size={12} />
-                  Add note to group
+                  {t("studyGroupAddNote")}
                 </button>
               </div>
             )}
@@ -164,7 +166,7 @@ export function StudyGroupPage() {
               <div className="px-4 pb-32 pt-3 space-y-3">
                 {groupNotes.length === 0 ? (
                   <div className="flex flex-col items-center gap-2 py-16 text-center">
-                    <p className="text-sm text-muted-foreground">No notes shared yet</p>
+                    <p className="text-sm text-muted-foreground">{t("studyGroupNoNotes")}</p>
                   </div>
                 ) : (
                   groupNotes.map((note) => (
@@ -189,7 +191,7 @@ export function StudyGroupPage() {
             <div className="flex-1 overflow-y-auto px-4 py-4 pb-4 space-y-1">
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-sm text-muted-foreground">No messages yet. Say hello!</p>
+                  <p className="text-sm text-muted-foreground">{t("studyGroupNoMessages")}</p>
                 </div>
               ) : (
                 messages.map((msg) => (
@@ -206,7 +208,7 @@ export function StudyGroupPage() {
               <MessageInput onSend={handleSendMessage} />
             ) : (
               <div className="shrink-0 border-t border-border px-4 py-3 text-center text-sm text-muted-foreground">
-                Join this group to send messages
+                {t("studyGroupJoinFirst")}
               </div>
             )}
           </div>

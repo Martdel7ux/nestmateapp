@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useI18n } from "@/contexts/i18n-context";
 import {
   Navigation, MapPin, X, Loader2, AlertCircle,
   Bus, ChevronRight, Star, Search, LocateFixed, List,
@@ -28,6 +29,7 @@ function FavoriteStopRow({
   stopId: string;
   onOpen: (id: string, name: string) => void;
 }) {
+  const { t } = useI18n();
   const { data: stop }                = useGtfsStop(stopId);
   const { data: arrivals = [] }       = useNextArrivals(stopId);
   const { mutate: toggle, isPending } = useToggleBusFavorite();
@@ -52,14 +54,14 @@ function FavoriteStopRow({
                     style={{ backgroundColor: `${bg}18`, border: `1px solid ${bg}40` }}>
                     <span className="text-xs font-bold" style={{ color: bg }}>{a.route_short_name}</span>
                     <span className="text-xs text-muted-foreground">
-                      {a.minutes_until <= 0 ? "Now" : `${a.minutes_until} min`}
+                      {a.minutes_until <= 0 ? t("busesNow") : `${a.minutes_until} ${t("busesMin")}`}
                     </span>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground mt-1">No more buses today</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("busesNoMoreToday")}</p>
           )}
         </div>
         <button type="button"
@@ -76,6 +78,7 @@ function FavoriteStopRow({
 // ── All Routes modal (full-screen slide-up) ───────────────────────────────────
 
 function RoutesModal({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
   const [query, setQuery]           = useState("");
   const { data: routes = [], isLoading } = useGtfsRoutes();
 
@@ -120,7 +123,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-3 shrink-0">
-          <h2 className="text-base font-bold text-foreground">All Routes</h2>
+          <h2 className="text-base font-bold text-foreground">{t("busesAllRoutes")}</h2>
           <button type="button" onClick={onClose}
             className="rounded-full p-1.5 text-muted-foreground hover:bg-muted/40">
             <X size={18} />
@@ -133,7 +136,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <input
               type="search"
-              placeholder="Search route number or name…"
+              placeholder={t("busesSearchRoute")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
@@ -151,7 +154,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
             <div className="flex flex-col items-center gap-3 py-16 text-center">
               <Bus size={36} className="text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">
-                {query ? "No routes match your search" : "No routes found"}
+                {query ? t("busesNoRoutes") : t("busesNoRoutes")}
               </p>
             </div>
           )}
@@ -172,6 +175,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export function BusesPage() {
+  const { t } = useI18n();
   // ── GPS ────────────────────────────────────────────────────────────────────
   const [gpsState,  setGpsState]  = useState<GpsState>("detecting");
   const [gpsCoords, setGpsCoords] = useState<[number, number]>(NICOSIA_CENTER);
@@ -276,7 +280,7 @@ export function BusesPage() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <AppHeader variant="sub-page" title="Nicosia Buses" />
+      <AppHeader variant="sub-page" title={t("busesTitle")} />
 
       <div className="flex-1 overflow-y-auto pb-28">
 
@@ -298,7 +302,7 @@ export function BusesPage() {
                   )}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide leading-none mb-1">From</p>
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide leading-none mb-1">{t("busesFrom")}</p>
                   {fromMode === "gps" ? (
                     <button
                       type="button"
@@ -332,7 +336,7 @@ export function BusesPage() {
                   <button type="button" onClick={resetToGps}
                     className="shrink-0 flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1">
                     <LocateFixed size={12} className="text-primary" />
-                    <span className="text-xs font-semibold text-primary">GPS</span>
+                    <span className="text-xs font-semibold text-primary">{t("busesGPS")}</span>
                   </button>
                 )}
               </div>
@@ -359,7 +363,7 @@ export function BusesPage() {
               <div className="flex items-center gap-3 px-4 py-3.5">
                 <MapPin size={16} className="shrink-0 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide leading-none mb-1">To</p>
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide leading-none mb-1">{t("busesTo")}</p>
                   <input
                     ref={toInputRef}
                     type="search"
@@ -409,7 +413,7 @@ export function BusesPage() {
             {tripsLoading && (
               <div className="flex items-center justify-center gap-2 py-8">
                 <Loader2 size={20} className="text-primary animate-spin" />
-                <p className="text-sm text-muted-foreground">Finding buses…</p>
+                <p className="text-sm text-muted-foreground">{t("busesFinding")}</p>
               </div>
             )}
 
@@ -417,12 +421,12 @@ export function BusesPage() {
               <div className="flex flex-col items-center gap-3 py-8 text-center">
                 <AlertCircle size={24} className="text-destructive/70" />
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Could not fetch routes</p>
+                  <p className="text-sm font-semibold text-foreground">{t("busesNoRoutes")}</p>
                   <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{errorMessage}</p>
                 </div>
                 <button type="button" onClick={() => refetchTrips()}
                   className="rounded-xl bg-primary/10 px-4 py-2 text-xs font-semibold text-primary">
-                  Try again
+                  {t("busesTryAgain")}
                 </button>
               </div>
             )}
@@ -430,7 +434,7 @@ export function BusesPage() {
             {tripsFetched && !tripsLoading && !tripsError && trips.length === 0 && (
               <div className="flex flex-col items-center gap-2 py-8 text-center">
                 <Bus size={28} className="text-muted-foreground/40" />
-                <p className="text-sm font-semibold text-foreground">No direct routes found</p>
+                <p className="text-sm font-semibold text-foreground">{t("busesNoDirectRoutes")}</p>
                 <p className="text-xs text-muted-foreground max-w-xs">
                   No buses connect these stops right now. Try a stop closer to your destination.
                 </p>
@@ -452,7 +456,7 @@ export function BusesPage() {
         {/* ── My Stops section ── */}
         <div className="px-4 mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-foreground">My Stops</h2>
+            <h2 className="text-sm font-bold text-foreground">{t("busesMyStops")}</h2>
             {favorites.length > 0 && (
               <span className="text-xs text-muted-foreground">{favorites.length} saved</span>
             )}
@@ -461,7 +465,7 @@ export function BusesPage() {
           {favorites.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-6 text-center">
               <Star size={24} className="mx-auto text-muted-foreground/40 mb-2" />
-              <p className="text-sm font-semibold text-foreground mb-1">No saved stops yet</p>
+              <p className="text-sm font-semibold text-foreground mb-1">{t("busesNoSavedStops")}</p>
               <p className="text-xs text-muted-foreground">
                 Open a route, tap any stop, then ★ to save it here for quick access
               </p>
@@ -494,7 +498,7 @@ export function BusesPage() {
             className="w-full flex items-center justify-center gap-2.5 rounded-2xl border border-border bg-muted/30 py-4 text-sm font-semibold text-foreground hover:bg-muted/50 active:bg-muted/60 transition-colors"
           >
             <List size={16} className="text-muted-foreground" />
-            View All Routes
+            {t("busesViewAllRoutes")}
           </button>
         </div>
       </div>

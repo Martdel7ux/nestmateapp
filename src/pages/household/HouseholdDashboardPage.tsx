@@ -8,11 +8,13 @@ import {
 } from "@/hooks/use-household";
 import { BalanceSummary } from "@/components/features/household/BalanceSummary";
 import { ExpenseCard } from "@/components/features/household/ExpenseCard";
+import { useI18n } from "@/contexts/i18n-context";
 
 export function HouseholdDashboardPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
 
   const { data: household, isLoading: hhLoading } = useHousehold(id);
   const { data: members = [] } = useHouseholdMembers(id);
@@ -22,7 +24,7 @@ export function HouseholdDashboardPage() {
   if (hhLoading) {
     return (
       <div className="flex h-full flex-col overflow-hidden">
-        <AppHeader variant="sub-page" title="Household" />
+        <AppHeader variant="sub-page" title={t("householdTitle")} />
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           <Skeleton className="h-36 rounded-2xl" />
           <Skeleton className="h-20 rounded-2xl" />
@@ -36,8 +38,8 @@ export function HouseholdDashboardPage() {
   if (!household) {
     return (
       <div className="flex h-full flex-col overflow-hidden">
-        <AppHeader variant="sub-page" title="Not Found" />
-        <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">Household not found.</div>
+        <AppHeader variant="sub-page" title={t("householdNotFound")} />
+        <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">{t("householdNotFound")}</div>
       </div>
     );
   }
@@ -62,9 +64,9 @@ export function HouseholdDashboardPage() {
         {/* Quick actions */}
         <div className="grid grid-cols-3 gap-2">
           {[
-            { icon: Plus, label: "Add Expense", to: `/household/${id}/expenses/new` },
-            { icon: ArrowLeftRight, label: "Settle Up", to: `/household/${id}/settle` },
-            { icon: Users, label: "Members", to: `/household/${id}/members` },
+            { icon: Plus, label: t("householdAddExpense"), to: `/household/${id}/expenses/new` },
+            { icon: ArrowLeftRight, label: t("householdSettleUp"), to: `/household/${id}/settle` },
+            { icon: Users, label: t("householdMembers"), to: `/household/${id}/members` },
           ].map(({ icon: Icon, label, to }) => (
             <Link
               key={label}
@@ -90,13 +92,13 @@ export function HouseholdDashboardPage() {
         {/* Recent expenses */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Recent Expenses</p>
-            <Link to={`/household/${id}/expenses`} className="text-xs text-primary font-semibold">See all</Link>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("householdRecentExp")}</p>
+            <Link to={`/household/${id}/expenses`} className="text-xs text-primary font-semibold">{t("householdSeeAll")}</Link>
           </div>
           {expenses.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-8 text-center">
               <Receipt size={32} className="text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">No expenses yet. Add the first one!</p>
+              <p className="text-sm text-muted-foreground">{t("householdNoExpenses")}</p>
             </div>
           ) : (
             expenses.map((exp) => (

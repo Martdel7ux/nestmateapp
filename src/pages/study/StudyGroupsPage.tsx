@@ -5,8 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { GroupCard } from "@/components/features/study/GroupCard";
 import { CourseSelect } from "@/components/features/study/CourseSelect";
 import { useDiscoverGroups, useMyStudyGroups } from "@/hooks/use-study-groups";
+import { useI18n } from "@/contexts/i18n-context";
 
 export function StudyGroupsPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [discoverCourseId, setDiscoverCourseId] = useState<string | null>(null);
 
@@ -21,14 +23,14 @@ export function StudyGroupsPage() {
           {/* My Groups */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-foreground">My Groups</h2>
+              <h2 className="font-semibold text-foreground">{t("studyGroupsMyGroups")}</h2>
               <button
                 type="button"
                 onClick={() => navigate("/study/groups/new")}
                 className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
               >
                 <Plus size={12} />
-                Create
+                {t("studyGroupsCreate")}
               </button>
             </div>
 
@@ -40,13 +42,13 @@ export function StudyGroupsPage() {
               </div>
             ) : myGroups.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border p-6 text-center">
-                <p className="text-sm text-muted-foreground">You haven't joined any groups yet</p>
+                <p className="text-sm text-muted-foreground">{t("studyGroupsNoGroups")}</p>
                 <button
                   type="button"
                   onClick={() => navigate("/study/groups/new")}
                   className="mt-2 text-sm font-medium text-primary"
                 >
-                  Create one →
+                  {t("studyGroupsCreateOne")}
                 </button>
               </div>
             ) : (
@@ -64,13 +66,13 @@ export function StudyGroupsPage() {
 
           {/* Discover Groups */}
           <section>
-            <h2 className="mb-3 font-semibold text-foreground">Discover Groups</h2>
+            <h2 className="mb-3 font-semibold text-foreground">{t("studyGroupsDiscover")}</h2>
 
             <div className="mb-3">
               <CourseSelect
                 value={discoverCourseId}
                 onChange={setDiscoverCourseId}
-                placeholder="Filter by course…"
+                placeholder={t("studyGroupsFilter")}
               />
             </div>
 
@@ -82,7 +84,7 @@ export function StudyGroupsPage() {
               </div>
             ) : discoverGroups.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border p-6 text-center">
-                <p className="text-sm text-muted-foreground">No public groups found</p>
+                <p className="text-sm text-muted-foreground">{t("studyGroupsNoPublic")}</p>
               </div>
             ) : (
               <div className="space-y-3">

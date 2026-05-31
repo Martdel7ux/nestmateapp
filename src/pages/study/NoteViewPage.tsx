@@ -7,6 +7,7 @@ import { CourseBadge } from "@/components/features/study/CourseBadge";
 import { UpvoteButton } from "@/components/features/study/UpvoteButton";
 import { useNote } from "@/hooks/use-note";
 import { useAuth } from "@/contexts/auth-context";
+import { useI18n } from "@/contexts/i18n-context";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", {
@@ -17,6 +18,7 @@ function formatDate(iso: string) {
 }
 
 export function NoteViewPage() {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -38,9 +40,9 @@ export function NoteViewPage() {
   if (!note) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
-        <p className="font-semibold">Note not found</p>
+        <p className="font-semibold">{t("noteNotFound")}</p>
         <button type="button" onClick={() => navigate(-1)} className="text-sm text-primary">
-          Go back
+          {t("noteGoBack")}
         </button>
       </div>
     );
@@ -125,7 +127,7 @@ export function NoteViewPage() {
           {/* Attachments */}
           {note.attachment_urls && note.attachment_urls.length > 0 && (
             <div className="mt-6">
-              <h3 className="mb-2 text-sm font-semibold text-foreground">Attachments</h3>
+              <h3 className="mb-2 text-sm font-semibold text-foreground">{t("noteAttachments")}</h3>
               <div className="space-y-2">
                 {note.attachment_urls.map((url, i) => (
                   <a

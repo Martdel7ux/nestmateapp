@@ -5,11 +5,13 @@ import { AppHeader } from "@/components/layout/app-header";
 import { useAuth } from "@/contexts/auth-context";
 import { useHousehold, useHouseholdMembers, useExpenses } from "@/hooks/use-household";
 import { ExpenseCard } from "@/components/features/household/ExpenseCard";
+import { useI18n } from "@/contexts/i18n-context";
 
 export function ExpensesListPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const { data: household } = useHousehold(id);
   const { data: members = [] } = useHouseholdMembers(id);
   const { data: expenses = [], isLoading } = useExpenses(id, 100);
@@ -18,7 +20,7 @@ export function ExpensesListPage() {
     <div className="flex h-full flex-col overflow-hidden">
       <AppHeader
         variant="sub-page"
-        title="Expenses"
+        title={t("householdExpensesTitle")}
         right={{
           type: "custom",
           element: (
@@ -43,7 +45,7 @@ export function ExpensesListPage() {
         {!isLoading && expenses.length === 0 && (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <Receipt size={36} className="text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">No expenses yet.</p>
+            <p className="text-sm text-muted-foreground">{t("householdNoExpList")}</p>
           </div>
         )}
         {expenses.map((exp) => (

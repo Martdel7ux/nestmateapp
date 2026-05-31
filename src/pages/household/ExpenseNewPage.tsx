@@ -9,17 +9,20 @@ import { SplitInputs } from "@/components/features/household/SplitInputs";
 import { getMemberName } from "@/lib/household-utils";
 import type { SplitMethod, ExpenseCategory } from "@/types/household";
 import { cn } from "@/lib/utils";
-
-const SPLIT_METHODS: { value: SplitMethod; label: string }[] = [
-  { value: "equal",  label: "Equal" },
-  { value: "shares", label: "By Shares" },
-  { value: "custom", label: "Custom" },
-];
+import { useI18n } from "@/contexts/i18n-context";
 
 export function ExpenseNewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
+
+  const SPLIT_METHODS: { value: SplitMethod; label: string }[] = [
+    { value: "equal",  label: t("expenseSplitEqual") },
+    { value: "shares", label: t("expenseSplitShares") },
+    { value: "custom", label: t("expenseSplitCustom") },
+  ];
+
   const { data: household } = useHousehold(id);
   const { data: members = [] } = useHouseholdMembers(id);
   const { mutateAsync, isPending } = useAddExpense(id!);
@@ -50,8 +53,8 @@ export function ExpenseNewPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user || !id) return;
-    if (!description.trim() || !amount) return toast.error("Description and amount are required.");
-    if (syncedParticipants.length === 0) return toast.error("Select at least one participant.");
+    if (!description.trim() || !amount) return toast.error(t("expenseDescRequired"));
+    if (syncedParticipants.length === 0) return toast.error(t("expenseParticipantRequired"));
     try {
       await mutateAsync({
         form: {
@@ -68,7 +71,7 @@ export function ExpenseNewPage() {
         },
         userId: user.id,
       });
-      toast.success("Expense added!");
+      toast.success(t("expenseAdded"));
       navigate(`/household/${id}`);
     } catch (err) {
       toast.error((err as Error).message);
@@ -77,22 +80,22 @@ export function ExpenseNewPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <AppHeader variant="sub-page" title="New Expense" />
+      <AppHeader variant="sub-page" title={t("expenseNewTitle")} />
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 space-y-5">
 
         <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">Description *</label>
+          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">{t("expenseDescLabel")}</label>
           <input
             required
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="e.g. Groceries"
+            placeholder={t("expenseDescPh")}
             className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">Amount *</label>
+          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">{t("expenseAmountLabel")}</label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
               {household?.currency === "EUR" ? "€" : household?.currency ?? "€"}
@@ -111,7 +114,7 @@ export function ExpenseNewPage() {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">Paid by</label>
+          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">{t("expensePaidBy")}</label>
           <select
             value={paidBy}
             onChange={(e) => setPaidBy(e.target.value)}
@@ -124,7 +127,7 @@ export function ExpenseNewPage() {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">Date</label>
+          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">{t("expenseDate")}</label>
           <input
             type="date"
             value={paidAt}
@@ -134,12 +137,12 @@ export function ExpenseNewPage() {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Category</label>
+          <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">{t("expenseCategory")}</label>
           <CategoryPicker value={category} onChange={setCategory} />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Split Method</label>
+          <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">{t("expenseSplitMethod")}</label>
           <div className="flex gap-2">
             {SPLIT_METHODS.map(({ value, label }) => (
               <button
@@ -160,7 +163,7 @@ export function ExpenseNewPage() {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Participants</label>
+          <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">{t("expenseParticipants")}</label>
           <SplitInputs
             method={splitMethod}
             members={members}
@@ -176,12 +179,12 @@ export function ExpenseNewPage() {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">Notes (optional)</label>
+          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">{t("expenseNotes")}</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            placeholder="Any extra details…"
+            placeholder={t("expenseNotesPh")}
             className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
           />
         </div>
@@ -191,7 +194,7 @@ export function ExpenseNewPage() {
           disabled={isPending}
           className="w-full rounded-2xl bg-primary px-6 py-3.5 font-semibold text-primary-foreground shadow-sm disabled:opacity-50 active:scale-[0.97] transition-transform"
         >
-          {isPending ? "Saving…" : "Add Expense"}
+          {isPending ? t("expenseSaving") : t("expenseAddBtn")}
         </button>
       </form>
     </div>
