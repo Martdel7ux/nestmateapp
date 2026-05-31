@@ -70,8 +70,8 @@ var config = {
                 glass: "var(--glass-shadow)"
             },
             fontFamily: {
-                display: ['"Playfair Display"', "serif"],
-                sans: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"]
+                display: ["Inter", "system-ui", "sans-serif"],
+                sans: ["Inter", "system-ui", "sans-serif"]
             },
             backgroundImage: {
                 "mesh-light": "radial-gradient(circle at top left, rgba(14,165,233,0.22), transparent 40%), radial-gradient(circle at top right, rgba(245,158,11,0.18), transparent 35%), linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,247,250,0.95))",

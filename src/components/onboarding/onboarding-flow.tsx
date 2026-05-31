@@ -9,7 +9,7 @@ type Stage = "splash" | "language" | "done";
 // ── Splash ──────────────────────────────────────────────────────────────────
 function SplashStage({ onDone }: { onDone: () => void }) {
   useEffect(() => {
-    const t = window.setTimeout(onDone, 2800);
+    const t = window.setTimeout(onDone, 1200);
     return () => window.clearTimeout(t);
   }, [onDone]);
 

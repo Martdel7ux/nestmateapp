@@ -158,9 +158,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  // Load all profiles for admin CRM + update user count stat
+  // Load all profiles + all verifications with signed URLs for admin CRM
   useEffect(() => {
     if (!supabase || !isAdmin) return;
+
     supabase
       .from("profiles")
       .select("*")
@@ -173,6 +174,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
             stats: { ...current.stats, totalUsers: data.length }
           }));
         }
+      });
+
+    // Load all verifications with signed URLs only for admins (deferred from startup)
+    supabase
+      .from("landlord_verifications")
+      .select("*, profile:profiles!landlord_id(*)")
+      .limit(200)
+      .then(async ({ data: verifsData }) => {
+        if (!verifsData?.length) return;
+        const withUrls = await Promise.all(
+          verifsData.map(async (v: Record<string, unknown>) => {
+            try {
+              const [{ data: idSigned }, { data: selfieSigned }] = await Promise.all([
+                supabase!.storage.from("verification-docs").createSignedUrl(v.id_document_url as string, 3600),
+                supabase!.storage.from("verification-docs").createSignedUrl(v.selfie_url as string, 3600)
+              ]);
+              return { ...v, id_document_url: idSigned?.signedUrl ?? v.id_document_url, selfie_url: selfieSigned?.signedUrl ?? v.selfie_url };
+            } catch { return v; }
+          })
+        );
+        setSnapshot((current) => ({
+          ...current,
+          verifications: withUrls as unknown as LandlordVerification[]
+        }));
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, user?.id]);
@@ -194,24 +219,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
           .from("properties")
           .select("*, owner:profiles!owner_id(*)")
           .order("created_at", { ascending: false })
-          .limit(300),
-        supabase.from("flatmate_listings").select("*, profile:profiles!user_id(*)").eq("is_approved", true).limit(200),
+          .limit(50),
+        supabase.from("flatmate_listings").select("*, profile:profiles!user_id(*)").eq("is_approved", true).limit(50),
         supabase
           .from("matches")
           .select("*")
-          .or(`user_a.eq.${userId},user_b.eq.${userId}`),
+          .or(`user_a.eq.${userId},user_b.eq.${userId}`)
+          .limit(100),
         supabase
           .from("notifications")
           .select("*")
           .eq("recipient_id", userId)
           .order("created_at", { ascending: false })
           .limit(50),
+        // Only fetch the current user's own verification — admin loads all via the admin effect
         supabase
           .from("landlord_verifications")
           .select("*, profile:profiles!landlord_id(*)")
-          .limit(100),
-        supabase.from("property_saves").select("property_id").eq("user_id", userId),
-        supabase.from("swipes").select("*").eq("swiper_id", userId)
+          .eq("landlord_id", userId)
+          .limit(1),
+        supabase.from("property_saves").select("property_id").eq("user_id", userId).limit(500),
+        supabase.from("swipes").select("*").eq("swiper_id", userId).limit(500)
       ]);
 
       const matchIds = (matchesData ?? []).map((m: Record<string, string>) => m.id);
@@ -222,31 +250,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
               .select("*")
               .in("match_id", matchIds)
               .order("created_at", { ascending: false })
-              .limit(300)
+              .limit(50)
           : { data: [] };
 
-      // Generate signed URLs so verification doc images display correctly (private bucket)
-      const verificationsWithUrls = await Promise.all(
-        (verifsData ?? []).map(async (v: Record<string, unknown>) => {
-          try {
-            const [{ data: idSigned }, { data: selfieSigned }] = await Promise.all([
-              supabase!.storage
-                .from("verification-docs")
-                .createSignedUrl(v.id_document_url as string, 3600),
-              supabase!.storage
-                .from("verification-docs")
-                .createSignedUrl(v.selfie_url as string, 3600)
-            ]);
-            return {
-              ...v,
-              id_document_url: idSigned?.signedUrl ?? v.id_document_url,
-              selfie_url: selfieSigned?.signedUrl ?? v.selfie_url
-            };
-          } catch {
-            return v;
-          }
-        })
-      );
+      // Skip signed URL generation on startup — admin panel generates them on demand
+      const verificationsWithUrls = verifsData ?? [];
 
       const savedIds = new Set(
         (savesData ?? []).map((s: Record<string, string>) => s.property_id)

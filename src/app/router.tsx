@@ -127,15 +127,10 @@ function OnboardingProtectedLayout() {
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
-  const { isComplete, loaded: onboardingLoaded } = useOnboarding();
+  const { isComplete, ready } = useOnboarding();
 
-  if (loading) return null;
+  if (loading || !ready) return null;
   if (supabase && !user) return <Navigate to="/auth" replace />;
-
-  // Wait until localStorage read + profile check are both done before deciding.
-  // This prevents redirecting to onboarding before completedAt is confirmed absent.
-  if (!onboardingLoaded) return null;
-
   if (!isComplete) return <Navigate to="/onboarding/welcome" replace />;
 
   return (

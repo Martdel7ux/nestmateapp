@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { useData } from "@/contexts/data-context";
+import { supabase } from "@/lib/supabase";
 import type {
   LandlordPreferences,
   OnboardingData,
@@ -18,14 +18,15 @@ import type {
 interface OnboardingContextValue {
   data: OnboardingData;
   isComplete: boolean;
-  /** True once ALL checks (localStorage + profile) have resolved. ProtectedLayout
-   *  must wait for this before making any redirect decision. */
-  loaded: boolean;
+  /** True once we have read localStorage for the current user. Always resolves
+   *  within one effect cycle (~16 ms). The router waits for this before deciding
+   *  whether to show onboarding. */
+  ready: boolean;
   setUserType: (type: OnboardingUserType) => void;
   patchStudentPrefs: (prefs: Partial<StudentPreferences>) => void;
   patchLandlordPrefs: (prefs: Partial<LandlordPreferences>) => void;
-  completeOnboarding: () => void;
-  skipOnboarding: () => void;
+  completeOnboarding: () => Promise<void>;
+  skipOnboarding: () => Promise<void>;
 }
 
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
@@ -47,62 +48,75 @@ function writeData(uid: string, data: OnboardingData) {
   } catch { /* quota errors */ }
 }
 
+function markComplete(uid: string, existing: OnboardingData): OnboardingData {
+  const completed = { ...existing, completedAt: new Date().toISOString() };
+  writeData(uid, completed);
+  return completed;
+}
+
+function deriveUserType(type: OnboardingUserType | undefined): string {
+  if (!type) return "student";
+  return type === "landlord" ? "landlord" : "student";
+}
+
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const { snapshot, dataLoading } = useData();
   const [data, setData] = useState<OnboardingData>({});
-  const [loaded, setLoaded] = useState(false);
+  // `ready` flips to true after one synchronous effect cycle — never hangs.
+  const [ready, setReady] = useState(false);
 
-  // Phase 1: read from localStorage as soon as we know the user.
-  // If completedAt is already set we're done — mark loaded immediately.
-  // If not, hold off and let Phase 2 finish the check before marking loaded.
+  // Step 1 — synchronous localStorage read. Runs once per user change, resolves in ~16 ms.
   useEffect(() => {
-    setLoaded(false);
+    setReady(false);
     if (!user) {
       setData({});
-      // Do NOT set loaded=true here. ProtectedLayout redirects to /auth for
-      // unauthenticated users before it ever checks `loaded`, so leaving it
-      // false prevents a premature onboarding redirect while auth is resolving.
+      setReady(true); // No user: ProtectedLayout will redirect to /auth anyway.
       return;
     }
-    const stored = readData(user.id);
-    setData(stored);
-    if (stored.completedAt) {
-      setLoaded(true);
-    }
-    // else: Phase 2 will set loaded once it has profile data
-  }, [user?.id]);
-
-  // Phase 2: once profile data is available, decide whether to auto-skip onboarding
-  // (existing / old accounts). Then — and only then — mark loaded so the router acts.
-  useEffect(() => {
-    if (!user || dataLoading) return;
 
     const stored = readData(user.id);
 
+    // Auto-skip for old accounts (no DB query needed).
     if (!stored.completedAt) {
       const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
       const isOldAccount = Date.now() - createdAt > 7 * 24 * 60 * 60 * 1000;
-      const hasProfileData = !!(snapshot.profile?.university || snapshot.profile?.city);
-
-      if (isOldAccount || hasProfileData) {
-        const completed = { ...stored, completedAt: new Date().toISOString() };
-        writeData(user.id, completed);
+      if (isOldAccount) {
+        const completed = markComplete(user.id, stored);
         setData(completed);
+        setReady(true);
+        return;
       }
     }
 
-    // All checks done — router may now act.
-    setLoaded(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, dataLoading]);
+    setData(stored);
+    setReady(true); // Always resolves synchronously from localStorage.
+  }, [user?.id]);
+
+  // Step 2 — background DB check for cross-device completion.
+  // Runs after ready=true so it never blocks the UI.
+  useEffect(() => {
+    if (!user || !supabase) return;
+    const stored = readData(user.id);
+    if (stored.completedAt) return; // Already done — nothing to check.
+
+    void supabase
+      .from("user_preferences")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data: row }) => {
+        if (!row) return;
+        const completed = markComplete(user.id, readData(user.id));
+        setData(completed);
+      });
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const persist = useCallback(
     (next: OnboardingData) => {
       setData(next);
       if (user) writeData(user.id, next);
     },
-    [user?.id],
+    [user?.id], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const setUserType = useCallback(
@@ -122,22 +136,50 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     [data, persist],
   );
 
-  const completeOnboarding = useCallback(
-    () => persist({ ...data, completedAt: new Date().toISOString() }),
-    [data, persist],
-  );
+  const completeOnboarding = useCallback(async () => {
+    const next = { ...data, completedAt: new Date().toISOString() };
+    persist(next);
 
-  const skipOnboarding = useCallback(
-    () => persist({ ...data, completedAt: new Date().toISOString() }),
-    [data, persist],
-  );
+    if (!supabase || !user) return;
+
+    const sp = data.studentPreferences;
+    const lp = data.landlordPreferences;
+
+    await supabase.from("user_preferences").upsert(
+      {
+        user_id: user.id,
+        user_type: deriveUserType(data.userType),
+        university: sp?.university ?? null,
+        city: sp?.city ?? lp?.location ?? null,
+        budget: sp?.budget ?? null,
+        has_place: sp?.hasPlace ?? null,
+        bedrooms_available: sp?.bedroomsAvailable ?? null,
+        rent_per_person: sp?.rentPerPerson ?? null,
+        property_count: lp?.propertyCount ?? null,
+        property_location: lp?.location ?? null,
+      },
+      { onConflict: "user_id" },
+    );
+  }, [data, persist, user]);
+
+  const skipOnboarding = useCallback(async () => {
+    const next = { ...data, completedAt: new Date().toISOString() };
+    persist(next);
+
+    if (!supabase || !user) return;
+
+    await supabase.from("user_preferences").upsert(
+      { user_id: user.id, user_type: deriveUserType(data.userType) },
+      { onConflict: "user_id" },
+    );
+  }, [data, persist, user]);
 
   return (
     <OnboardingContext.Provider
       value={{
         data,
         isComplete: Boolean(data.completedAt),
-        loaded,
+        ready,
         setUserType,
         patchStudentPrefs,
         patchLandlordPrefs,

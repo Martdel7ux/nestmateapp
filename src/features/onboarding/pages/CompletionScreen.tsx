@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
@@ -29,10 +29,13 @@ const SUBTITLE: Record<string, string> = {
 export function CompletionScreen() {
   const navigate = useNavigate();
   const { data, completeOnboarding } = useOnboarding();
+  const [saving, setSaving] = useState(true);
 
   useEffect(() => {
-    completeOnboarding();
-  }, [completeOnboarding]);
+    completeOnboarding().finally(() => setSaving(false));
+  // completeOnboarding identity is stable for this session
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const userType = data.userType ?? "student_housing";
   const dest = DESTINATION[userType] ?? "/";
@@ -84,9 +87,10 @@ export function CompletionScreen() {
           <button
             type="button"
             onClick={() => navigate(dest, { replace: true })}
-            className="w-full rounded-2xl bg-primary py-4 font-semibold text-primary-foreground active:scale-[0.98] transition-transform"
+            disabled={saving}
+            className="w-full rounded-2xl bg-primary py-4 font-semibold text-primary-foreground active:scale-[0.98] transition-transform disabled:opacity-60"
           >
-            {cta}
+            {saving ? "Saving…" : cta}
           </button>
         </motion.div>
       </div>
