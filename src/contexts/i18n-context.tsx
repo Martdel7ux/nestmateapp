@@ -35,11 +35,19 @@ const dictionary: Dictionary = {
   homePoweredByAI:    { en: "Powered by Nestmate AI", el: "Με τεχνολογία Nestmate AI" },
   homeAIAssistant:    { en: "AI Assistant",  el: "AI Βοηθός" },
   homeTopProperty:    { en: "Top Properties",  el: "Κορυφαία Ακίνητα" },
+  homeTopProperties:  { en: "Top Properties",  el: "Κορυφαία Ακίνητα" },
   homeViewAll:        { en: "View All",      el: "Δες Όλα" },
   homeNoProperties:   { en: "No properties match your search.", el: "Δεν βρέθηκαν ακίνητα." },
   homeReviews:        { en: "reviews",   el: "κριτικές" },
   homePerMonth:       { en: "/mo",       el: "/μήνα" },
   homeCategoryAll:    { en: "All",       el: "Όλα" },
+
+  // ── Home hero card ──
+  homeFindYourHome:         { en: "Student housing in Cyprus",                          el: "Φοιτητική στέγαση στην Κύπρο" },
+  homeStudentHousingTitle:  { en: "200+ verified properties · Connect with flatmates",  el: "200+ επαληθευμένα ακίνητα · Βρες συγκάτοικο" },
+  homeStudentHousingDesc:   { en: "Verified homes near your university, all in one place.", el: "Επαληθευμένα σπίτια κοντά στο πανεπιστήμιό σου." },
+  homeSearch:               { en: "Search",    el: "Αναζήτηση" },
+  homeFlatmates:            { en: "Flatmates", el: "Συγκάτοικοι" },
 
   // ── Filter panel ──
   filterTitle:        { en: "Filters",        el: "Φίλτρα" },
