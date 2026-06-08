@@ -16,7 +16,7 @@ export function Avatar({ name, src, className, ...props }: AvatarProps) {
       {...props}
     >
       {src ? (
-        <img src={src} alt={name} className="h-full w-full rounded-full object-cover" />
+        <img src={src} alt={name} loading="lazy" decoding="async" className="h-full w-full rounded-full object-cover" />
       ) : (
         initials(name)
       )}

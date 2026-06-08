@@ -68,6 +68,7 @@ export function ProfileDetailSheet({
             <img
               src={photos[imgIndex]}
               alt={`Photo ${imgIndex + 1}`}
+              decoding="async"
               className="h-full w-full object-cover"
               onError={(e) => { (e.currentTarget as HTMLImageElement).src = dicebear; }}
             />
@@ -102,7 +103,7 @@ export function ProfileDetailSheet({
           {/* Header */}
           <div className="flex items-start gap-3">
             {hasFlat && (
-              <img src={profilePhoto} alt={name}
+              <img src={profilePhoto} alt={name} loading="lazy" decoding="async"
                 className="h-14 w-14 rounded-full object-cover border-2 border-border shadow shrink-0"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).src = dicebear; }} />
             )}

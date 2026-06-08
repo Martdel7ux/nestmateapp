@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MotionConfig } from "framer-motion";
 import { Toaster } from "sonner";
 import { useState, type ReactNode } from "react";
 import { ThemeProvider } from "@/contexts/theme-context";
@@ -14,7 +15,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 60_000,
-            retry: 1
+            retry: 1,
+            // Mobile apps resume frequently; refetching every time the window
+            // regains focus causes a burst of network + re-renders on each
+            // app-switch. Rely on staleTime + explicit invalidation instead.
+            refetchOnWindowFocus: false
           }
         }
       })
@@ -27,8 +32,12 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <AuthProvider>
             <DataProvider>
               <OnboardingProvider>
-                {children}
-                <Toaster richColors position="top-center" />
+                {/* reducedMotion="user" makes every Framer animation honor the
+                    OS "Reduce Motion" setting (incl. infinite loops). */}
+                <MotionConfig reducedMotion="user">
+                  {children}
+                  <Toaster richColors position="top-center" />
+                </MotionConfig>
               </OnboardingProvider>
             </DataProvider>
           </AuthProvider>

@@ -26,6 +26,8 @@ export function MemberAvatar({ member, size = "md", className }: Props) {
       <img
         src={member.avatar_url}
         alt={getMemberInitials(member)}
+        loading="lazy"
+        decoding="async"
         className={cn("rounded-full object-cover shrink-0", dim, className)}
       />
     );

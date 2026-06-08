@@ -100,7 +100,7 @@ function AttachmentBubble({ url, type, isMine }: {
   isMine: boolean;
 }) {
   const { t } = useI18n();
-  if (type === "image") return <img src={url} alt="attachment" className="max-w-[220px] rounded-2xl object-cover shadow-sm" />;
+  if (type === "image") return <img src={url} alt="attachment" loading="lazy" decoding="async" className="max-w-[220px] rounded-2xl object-cover shadow-sm" />;
   if (type === "video") return <video controls src={url} className="max-w-[220px] rounded-2xl shadow-sm" />;
   if (type === "audio") return <audio controls src={url} className="max-w-[220px]" />;
   return (

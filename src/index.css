@@ -33,8 +33,8 @@
   --glass-border: rgba(15, 15, 25, 0.09);
   --glass-border-strong: rgba(15, 15, 25, 0.16);
   --glass-highlight: rgba(255, 255, 255, 0.92);
-  --glass-blur: 20px;
-  --glass-saturate: 160%;
+  --glass-blur: 14px;
+  --glass-saturate: 140%;
   --glass-shadow: 0 8px 32px rgba(15, 15, 25, 0.07), 0 2px 8px rgba(15, 15, 25, 0.05);
 
   /* ── Semantic text tokens ────────────────────────────────────────────── */
@@ -110,8 +110,8 @@
   --glass-border: rgba(255, 255, 255, 0.10);
   --glass-border-strong: rgba(255, 255, 255, 0.20);
   --glass-highlight: rgba(255, 255, 255, 0.15);
-  --glass-blur: 24px;
-  --glass-saturate: 180%;
+  --glass-blur: 16px;
+  --glass-saturate: 150%;
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.14);
 
   /* ── Header glass tokens — dark mode ────────────────────────────────── */
@@ -233,8 +233,8 @@ input, textarea, select { font-size: 16px !important; }
 .glass-card-dark {
   background: rgba(255, 255, 255, 0.055);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
 }
 
 /* Glass nav — liquid glass style */
@@ -250,8 +250,8 @@ input, textarea, select { font-size: 16px !important; }
     ),
     var(--nav-fill);
   border: 1px solid var(--nav-border);
-  backdrop-filter: blur(44px) saturate(220%) brightness(1.03);
-  -webkit-backdrop-filter: blur(44px) saturate(220%) brightness(1.03);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
   box-shadow:
     var(--nav-shadow),
     /* Inset top specular edge — catches the light */
@@ -317,8 +317,8 @@ input, textarea, select { font-size: 16px !important; }
 .glass-nav-dark {
   background: rgba(10, 10, 20, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
 }
 
 /* ── Grain texture overlay ───────────────────────────────────────────────── */
@@ -335,7 +335,7 @@ input, textarea, select { font-size: 16px !important; }
 .ambient-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(48px);
   pointer-events: none;
 }
 
@@ -390,13 +390,16 @@ input, textarea, select { font-size: 16px !important; }
   box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  transition: background 200ms ease, backdrop-filter 200ms ease;
+  /* NOTE: backdrop-filter is intentionally NOT transitioned — animating a
+     backdrop blur re-samples the whole backdrop every frame and is one of the
+     most expensive things to do on mobile. Only the background fades. */
+  transition: background 200ms ease;
 }
 
 .app-header[data-scrolled] {
   background: var(--glass-fill);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
 }
 
 /* Fallback: browsers that don't support backdrop-filter get an opaque fill */
@@ -414,4 +417,53 @@ input, textarea, select { font-size: 16px !important; }
   -webkit-backdrop-filter: none !important;
   border: none !important;
   box-shadow: none !important;
+}
+
+/* ── Mobile / touch performance ──────────────────────────────────────────────
+   backdrop-filter cost scales with blur radius and is re-sampled per frame for
+   every glass surface on screen — the main cause of scroll jank on phones.
+   Touch devices get a much smaller radius (and a slightly more opaque fill so
+   the surface still reads as glass) plus lighter nav/header blur. */
+@media (pointer: coarse) {
+  :root,
+  [data-theme="dark"],
+  .dark {
+    --glass-blur: 8px;
+    --glass-saturate: 120%;
+    --glass-fill: rgba(255, 255, 255, 0.72);
+  }
+  [data-theme="dark"],
+  .dark {
+    --glass-fill: rgba(20, 20, 28, 0.72);
+  }
+
+  .glass-nav {
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+  }
+  .glass-card-dark,
+  .glass-nav-dark {
+    backdrop-filter: blur(10px) saturate(130%);
+    -webkit-backdrop-filter: blur(10px) saturate(130%);
+  }
+  .app-header[data-scrolled] {
+    backdrop-filter: blur(10px) saturate(130%);
+    -webkit-backdrop-filter: blur(10px) saturate(130%);
+  }
+  /* Lighter ambient blobs on mobile — the big blur is costly behind glass */
+  .ambient-blob { filter: blur(40px); }
+}
+
+/* ── Respect reduced-motion globally ─────────────────────────────────────────
+   Honors the OS "Reduce Motion" setting: near-instant transitions/animations
+   and no infinite loops, which also saves battery and avoids compositor churn. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

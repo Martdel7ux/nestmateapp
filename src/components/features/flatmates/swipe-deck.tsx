@@ -124,7 +124,7 @@ function ProfileCard({ flatmate, onSwipe, onTap, isTop, stackIndex }: {
       <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] bg-slate-900"
         style={{ transform: `scale(${1 - stackIndex * 0.04}) translateY(${stackIndex * 14}px)`, zIndex: 10 - stackIndex }}
       >
-        <img src={imageUrl} alt={name} className="h-full w-full object-cover opacity-70"
+        <img src={imageUrl} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover opacity-70"
           onError={(e) => { (e.currentTarget as HTMLImageElement).src = dicebear; }} />
       </div>
     );
@@ -144,7 +144,7 @@ function ProfileCard({ flatmate, onSwipe, onTap, isTop, stackIndex }: {
       exit={{ opacity: 0, transition: { duration: 0.15 } }}
       transition={{ type: "spring", stiffness: 300, damping: 28 }}
     >
-      <img src={imageUrl} alt={name} className="h-full w-full object-cover"
+      <img src={imageUrl} alt={name} decoding="async" className="h-full w-full object-cover"
         onError={(e) => { (e.currentTarget as HTMLImageElement).src = dicebear; }} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 

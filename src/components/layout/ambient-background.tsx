@@ -18,17 +18,17 @@ export function AmbientBackground({ className }: { className?: string }) {
 
       {/* Primary glow — top-left (sky/primary) */}
       <div
-        className="absolute -left-[15%] -top-[10%] h-[50vh] w-[50vh] rounded-full blur-[90px]"
+        className="absolute -left-[15%] -top-[10%] h-[50vh] w-[50vh] rounded-full blur-[48px] md:blur-[80px]"
         style={{ background: "var(--ambient-primary)" }}
       />
       {/* Secondary glow — top-right (amber/secondary) */}
       <div
-        className="absolute -right-[10%] top-[5%] h-[40vh] w-[40vh] rounded-full blur-[90px]"
+        className="absolute -right-[10%] top-[5%] h-[40vh] w-[40vh] rounded-full blur-[48px] md:blur-[80px]"
         style={{ background: "var(--ambient-secondary)" }}
       />
       {/* Accent glow — bottom-left (emerald) */}
       <div
-        className="absolute bottom-[5%] left-[5%] h-[38vh] w-[38vh] rounded-full blur-[90px]"
+        className="absolute bottom-[5%] left-[5%] h-[38vh] w-[38vh] rounded-full blur-[48px] md:blur-[80px]"
         style={{ background: "var(--ambient-accent)" }}
       />
 

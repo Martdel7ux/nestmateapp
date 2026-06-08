@@ -45,7 +45,7 @@ export function ContentResultRow({ result, onNavigate }: ContentRowProps) {
       className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left transition hover:bg-muted/60 active:scale-[0.98]"
     >
       {result.thumbnail_url ? (
-        <img src={result.thumbnail_url} alt="" className="h-9 w-9 shrink-0 rounded-lg object-cover" />
+        <img src={result.thumbnail_url} alt="" loading="lazy" decoding="async" className="h-9 w-9 shrink-0 rounded-lg object-cover" />
       ) : (
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted">
           <FileText size={15} className="text-muted-foreground" />
