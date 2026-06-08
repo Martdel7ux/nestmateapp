@@ -140,8 +140,9 @@ export function ProfilePage() {
       toast.success("Password changed successfully");
       setPwOpen(false);
       setNewPw(""); setConfirmPw("");
-    } catch {
-      toast.error("Failed to change password");
+    } catch (e) {
+      // Surface the real reason (password policy, reauthentication, etc.)
+      toast.error(e instanceof Error ? e.message : "Failed to change password");
     } finally {
       setSavingPw(false);
     }

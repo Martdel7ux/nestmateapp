@@ -22,6 +22,7 @@ import { CompletionScreen } from "@/features/onboarding/pages/CompletionScreen";
 import { HomePage } from "@/pages/home-page";
 import { AuthPage } from "@/pages/auth-page";
 import { AuthCallbackPage } from "@/pages/auth-callback-page";
+import { ResetPasswordPage } from "@/pages/reset-password-page";
 import { NotFoundPage } from "@/pages/not-found-page";
 
 // ── Lazy page imports ────────────────────────────────────────────────────────
@@ -153,6 +154,7 @@ export function AppRouter() {
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Onboarding — auth-gated but no AppShell */}
         <Route element={<OnboardingProtectedLayout />}>

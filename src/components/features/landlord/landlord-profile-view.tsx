@@ -73,7 +73,7 @@ export function LandlordProfileView() {
       await updatePassword(newPw);
       toast.success("Password changed");
       setPwOpen(false); setNewPw(""); setConfirmPw("");
-    } catch { toast.error("Failed to change password"); }
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed to change password"); }
     finally { setSavingPw(false); }
   };
 
