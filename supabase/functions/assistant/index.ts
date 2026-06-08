@@ -1,4 +1,5 @@
-import { handleCors, corsHeaders } from "../_shared/cors.ts";
+import { handleCors, corsHeadersFor } from "../_shared/cors.ts";
+import { enforceRateLimit } from "../_shared/rate-limit.ts";
 import { callAnthropicStream } from "../_shared/anthropic.ts";
 import { callOpenAIStream, fakeSseStream } from "../_shared/openai.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -340,6 +341,13 @@ Deno.serve(async (request) => {
   const cors = handleCors(request);
   if (cors) return cors;
 
+  // Per-user rate limit: protects against runaway loops and bill abuse.
+  const limited = await enforceRateLimit(request, [
+    { bucket: "assistant", max: 15, windowSeconds: 60 },
+    { bucket: "assistant:day", max: 300, windowSeconds: 86_400 },
+  ]);
+  if (limited) return limited;
+
   const { messages = [] } = await request.json();
 
   const authHeader = request.headers.get("Authorization") ?? "";
@@ -347,7 +355,7 @@ Deno.serve(async (request) => {
   const systemPrompt = buildSystemPrompt(userContext);
 
   const sseHeaders = {
-    ...corsHeaders,
+    ...corsHeadersFor(request),
     "Content-Type": "text/event-stream",
     Connection: "keep-alive",
     "Cache-Control": "no-cache",

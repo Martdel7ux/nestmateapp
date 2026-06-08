@@ -1,13 +1,13 @@
-import { corsHeaders } from "./cors.ts";
+import { corsHeaders, corsHeadersFor } from "./cors.ts";
 
 const OPENAI_API_URL = "https://api.openai.com/v1/responses";
 const DEFAULT_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-4.1-mini";
 
-export async function createJsonResponse(body: unknown, status = 200) {
+export async function createJsonResponse(body: unknown, status = 200, request?: Request) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
-      ...corsHeaders,
+      ...(request ? corsHeadersFor(request) : corsHeaders),
       "Content-Type": "application/json"
     }
   });

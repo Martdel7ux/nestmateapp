@@ -1045,11 +1045,28 @@ export function DataProvider({ children }: { children: ReactNode }) {
           profile: { ...current.profile, ...profileData }
         }));
         if (supabase && user) {
-          const { error } = await supabase
-            .from("profiles")
-            .update(profileData)
-            .eq("id", user.id);
-          if (error) console.error("updateProfile error:", error);
+          // Home address is owner-only PII → profiles_private; everything else
+          // stays on the world-readable profiles table.
+          const { street_address, postal_code, ...publicData } = profileData;
+          const updates: PromiseLike<{ error: unknown }>[] = [];
+          if (Object.keys(publicData).length > 0) {
+            updates.push(
+              supabase.from("profiles").update(publicData).eq("id", user.id)
+            );
+          }
+          if ("street_address" in profileData || "postal_code" in profileData) {
+            updates.push(
+              supabase
+                .from("profiles_private")
+                .upsert(
+                  { id: user.id, street_address, postal_code },
+                  { onConflict: "id" }
+                )
+            );
+          }
+          const results = await Promise.all(updates);
+          const failed = results.find((r) => r.error);
+          if (failed) console.error("updateProfile error:", failed.error);
         }
       },
 

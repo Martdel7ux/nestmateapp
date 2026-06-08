@@ -1,9 +1,13 @@
 import { handleCors } from "../_shared/cors.ts";
+import { enforceRateLimit } from "../_shared/rate-limit.ts";
 import { callOpenAIJson, createJsonResponse } from "../_shared/openai.ts";
 
 Deno.serve(async (request) => {
   const cors = handleCors(request);
   if (cors) return cors;
+
+  const limited = await enforceRateLimit(request, { bucket: "smart-search", max: 30, windowSeconds: 60 });
+  if (limited) return limited;
 
   const { query } = await request.json();
   const normalized = String(query ?? "").toLowerCase();
@@ -27,8 +31,8 @@ Deno.serve(async (request) => {
       response_format: { type: "json_object" }
     });
 
-    return createJsonResponse(result ? JSON.parse(result) : fallback);
+    return createJsonResponse(result ? JSON.parse(result) : fallback, 200, request);
   } catch (_error) {
-    return createJsonResponse(fallback);
+    return createJsonResponse(fallback, 200, request);
   }
 });

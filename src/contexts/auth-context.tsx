@@ -28,8 +28,6 @@ interface SignUpInput {
   userType: UserType;
 }
 
-const ADMIN_EMAILS = ["martinahoto4@gmail.com"];
-
 interface AuthContextValue {
   user: User | null;
   session: Session | null;
@@ -54,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!supabase) {
@@ -84,17 +83,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then((result: { data: Profile | null }) => {
-        setProfile(result.data ?? null);
-      });
+    // Public profile + owner-only private PII (consent timestamps, home address)
+    // live in separate tables; merge them into the in-memory Profile object so
+    // the rest of the app can keep reading `profile.street_address`, etc.
+    Promise.all([
+      supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+      supabase.from("profiles_private").select("*").eq("id", user.id).maybeSingle(),
+    ]).then(([pub, priv]) => {
+      const base = pub.data as Profile | null;
+      if (!base) {
+        setProfile(null);
+        return;
+      }
+      setProfile({ ...base, ...(priv.data ?? {}) } as Profile);
+    });
   }, [user]);
 
-  const isAdmin = ADMIN_EMAILS.includes(user?.email ?? "");
+  // Admin status comes from the `user_roles` table (the same source the
+  // database RLS policies use), not a hardcoded email. RLS lets only admins
+  // read user_roles, so a non-admin simply gets no row here → isAdmin = false.
+  useEffect(() => {
+    if (!supabase || !user) {
+      setIsAdmin(false);
+      return;
+    }
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle()
+      .then(({ data }) => setIsAdmin(Boolean(data)));
+  }, [user]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -157,8 +177,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       async deleteAccount() {
         if (!supabase || !user) return;
-        // Delete profile row first, then sign out (account deletion requires server-side admin)
-        await supabase.from("profiles").delete().eq("id", user.id);
+        // Fully erase the account server-side (auth user + storage + cascaded
+        // rows). The client cannot delete an auth user, so this runs in the
+        // `delete-account` edge function with the service role.
+        const { error } = await supabase.functions.invoke("delete-account", {
+          method: "POST",
+        });
+        if (error) throw error;
         await supabase.auth.signOut();
       },
       async resetPassword(email) {
@@ -171,18 +196,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async updateConsent(acceptAll) {
         if (!supabase || !user || !acceptAll) return;
         const iso = new Date().toISOString();
+        // Consent timestamps are owner-only PII → profiles_private.
         const { error, data } = await supabase
-          .from("profiles")
-          .update({
-            accepted_terms_at: iso,
-            accepted_privacy_at: iso,
-            accepted_cookies_at: iso
-          })
-          .eq("id", user.id)
+          .from("profiles_private")
+          .upsert(
+            {
+              id: user.id,
+              accepted_terms_at: iso,
+              accepted_privacy_at: iso,
+              accepted_cookies_at: iso
+            },
+            { onConflict: "id" }
+          )
           .select()
           .single();
         if (error) throw error;
-        setProfile(data as Profile);
+        setProfile((current) => (current ? { ...current, ...data } : current));
       }
     }),
     [isAdmin, loading, profile, session, user]
