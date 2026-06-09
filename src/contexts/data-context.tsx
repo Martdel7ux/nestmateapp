@@ -12,6 +12,9 @@ import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
 import type { AppSnapshot } from "@/types/app";
 import type {
+  Cleanliness, SleepSchedule, SocialHabits, StudyHabits
+} from "@/lib/flatmate-lifestyle";
+import type {
   City,
   FlatmateListing,
   LandlordVerification,
@@ -62,6 +65,11 @@ interface CreateFlatmateInput {
   apartmentImages?: string[];
   profileImageFile?: File;
   apartmentImageFiles?: File[];
+  // Lifestyle (Match Score)
+  cleanliness?: Cleanliness;
+  sleepSchedule?: SleepSchedule;
+  socialHabits?: SocialHabits;
+  studyHabits?: StudyHabits;
 }
 
 interface CreatePropertyInput {
@@ -103,6 +111,12 @@ interface DataContextValue {
   approveFlatmate: (flatmateId: string, approved: boolean) => void;
   approveProperty: (propertyId: string, approved: boolean) => void;
   createFlatmateListing: (data: CreateFlatmateInput) => Promise<void>;
+  updateMyLifestyle: (values: {
+    cleanliness: Cleanliness;
+    sleepSchedule: SleepSchedule;
+    socialHabits: SocialHabits;
+    studyHabits: StudyHabits;
+  }) => Promise<void>;
   updateProfile: (data: Partial<Pick<Profile, "full_name" | "bio" | "university" | "city" | "avatar_url" | "area" | "street_address" | "postal_code" | "location_set_at" | "location_confirmed_at">>, avatarFile?: File) => Promise<void>;
   submitVerification: (idFile: File, selfieFile: File) => Promise<void>;
   approveVerification: (landlordId: string) => void;
@@ -977,6 +991,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
           flat_postal_code: data.flatPostalCode ?? null,
           apartment_images: apartmentImages,
           apartment_description: data.apartmentDescription ?? null,
+          cleanliness: data.cleanliness ?? null,
+          sleep_schedule: data.sleepSchedule ?? null,
+          social_habits: data.socialHabits ?? null,
+          study_habits: data.studyHabits ?? null,
           is_approved: true,
           profile: snapshot.profile
         };
@@ -1013,6 +1031,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 flat_postal_code: data.flatPostalCode ?? null,
                 apartment_images: apartmentImages,
                 apartment_description: data.apartmentDescription ?? null,
+                cleanliness: data.cleanliness ?? null,
+                sleep_schedule: data.sleepSchedule ?? null,
+                social_habits: data.socialHabits ?? null,
+                study_habits: data.studyHabits ?? null,
                 is_approved: true
               },
               { onConflict: "user_id" }
@@ -1020,6 +1042,39 @@ export function DataProvider({ children }: { children: ReactNode }) {
             .then(({ error }) => {
               if (error) toast.error(`Listing save failed: ${error.message}`);
             });
+        }
+      },
+
+      async updateMyLifestyle(values) {
+        if (!user) return;
+        const userId = user.id;
+        const patch = {
+          cleanliness: values.cleanliness,
+          sleep_schedule: values.sleepSchedule,
+          social_habits: values.socialHabits,
+          study_habits: values.studyHabits,
+        };
+        // Optimistic local update (also refreshes the offline cache so the
+        // change survives a re-login).
+        setSnapshot((current) => {
+          const flatmates = current.flatmates.map((f) =>
+            f.user_id === userId ? { ...f, ...patch } : f
+          );
+          const mine = flatmates.find((f) => f.user_id === userId);
+          if (mine) {
+            try {
+              localStorage.setItem(`flatmate_submitted_${userId}`, JSON.stringify(mine));
+            } catch { /* ignore quota errors */ }
+          }
+          return { ...current, flatmates };
+        });
+        if (supabase) {
+          const { error } = await supabase
+            .from("flatmate_listings")
+            .update(patch)
+            .eq("user_id", userId);
+          if (error) toast.error(`Could not save: ${error.message}`);
+          else toast.success("Match preferences saved");
         }
       },
 

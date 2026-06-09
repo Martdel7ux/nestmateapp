@@ -6,6 +6,7 @@ import { Select } from "@/components/ui/select";
 import { AppHeader } from "@/components/layout/app-header";
 import { FlatmateForm } from "@/components/features/flatmates/flatmate-form";
 import { SwipeDeck } from "@/components/features/flatmates/swipe-deck";
+import { LifestyleEditor } from "@/components/features/flatmates/lifestyle-editor";
 import { useData } from "@/contexts/data-context";
 import { useI18n } from "@/contexts/i18n-context";
 import { cities } from "@/lib/constants";
@@ -96,7 +97,8 @@ export function FlatmatesPage() {
         </Card>
       )}
 
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-xl space-y-4">
+        <LifestyleEditor />
         <SwipeDeck />
       </div>
     </div>

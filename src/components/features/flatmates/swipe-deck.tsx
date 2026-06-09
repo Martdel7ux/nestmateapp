@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { BedDouble, Heart, Home, MapPin, MessageCircle, Search, X } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useData } from "@/contexts/data-context";
+import { useMatchScore } from "@/hooks/use-match-score";
+import { matchTier } from "@/lib/match-score";
 import type { FlatmateListing } from "@/types/supabase";
 import { ProfileDetailSheetPortal } from "./profile-detail-sheet";
 
@@ -101,6 +103,7 @@ function ProfileCard({ flatmate, onSwipe, onTap, isTop, stackIndex }: {
   const rotate = useTransform(x, [-200, 200], [-18, 18]);
   const likeOpacity = useTransform(x, [20, 100], [0, 1]);
   const nopeOpacity = useTransform(x, [-100, -20], [1, 0]);
+  const match = useMatchScore(flatmate);
 
   const dicebear = `https://api.dicebear.com/9.x/adventurer/svg?seed=${flatmate.profile?.full_name ?? flatmate.id}&backgroundColor=b6e3f4&backgroundType=solid`;
   const imageUrl =
@@ -168,6 +171,18 @@ function ProfileCard({ flatmate, onSwipe, onTap, isTop, stackIndex }: {
           <span className="text-[10px] font-medium text-white/80">Tap for details</span>
         </div>
       </div>
+
+      {/* Compatibility match score */}
+      {match && match.dimensions.length > 0 && (
+        <div className="absolute left-1/2 top-3.5 -translate-x-1/2">
+          <div className="flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 shadow-lg ring-1 ring-black/5">
+            <span className={`text-base font-extrabold leading-none ${matchTier(match.overall).text}`}>
+              {match.overall}%
+            </span>
+            <span className="text-[11px] font-bold uppercase tracking-wide text-gray-500">Match</span>
+          </div>
+        </div>
+      )}
 
       <div className="absolute inset-x-0 bottom-0 space-y-3 p-6">
         <div className="flex items-center gap-1.5">

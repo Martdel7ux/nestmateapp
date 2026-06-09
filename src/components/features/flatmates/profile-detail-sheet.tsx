@@ -1,8 +1,10 @@
 import { useState } from "react";
 import {
-  ChevronDown, Euro, Globe, GraduationCap, Home, MapPin, PawPrint, Search, X, Heart,
+  ChevronDown, Euro, Globe, GraduationCap, Home, MapPin, PawPrint, Search, X, Heart, Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useMatchScore } from "@/hooks/use-match-score";
+import { matchTier } from "@/lib/match-score";
 import type { FlatmateListing } from "@/types/supabase";
 
 function Chip({ label }: { label: string }) {
@@ -36,6 +38,8 @@ export function ProfileDetailSheet({
 
   const profilePhoto =
     flatmate.profile_image_url ?? flatmate.profile?.avatar_url ?? dicebear;
+
+  const match = useMatchScore(flatmate);
 
   return (
     <motion.div
@@ -123,6 +127,40 @@ export function ProfileDetailSheet({
               {hasFlat ? "Has a flat" : "Seeking"}
             </div>
           </div>
+
+          {/* Compatibility / Match Score */}
+          {match && match.dimensions.length > 0 && (
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={16} className="text-primary" />
+                  <h3 className="text-sm font-semibold">Compatibility</h3>
+                </div>
+                <div className="text-right">
+                  <span className={`text-2xl font-extrabold leading-none ${matchTier(match.overall).text}`}>
+                    {match.overall}%
+                  </span>
+                  <p className="text-[11px] font-medium text-muted-foreground">{matchTier(match.overall).label}</p>
+                </div>
+              </div>
+              <div className="space-y-2.5 pt-0.5">
+                {match.dimensions.map((d) => (
+                  <div key={d.key} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium text-foreground">{d.label}</span>
+                      <span className="text-muted-foreground">{d.score}%</span>
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className={`h-full rounded-full ${matchTier(d.score).bar}`}
+                        style={{ width: `${d.score}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Bio */}
           {flatmate.bio && (

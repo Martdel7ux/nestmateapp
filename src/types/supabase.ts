@@ -1,4 +1,7 @@
 import { cities, studentTypes, userTypes } from "@/lib/constants";
+import type {
+  Cleanliness, SleepSchedule, SocialHabits, StudyHabits
+} from "@/lib/flatmate-lifestyle";
 
 export type City = (typeof cities)[number];
 export type StudentType = (typeof studentTypes)[number];
@@ -82,6 +85,11 @@ export interface FlatmateListing {
   flat_postal_code?: string | null;
   apartment_images: string[];
   apartment_description?: string | null;
+  // Lifestyle attributes for the Match Score (nullable: older listings lack them)
+  cleanliness?: Cleanliness | null;
+  sleep_schedule?: SleepSchedule | null;
+  social_habits?: SocialHabits | null;
+  study_habits?: StudyHabits | null;
   is_approved: boolean;
   profile?: Profile;
 }

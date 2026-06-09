@@ -7,6 +7,10 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useData } from "@/contexts/data-context";
 import { cities } from "@/lib/constants";
+import {
+  CLEANLINESS_OPTIONS, SLEEP_OPTIONS, SOCIAL_OPTIONS, STUDY_OPTIONS, LIFESTYLE_DEFAULTS,
+  type Cleanliness, type SleepSchedule, type SocialHabits, type StudyHabits,
+} from "@/lib/flatmate-lifestyle";
 import type { City, StudentType } from "@/types/supabase";
 
 const COUNTRIES = [
@@ -70,6 +74,11 @@ export function FlatmateForm() {
   const [language, setLanguage] = useState("");
   const [studentType, setStudentType] = useState<StudentType>("full_time");
   const [petPreference, setPetPreference] = useState<"love" | "okay" | "neutral" | "no">("okay");
+  // Lifestyle (powers the Match Score)
+  const [cleanliness, setCleanliness] = useState<Cleanliness>(LIFESTYLE_DEFAULTS.cleanliness);
+  const [sleepSchedule, setSleepSchedule] = useState<SleepSchedule>(LIFESTYLE_DEFAULTS.sleep_schedule);
+  const [socialHabits, setSocialHabits] = useState<SocialHabits>(LIFESTYLE_DEFAULTS.social_habits);
+  const [studyHabits, setStudyHabits] = useState<StudyHabits>(LIFESTYLE_DEFAULTS.study_habits);
   const [hasFlat, setHasFlat] = useState(false);
   const [minBudget, setMinBudget] = useState("");
   const [maxBudget, setMaxBudget] = useState("");
@@ -154,6 +163,10 @@ export function FlatmateForm() {
       profileImageFile: profileFile ?? undefined,
       apartmentImages: flatPreviews,
       apartmentImageFiles: flatImageFiles,
+      cleanliness,
+      sleepSchedule,
+      socialHabits,
+      studyHabits,
     });
     setSubmitting(false);
   };
@@ -252,6 +265,42 @@ export function FlatmateForm() {
               <option value="okay">Okay with pets</option>
               <option value="neutral">Neutral</option>
               <option value="no">No pets please</option>
+            </Select>
+          </div>
+        </div>
+      </Card>
+
+      {/* ── Lifestyle (Match Score) ── */}
+      <Card className="space-y-4">
+        <div>
+          <h3 className="font-display text-xl">Lifestyle</h3>
+          <p className="text-sm text-muted-foreground">
+            We use these to calculate a compatibility match score with potential flatmates.
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Cleanliness</label>
+            <Select value={cleanliness} onChange={(e) => setCleanliness(e.target.value as Cleanliness)}>
+              {CLEANLINESS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Sleep schedule</label>
+            <Select value={sleepSchedule} onChange={(e) => setSleepSchedule(e.target.value as SleepSchedule)}>
+              {SLEEP_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Social habits</label>
+            <Select value={socialHabits} onChange={(e) => setSocialHabits(e.target.value as SocialHabits)}>
+              {SOCIAL_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Study habits</label>
+            <Select value={studyHabits} onChange={(e) => setStudyHabits(e.target.value as StudyHabits)}>
+              {STUDY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </Select>
           </div>
         </div>
