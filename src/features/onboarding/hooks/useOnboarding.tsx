@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { supabase } from "@/lib/supabase";
+import { storageGet, storageSet } from "@/lib/native-storage";
 import type {
   LandlordPreferences,
   OnboardingData,
@@ -33,24 +34,25 @@ const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
 const storageKey = (uid: string) => `nestmate_onboarding_${uid}`;
 
-function readData(uid: string): OnboardingData {
+// Backed by Capacitor Preferences (durable native storage) with a localStorage
+// fallback on web — see native-storage.ts. These are async because native
+// storage access is async.
+async function readData(uid: string): Promise<OnboardingData> {
   try {
-    const raw = localStorage.getItem(storageKey(uid));
+    const raw = await storageGet(storageKey(uid));
     return raw ? (JSON.parse(raw) as OnboardingData) : {};
   } catch {
     return {};
   }
 }
 
-function writeData(uid: string, data: OnboardingData) {
-  try {
-    localStorage.setItem(storageKey(uid), JSON.stringify(data));
-  } catch { /* quota errors */ }
+async function writeData(uid: string, data: OnboardingData): Promise<void> {
+  await storageSet(storageKey(uid), JSON.stringify(data));
 }
 
-function markComplete(uid: string, existing: OnboardingData): OnboardingData {
+async function markComplete(uid: string, existing: OnboardingData): Promise<OnboardingData> {
   const completed = { ...existing, completedAt: new Date().toISOString() };
-  writeData(uid, completed);
+  await writeData(uid, completed);
   return completed;
 }
 
@@ -65,56 +67,89 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   // `ready` flips to true after one synchronous effect cycle — never hangs.
   const [ready, setReady] = useState(false);
 
-  // Step 1 — synchronous localStorage read. Runs once per user change, resolves in ~16 ms.
+  // Resolve onboarding status for the current user. The DB (`user_preferences`)
+  // is the source of truth for completion; localStorage is just a fast cache.
+  //
+  // Crucially, when the local cache has NO completion record we must consult the
+  // DB BEFORE flipping `ready` — otherwise a returning user whose cache was
+  // cleared (e.g. after force-quitting the native app, where WebView storage is
+  // not guaranteed to persist) would be wrongly sent back through onboarding.
   useEffect(() => {
+    let cancelled = false;
     setReady(false);
+
     if (!user) {
       setData({});
       setReady(true); // No user: ProtectedLayout will redirect to /auth anyway.
       return;
     }
 
-    const stored = readData(user.id);
+    const uid = user.id;
+    const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
+    const isOldAccount = createdAt > 0 && Date.now() - createdAt > 7 * 24 * 60 * 60 * 1000;
 
-    // Auto-skip for old accounts (no DB query needed).
-    if (!stored.completedAt) {
-      const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
-      const isOldAccount = Date.now() - createdAt > 7 * 24 * 60 * 60 * 1000;
-      if (isOldAccount) {
-        const completed = markComplete(user.id, stored);
-        setData(completed);
-        setReady(true);
+    const finish = (next: OnboardingData) => {
+      if (cancelled) return;
+      setData(next);
+      setReady(true);
+    };
+
+    // Safety net: never block the app indefinitely on slow storage/DB access.
+    const timeout = window.setTimeout(() => finish({}), 6000);
+
+    void (async () => {
+      const stored = await readData(uid);
+      if (cancelled) return;
+
+      // Fast path: durable cache already marks completion.
+      if (stored.completedAt) {
+        window.clearTimeout(timeout);
+        finish(stored);
         return;
       }
-    }
 
-    setData(stored);
-    setReady(true); // Always resolves synchronously from localStorage.
-  }, [user?.id]);
+      // Old account heuristic: auto-skip without a DB query.
+      if (isOldAccount) {
+        const completed = await markComplete(uid, stored);
+        window.clearTimeout(timeout);
+        finish(completed);
+        return;
+      }
 
-  // Step 2 — background DB check for cross-device completion.
-  // Runs after ready=true so it never blocks the UI.
-  useEffect(() => {
-    if (!user || !supabase) return;
-    const stored = readData(user.id);
-    if (stored.completedAt) return; // Already done — nothing to check.
+      // No local completion → authoritative DB check before deciding.
+      if (!supabase) {
+        window.clearTimeout(timeout);
+        finish(stored);
+        return;
+      }
 
-    void supabase
-      .from("user_preferences")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data: row }) => {
-        if (!row) return;
-        const completed = markComplete(user.id, readData(user.id));
-        setData(completed);
-      });
+      try {
+        const { data: row } = await supabase
+          .from("user_preferences")
+          .select("id")
+          .eq("user_id", uid)
+          .maybeSingle();
+        if (cancelled) return;
+        const next = row ? await markComplete(uid, stored) : stored;
+        window.clearTimeout(timeout);
+        finish(next);
+      } catch {
+        // Network error → fall back to local cache (treat as not complete).
+        window.clearTimeout(timeout);
+        finish(stored);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const persist = useCallback(
     (next: OnboardingData) => {
       setData(next);
-      if (user) writeData(user.id, next);
+      if (user) void writeData(user.id, next);
     },
     [user?.id], // eslint-disable-line react-hooks/exhaustive-deps
   );
