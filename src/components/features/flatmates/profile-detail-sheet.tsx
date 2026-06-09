@@ -5,6 +5,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useMatchScore } from "@/hooks/use-match-score";
 import { matchTier } from "@/lib/match-score";
+import {
+  CLEANLINESS_OPTIONS, SLEEP_OPTIONS, SOCIAL_OPTIONS, STUDY_OPTIONS, lifestyleOption,
+  type LifestyleOption,
+} from "@/lib/flatmate-lifestyle";
 import type { FlatmateListing } from "@/types/supabase";
 
 function Chip({ label }: { label: string }) {
@@ -40,6 +44,13 @@ export function ProfileDetailSheet({
     flatmate.profile_image_url ?? flatmate.profile?.avatar_url ?? dicebear;
 
   const match = useMatchScore(flatmate);
+
+  const lifestyleChips = [
+    lifestyleOption(CLEANLINESS_OPTIONS, flatmate.cleanliness),
+    lifestyleOption(SLEEP_OPTIONS, flatmate.sleep_schedule),
+    lifestyleOption(SOCIAL_OPTIONS, flatmate.social_habits),
+    lifestyleOption(STUDY_OPTIONS, flatmate.study_habits),
+  ].filter(Boolean) as LifestyleOption<string>[];
 
   return (
     <motion.div
@@ -165,6 +176,24 @@ export function ProfileDetailSheet({
           {/* Bio */}
           {flatmate.bio && (
             <p className="text-sm leading-relaxed text-muted-foreground">{flatmate.bio}</p>
+          )}
+
+          {/* Lifestyle chips */}
+          {lifestyleChips.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Lifestyle</h3>
+              <div className="flex flex-wrap gap-2">
+                {lifestyleChips.map(({ value, label, icon: Icon }) => (
+                  <span
+                    key={value}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
+                  >
+                    <Icon size={12} className="shrink-0" />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
 
           {/* Flat details */}
