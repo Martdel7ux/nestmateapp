@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Filter, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,11 +12,33 @@ import { useI18n } from "@/contexts/i18n-context";
 import { cities } from "@/lib/constants";
 
 export function FlatmatesPage() {
-  const { myFlatmateListing, flatmateFilters, setFlatmateFilters, dataLoading } = useData();
+  const { myFlatmateListing, flatmateFilters, setFlatmateFilters, dataLoading, snapshot } = useData();
   const { t } = useI18n();
   const [showFilters, setShowFilters] = useState(false);
 
   const myListing = myFlatmateListing;
+
+  // Filter options derived from the actual candidate pool, so a user never
+  // picks a university/country that returns zero results.
+  const availableUniversities = useMemo(() => {
+    const set = new Set<string>();
+    for (const f of snapshot.flatmates) {
+      if (!f.is_approved) continue;
+      const u = f.profile?.university?.trim();
+      if (u) set.add(u);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [snapshot.flatmates]);
+
+  const availableCountries = useMemo(() => {
+    const set = new Set<string>();
+    for (const f of snapshot.flatmates) {
+      if (!f.is_approved) continue;
+      const c = f.country_of_origin?.trim();
+      if (c) set.add(c);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [snapshot.flatmates]);
 
   // ── Still loading from Supabase: don't flash the form prematurely ──
   if (dataLoading) {
@@ -82,6 +104,24 @@ export function FlatmatesPage() {
             <option value="erasmus">{t("flatmatesErasmus")}</option>
             <option value="full_time">{t("flatmatesFullTime")}</option>
           </Select>
+          {availableUniversities.length > 0 && (
+            <Select
+              value={flatmateFilters.university ?? ""}
+              onChange={(e) => setFlatmateFilters({ ...flatmateFilters, university: e.target.value || undefined })}
+            >
+              <option value="">{t("flatmatesAllUnis")}</option>
+              {availableUniversities.map((u) => <option key={u} value={u}>{u}</option>)}
+            </Select>
+          )}
+          {availableCountries.length > 0 && (
+            <Select
+              value={flatmateFilters.country ?? ""}
+              onChange={(e) => setFlatmateFilters({ ...flatmateFilters, country: e.target.value || undefined })}
+            >
+              <option value="">{t("flatmatesAllCountries")}</option>
+              {availableCountries.map((c) => <option key={c} value={c}>{c}</option>)}
+            </Select>
+          )}
           <Input
             type="number"
             placeholder={t("flatmatesMinBudget")}

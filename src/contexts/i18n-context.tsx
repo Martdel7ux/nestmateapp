@@ -70,6 +70,8 @@ const dictionary: Dictionary = {
   flatmatesFilter:      { en: "Filter",     el: "Φίλτρο" },
   flatmatesAllCities:   { en: "All cities", el: "Όλες οι πόλεις" },
   flatmatesAllTypes:    { en: "All student types", el: "Όλοι οι τύποι" },
+  flatmatesAllUnis:     { en: "All universities", el: "Όλα τα πανεπιστήμια" },
+  flatmatesAllCountries:{ en: "All countries", el: "Όλες οι χώρες" },
   flatmatesErasmus:     { en: "Erasmus / short-term", el: "Erasmus / βραχυπρόθεσμος" },
   flatmatesFullTime:    { en: "Full-time",  el: "Κανονικός φοιτητής" },
   flatmatesMinBudget:   { en: "Min budget (€)", el: "Ελάχ. προϋπολογισμός (€)" },

@@ -41,6 +41,8 @@ interface FlatmateFilters {
   minBudget?: number;
   maxBudget?: number;
   studentType?: string;
+  university?: string;
+  country?: string;
 }
 
 interface CreateFlatmateInput {
@@ -392,6 +394,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (
         flatmateFilters.studentType &&
         flatmate.student_type !== flatmateFilters.studentType
+      )
+        return false;
+      if (
+        flatmateFilters.university &&
+        flatmate.profile?.university !== flatmateFilters.university
+      )
+        return false;
+      if (
+        flatmateFilters.country &&
+        flatmate.country_of_origin !== flatmateFilters.country
       )
         return false;
       return true;
