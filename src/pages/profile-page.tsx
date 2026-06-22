@@ -321,10 +321,7 @@ export function ProfilePage() {
           className="w-full rounded-[1.5rem] border border-primary/20 bg-primary/5 p-4 text-left transition hover:bg-primary/10 active:scale-[0.98]"
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Sparkles size={15} className="text-primary" />
-              <span className="text-sm font-semibold text-primary">Complete your profile</span>
-            </div>
+            <span className="text-sm font-semibold text-primary">Complete your profile</span>
             <span className="text-sm font-bold text-primary">{completionPct}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-primary/15">

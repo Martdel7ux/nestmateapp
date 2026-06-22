@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Building2, Grid2X2, Heart, Landmark, MapPin, Search, SlidersHorizontal, Star } from "lucide-react";
+import { Building2, Heart, MapPin, Search, SlidersHorizontal, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { AppHeader } from "@/components/layout/app-header";
 import { useData } from "@/contexts/data-context";
@@ -38,15 +38,9 @@ const CITY_AREAS: Record<string, string[]> = {
   ],
 };
 
-const categoryDefs = [
-  { value: "All",      icon: Grid2X2  },
-  { value: "Nicosia",  icon: Building2 },
-  { value: "Limassol", icon: Building2 },
-  { value: "Larnaca",  icon: Landmark  },
-  { value: "Paphos",   icon: Building2 },
-] as const;
+const categoryDefs = ["All", "Nicosia", "Limassol", "Larnaca", "Paphos"] as const;
 
-type Category = (typeof categoryDefs)[number]["value"];
+type Category = (typeof categoryDefs)[number];
 
 function PropertyCard({
   property,
@@ -275,7 +269,7 @@ export function PropertiesPage() {
         transition={{ delay: 0.2, duration: 0.4 }}
       >
         <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-5 pb-1">
-          {categoryDefs.map(({ value, icon: Icon }) => {
+          {categoryDefs.map((value) => {
             const active = category === value;
             return (
               <button
@@ -287,7 +281,6 @@ export function PropertiesPage() {
                     : "glass text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Icon size={15} />
                 {value === "All" ? t("homeCategoryAll") : value}
               </button>
             );
