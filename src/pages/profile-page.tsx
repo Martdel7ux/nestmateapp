@@ -6,7 +6,7 @@ import { useI18n } from "@/contexts/i18n-context";
 import {
   Camera, Check, ChevronRight, Eye, EyeOff,
   Heart, HelpCircle, Key, Laptop, LogOut, MapPin, Moon, Pencil,
-  ShieldCheck, Sparkles, Sun, Trash2, University, User, X
+  ShieldCheck, Sun, Trash2, University, User, UserRoundCheck, X
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -212,7 +212,7 @@ export function ProfilePage() {
               className="fixed inset-x-4 bottom-6 z-50 rounded-[2rem] bg-background p-6 shadow-card"
             >
               <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mx-auto">
-                <Sparkles size={26} className="text-primary" />
+                <UserRoundCheck size={26} className="text-primary" />
               </div>
               <h3 className="text-center font-display text-xl font-bold">Complete your profile</h3>
               <p className="mt-2 text-center text-sm text-muted-foreground leading-relaxed">
