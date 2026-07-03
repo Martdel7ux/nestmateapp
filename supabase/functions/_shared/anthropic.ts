@@ -6,7 +6,10 @@ export async function callAnthropicStream(
   system: string
 ): Promise<ReadableStream<Uint8Array> | null> {
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) return null;
+  if (!apiKey) {
+    console.warn("[assistant] ANTHROPIC_API_KEY is not set — Claude unavailable.");
+    return null;
+  }
 
   const model = Deno.env.get("ANTHROPIC_MODEL") ?? "claude-haiku-4-5-20251001";
 
@@ -20,13 +23,19 @@ export async function callAnthropicStream(
     body: JSON.stringify({
       model,
       max_tokens: 1024,
+      // Lower temperature keeps answers focused and precise rather than rambly.
+      temperature: 0.4,
       system,
       stream: true,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
     }),
   });
 
-  if (!response.ok || !response.body) return null;
+  if (!response.ok || !response.body) {
+    const detail = await response.text().catch(() => "");
+    console.error(`[assistant] Anthropic request failed (${response.status}): ${detail.slice(0, 300)}`);
+    return null;
+  }
 
   // Transform Anthropic's SSE format → { delta: "text" } format the client expects
   const encoder = new TextEncoder();

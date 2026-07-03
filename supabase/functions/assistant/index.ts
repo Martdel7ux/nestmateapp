@@ -367,8 +367,8 @@ Deno.serve(async (request) => {
     if (claudeStream) {
       return new Response(claudeStream, { headers: sseHeaders });
     }
-  } catch (_error) {
-    // fall through
+  } catch (error) {
+    console.error("[assistant] Claude threw:", error);
   }
 
   // 2. Fall back to OpenAI
@@ -377,11 +377,15 @@ Deno.serve(async (request) => {
     if (upstream?.body) {
       return new Response(upstream.body, { headers: sseHeaders });
     }
-  } catch (_error) {
-    // fall through
+  } catch (error) {
+    console.error("[assistant] OpenAI threw:", error);
   }
 
-  // 3. Local fake stream (no API keys configured)
+  // 3. Canned fallback — only reached when NO LLM provider is configured/working.
+  //    If you're seeing this in production, set the ANTHROPIC_API_KEY secret.
+  console.warn(
+    "[assistant] No LLM provider available — returning canned reply. Set ANTHROPIC_API_KEY (or OPENAI_API_KEY)."
+  );
   return new Response(
     fakeSseStream(
       "I'm Nestmate AI. I can help with your rent, documents, flatmates, Cyprus housing market, visa requirements, and how to use NestMate. What would you like to know?"
