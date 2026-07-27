@@ -17,13 +17,16 @@ export function WelcomeSplash() {
     <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-[var(--bg-base)]">
       {/* Ambient blobs */}
       <div className="fixed inset-0 -z-10" aria-hidden>
-        <div className="absolute inset-0 bg-[var(--bg-base)]" />
-        <div className="absolute -left-[20%] -top-[10%] h-[55vh] w-[55vh] rounded-full blur-[100px]"
-          style={{ background: "var(--ambient-primary)" }} />
-        <div className="absolute -right-[10%] top-[20%] h-[50vh] w-[50vh] rounded-full blur-[100px]"
-          style={{ background: "var(--ambient-secondary)" }} />
-        <div className="absolute bottom-[5%] left-[5%] h-[45vh] w-[45vh] rounded-full blur-[100px]"
-          style={{ background: "var(--ambient-accent)" }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(65vh 65vh at 6% 2%, var(--ambient-primary), transparent 60%)," +
+              "radial-gradient(60vh 60vh at 94% 20%, var(--ambient-secondary), transparent 60%)," +
+              "radial-gradient(55vh 55vh at 6% 92%, var(--ambient-accent), transparent 60%)," +
+              "var(--bg-base)",
+          }}
+        />
       </div>
 
       {/* Logo */}

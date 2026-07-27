@@ -89,29 +89,33 @@ export function HomePage() {
 
   return (
     <div className="relative min-h-dvh [overflow-x:clip]">
-      {/* Ambient background blobs */}
+      {/* Ambient background — static radial gradients instead of blurred blobs.
+          blur() on large elements is very expensive on mobile GPUs and delays
+          the first paint when navigating to Home; gradients look nearly the
+          same and composite instantly. */}
       <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden>
-        <div className="absolute inset-0 bg-[var(--bg-base)]" />
-        <div className="absolute -left-[20%] -top-[10%] h-[48vh] w-[48vh] rounded-full blur-[90px]"
-          style={{ background: "var(--ambient-primary)" }} />
-        <div className="absolute -right-[15%] top-[18%] h-[44vh] w-[44vh] rounded-full blur-[90px]"
-          style={{ background: "var(--ambient-secondary)" }} />
-        <div className="absolute bottom-[8%] left-[5%] h-[40vh] w-[40vh] rounded-full blur-[90px]"
-          style={{ background: "var(--ambient-accent)" }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(58vh 58vh at 8% 4%, var(--ambient-primary), transparent 60%)," +
+              "radial-gradient(54vh 54vh at 92% 22%, var(--ambient-secondary), transparent 60%)," +
+              "radial-gradient(50vh 50vh at 8% 90%, var(--ambient-accent), transparent 60%)," +
+              "var(--bg-base)",
+          }}
+        />
         <div className="bg-noise absolute inset-0" style={{ opacity: "var(--grain-opacity)" }} />
       </div>
 
       {/* Sticky header */}
       <AppHeader variant="home" title="" right={{ type: "notifications" }} />
 
-      {/* Blur veil below header */}
+      {/* Fade veil below header — a gradient instead of a backdrop-blur, which
+          would re-sample the page every frame while scrolling. */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[39]"
         style={{
           height: "calc(72px + env(safe-area-inset-top))",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
-          maskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, black 35%, transparent 100%)",
+          background: "linear-gradient(to bottom, var(--bg-base) 30%, transparent 100%)",
         }} />
 
       <PropertyDetailModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />

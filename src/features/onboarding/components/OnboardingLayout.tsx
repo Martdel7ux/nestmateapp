@@ -12,18 +12,15 @@ export function OnboardingLayout({ children, step, totalSteps = 3 }: OnboardingL
     <div className="relative flex min-h-dvh flex-col bg-[var(--bg-base)] [overflow-x:clip]">
       {/* Ambient blobs */}
       <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden>
-        <div className="absolute inset-0 bg-[var(--bg-base)]" />
         <div
-          className="absolute -left-[20%] -top-[10%] h-[48vh] w-[48vh] rounded-full blur-[90px]"
-          style={{ background: "var(--ambient-primary)" }}
-        />
-        <div
-          className="absolute -right-[15%] top-[30%] h-[44vh] w-[44vh] rounded-full blur-[90px]"
-          style={{ background: "var(--ambient-secondary)" }}
-        />
-        <div
-          className="absolute bottom-[5%] left-[5%] h-[36vh] w-[36vh] rounded-full blur-[90px]"
-          style={{ background: "var(--ambient-accent)" }}
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(58vh 58vh at 8% 4%, var(--ambient-primary), transparent 60%)," +
+              "radial-gradient(54vh 54vh at 92% 30%, var(--ambient-secondary), transparent 60%)," +
+              "radial-gradient(46vh 46vh at 8% 92%, var(--ambient-accent), transparent 60%)," +
+              "var(--bg-base)",
+          }}
         />
       </div>
 

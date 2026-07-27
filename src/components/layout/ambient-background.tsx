@@ -13,23 +13,20 @@ export function AmbientBackground({ className }: { className?: string }) {
       className={cn("fixed inset-0 -z-10 overflow-hidden", className)}
       aria-hidden
     >
-      {/* Themed base */}
-      <div className="absolute inset-0 bg-[var(--bg-base)]" />
-
-      {/* Primary glow — top-left (sky/primary) */}
+      {/* Brand glows rendered as static radial gradients instead of blurred
+          circles. `filter: blur()` on large elements is one of the most
+          expensive things a mobile GPU does and delays first paint on page
+          navigation; radial gradients look nearly identical and composite
+          instantly. */}
       <div
-        className="absolute -left-[15%] -top-[10%] h-[50vh] w-[50vh] rounded-full blur-[48px] md:blur-[80px]"
-        style={{ background: "var(--ambient-primary)" }}
-      />
-      {/* Secondary glow — top-right (amber/secondary) */}
-      <div
-        className="absolute -right-[10%] top-[5%] h-[40vh] w-[40vh] rounded-full blur-[48px] md:blur-[80px]"
-        style={{ background: "var(--ambient-secondary)" }}
-      />
-      {/* Accent glow — bottom-left (emerald) */}
-      <div
-        className="absolute bottom-[5%] left-[5%] h-[38vh] w-[38vh] rounded-full blur-[48px] md:blur-[80px]"
-        style={{ background: "var(--ambient-accent)" }}
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(60vh 60vh at 12% 6%, var(--ambient-primary), transparent 60%)," +
+            "radial-gradient(52vh 52vh at 92% 12%, var(--ambient-secondary), transparent 60%)," +
+            "radial-gradient(48vh 48vh at 8% 92%, var(--ambient-accent), transparent 60%)," +
+            "var(--bg-base)",
+        }}
       />
 
       {/* Grain texture */}
