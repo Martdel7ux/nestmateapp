@@ -1,0 +1,114 @@
+/* ============================================================================
+   NestMate v2 design system — "nocturne" tokens from the prototype.
+   Scoped under [data-nm] so it never collides with the existing app styles.
+   ========================================================================== */
+
+[data-nm] {
+  --nm-bg: #F8FAFC;
+  --nm-surface: #FFFFFF;
+  --nm-surface2: #F1F5F9;
+  --nm-text: #111827;
+  --nm-muted: #6B7280;
+  --nm-accent: #4F46E5;
+  --nm-soft: #EEF0FE;
+  --nm-mint: #34D399;
+  --nm-mint-soft: #E7FAF2;
+  --nm-coral: #FF7A70;
+  --nm-coral-soft: #FFF0EE;
+  --nm-line: rgba(17, 24, 39, .08);
+  --nm-elev: 0 2px 16px rgba(17, 24, 39, .06);
+  --nm-r-lg: 24px;
+  --nm-r-md: 18px;
+  --nm-r-sm: 14px;
+
+  color: var(--nm-text);
+  background: var(--nm-bg);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+[data-nm="dark"] {
+  --nm-bg: #161826;
+  --nm-surface: #232532;
+  --nm-surface2: #2b2e3d;
+  --nm-text: #e9e9ed;
+  --nm-muted: #9397ab;
+  --nm-accent: #b5abfc;
+  --nm-soft: #2b2741;
+  --nm-mint: #34D399;
+  --nm-mint-soft: #1d3b34;
+  --nm-coral: #FF9A92;
+  --nm-coral-soft: #3d2a29;
+  --nm-line: rgba(233, 233, 237, .10);
+  --nm-elev: 0 0 0 1px #3f424d, 0 8px 24px rgba(0, 0, 0, .4);
+}
+
+/* Hide scrollbars inside the app surface, like the prototype */
+[data-nm] *,
+[data-nm] *::before,
+[data-nm] *::after { box-sizing: border-box; }
+[data-nm] * { scrollbar-width: none; -ms-overflow-style: none; }
+[data-nm] *::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+@keyframes nmFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes nmRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* ── Reusable primitives ──────────────────────────────────────────────────── */
+.nm-card {
+  background: var(--nm-surface);
+  border-radius: var(--nm-r-md);
+  box-shadow: var(--nm-elev);
+}
+.nm-card-lg { border-radius: var(--nm-r-lg); }
+
+.nm-section-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--nm-muted);
+}
+
+.nm-link {
+  all: unset;
+  cursor: pointer;
+  font: 500 12.5px "Inter", sans-serif;
+  color: var(--nm-accent);
+}
+
+.nm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 99px;
+  background: var(--nm-soft);
+  font: 500 11.5px "Inter", sans-serif;
+  color: var(--nm-accent);
+}
+
+.nm-icon-btn {
+  all: unset;
+  cursor: pointer;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 99px;
+  background: var(--nm-surface);
+  box-shadow: var(--nm-elev);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nm-hscroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x proximity;
+}
+.nm-hscroll > * { scroll-snap-align: start; }
+
+.nm-press { transition: transform .12s ease; }
+.nm-press:active { transform: scale(.98); }

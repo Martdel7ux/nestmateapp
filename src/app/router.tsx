@@ -23,6 +23,9 @@ import { HomePage } from "@/pages/home-page";
 import { AuthPage } from "@/pages/auth-page";
 import { AuthCallbackPage } from "@/pages/auth-callback-page";
 import { ResetPasswordPage } from "@/pages/reset-password-page";
+import { RedesignShell } from "@/redesign/RedesignShell";
+import { WelcomeScreen } from "@/redesign/screens/WelcomeScreen";
+import { NmOnboarding } from "@/redesign/screens/NmOnboarding";
 import { NotFoundPage } from "@/pages/not-found-page";
 
 // ── Lazy page imports ────────────────────────────────────────────────────────
@@ -147,6 +150,18 @@ function ProtectedLayout() {
   );
 }
 
+/** Gate for the v2 experience: same auth/onboarding checks as ProtectedLayout,
+ *  but renders the new NestMate shell (no legacy AppShell chrome). */
+function V2Gate() {
+  const { user, loading } = useAuth();
+  const { isComplete, ready } = useOnboarding();
+
+  if (loading || !ready) return null;
+  if (supabase && !user) return <Navigate to="/welcome" replace />;
+  if (!isComplete) return <Navigate to="/onboarding" replace />;
+  return <RedesignShell />;
+}
+
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -155,6 +170,14 @@ export function AppRouter() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        {/* New-style auth + onboarding entry for the v2 experience */}
+        <Route path="/welcome" element={<WelcomeScreen />} />
+        <Route path="/onboarding" element={<NmOnboarding />} />
+        {/* Ungated v2 preview */}
+        <Route path="/v2" element={<RedesignShell />} />
+
+        {/* NestMate v2 is the main app entry (auth-gated). */}
+        <Route path="/" element={<V2Gate />} />
 
         {/* Onboarding — auth-gated but no AppShell */}
         <Route element={<OnboardingProtectedLayout />}>
@@ -167,7 +190,8 @@ export function AppRouter() {
         </Route>
 
         <Route element={<ProtectedLayout />}>
-          <Route path="/" element={<HomePage />} />
+          {/* Legacy app kept reachable as a fallback during the v2 rollout. */}
+          <Route path="/legacy" element={<HomePage />} />
           <Route path="/properties" element={<PropertiesPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/saved-properties" element={<SavedPropertiesPage />} />
