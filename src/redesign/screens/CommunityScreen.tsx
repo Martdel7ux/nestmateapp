@@ -1,6 +1,11 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { useDiscoverGroups, useJoinStudyGroup } from "@/hooks/use-study-groups";
+import { useMarketplaceListings, useCreateMarketplaceListing, usePerks } from "@/hooks/use-marketplace";
 import { ModuleIcon } from "../icons";
+
+const CATEGORIES = ["Furniture", "Books", "Electronics", "Bikes", "Other"];
+const noteCard = { marginTop: 18, padding: 26, textAlign: "center" as const, display: "flex", flexDirection: "column" as const, alignItems: "center" as const, gap: 10 };
 
 type Seg = "societies" | "market" | "perks";
 const SEGMENTS: { key: Seg; label: string }[] = [
@@ -53,61 +58,106 @@ function SocietiesBody() {
   );
 }
 
-const MARKET = [
-  { price: "€45", name: "IKEA desk lamp", seller: "Maria · CUT" },
-  { price: "€120", name: "Road bike, M frame", seller: "Kwame · UNIC" },
-  { price: "€25", name: "Calc textbook bundle", seller: "Lena · UCY" },
-  { price: "€60", name: "Mini fridge", seller: "Omar · Frederick" },
-];
+const formInput: React.CSSProperties = {
+  width: "100%", boxSizing: "border-box", padding: "12px 14px", borderRadius: "var(--nm-r-sm)",
+  border: "1px solid var(--nm-line)", outline: "none", background: "var(--nm-surface2)", fontSize: 16, color: "var(--nm-text)",
+};
 
 function MarketBody() {
+  const { data, isLoading } = useMarketplaceListings();
+  const create = useCreateMarketplaceListing();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
+  const [category, setCategory] = useState(CATEGORIES[0]);
+  const listings = data ?? [];
+
+  const submit = () => {
+    if (!title.trim() || !price) { toast.error("Add a title and a price."); return; }
+    create.mutate(
+      { title: title.trim(), price: Number(price), category },
+      {
+        onSuccess: () => { toast.success("Listed!"); setOpen(false); setTitle(""); setPrice(""); },
+        onError: (e) => toast.error(e instanceof Error ? e.message : "Could not list — is the marketplace table set up?"),
+      },
+    );
+  };
+
   return (
     <>
-      <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 13 }}>
-        {MARKET.map((m) => (
-          <div key={m.name} className="nm-card" style={{ overflow: "hidden" }}>
-            <div style={{ height: 96, background: "var(--nm-surface2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-muted)" }}>
-              <ModuleIcon name="market" size={30} />
-            </div>
-            <div style={{ padding: "12px 13px 14px" }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{m.price}</div>
-              <div style={{ fontSize: 12.5, marginTop: 3 }}>{m.name}</div>
-              <div style={{ fontSize: 11.5, color: "var(--nm-muted)", marginTop: 5 }}>{m.seller}</div>
-            </div>
+      {open && (
+        <div className="nm-card nm-card-lg" style={{ marginTop: 16, padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+          <input style={formInput} placeholder="What are you selling?" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <div style={{ display: "flex", gap: 10 }}>
+            <input style={{ ...formInput, flex: 1 }} type="number" placeholder="Price €" value={price} onChange={(e) => setPrice(e.target.value)} />
+            <select style={{ ...formInput, flex: 1 }} value={category} onChange={(e) => setCategory(e.target.value)}>
+              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
-        ))}
-      </div>
-      <button type="button" style={{ all: "unset", cursor: "pointer", display: "block", boxSizing: "border-box", width: "100%", textAlign: "center", marginTop: 18, padding: 16, borderRadius: "var(--nm-r-md)", border: "1px solid var(--nm-accent)", color: "var(--nm-accent)", font: "600 15px Inter, sans-serif" }}>
-        List something
+          <div style={{ display: "flex", gap: 10 }}>
+            <button type="button" onClick={() => setOpen(false)} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 12, borderRadius: "var(--nm-r-sm)", background: "var(--nm-surface2)", font: "600 14px Inter, sans-serif", color: "var(--nm-muted)" }}>Cancel</button>
+            <button type="button" disabled={create.isPending} onClick={submit} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 12, borderRadius: "var(--nm-r-sm)", background: "var(--nm-accent)", color: "#fff", font: "600 14px Inter, sans-serif", opacity: create.isPending ? 0.7 : 1 }}>Post</button>
+          </div>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div style={{ marginTop: 22, textAlign: "center", color: "var(--nm-muted)", fontSize: 13 }}>Loading…</div>
+      ) : listings.length === 0 ? (
+        <div className="nm-card nm-card-lg" style={noteCard}>
+          <span className="nm-pill">Nothing listed yet</span>
+          <p style={{ fontSize: 13.5, color: "var(--nm-muted)", lineHeight: 1.5, maxWidth: 260 }}>Be the first to list something for other students.</p>
+        </div>
+      ) : (
+        <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 13 }}>
+          {listings.map((m) => (
+            <div key={m.id} className="nm-card" style={{ overflow: "hidden" }}>
+              <div style={{ height: 96, background: "var(--nm-surface2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-muted)" }}>
+                {m.image_url ? <img src={m.image_url} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <ModuleIcon name="market" size={30} />}
+              </div>
+              <div style={{ padding: "12px 13px 14px" }}>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>€{Math.round(Number(m.price))}</div>
+                <div style={{ fontSize: 12.5, marginTop: 3 }}>{m.title}</div>
+                <div style={{ fontSize: 11.5, color: "var(--nm-muted)", marginTop: 5 }}>{m.seller?.full_name ?? "Student"}{m.city ? ` · ${m.city}` : ""}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <button type="button" onClick={() => setOpen((o) => !o)} style={{ all: "unset", cursor: "pointer", display: "block", boxSizing: "border-box", width: "100%", textAlign: "center", marginTop: 18, padding: 16, borderRadius: "var(--nm-r-md)", border: "1px solid var(--nm-accent)", color: "var(--nm-accent)", font: "600 15px Inter, sans-serif" }}>
+        {open ? "Close" : "List something"}
       </button>
-      <p style={{ fontSize: 11.5, color: "var(--nm-muted)", marginTop: 12, textAlign: "center" }}>Preview · marketplace listings arrive with the next update.</p>
     </>
   );
 }
 
-const DEALS = [
-  { name: "Bolt rides", note: "Weekday student fares", off: "-20%" },
-  { name: "Coffee Island", note: "Any drink with student ID", off: "-15%" },
-  { name: "Public gym Nicosia", note: "Monthly student pass", off: "-30%" },
-  { name: "Cineplex", note: "Tuesday screenings", off: "-25%" },
-];
-
 function PerksBody() {
+  const { data, isLoading } = usePerks();
+  const perks = data ?? [];
+  if (isLoading) return <div style={{ marginTop: 22, textAlign: "center", color: "var(--nm-muted)", fontSize: 13 }}>Loading…</div>;
+  if (perks.length === 0) {
+    return (
+      <div className="nm-card nm-card-lg" style={noteCard}>
+        <span className="nm-pill">No perks yet</span>
+        <p style={{ fontSize: 13.5, color: "var(--nm-muted)", lineHeight: 1.5, maxWidth: 260 }}>Student discounts around your city will appear here once added.</p>
+      </div>
+    );
+  }
   return (
     <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 11 }}>
-      {DEALS.map((d) => (
-        <div key={d.name} style={{ display: "flex", alignItems: "center", gap: 13, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", padding: "15px 16px", boxShadow: "var(--nm-elev)" }}>
+      {perks.map((d) => (
+        <div key={d.id} style={{ display: "flex", alignItems: "center", gap: 13, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", padding: "15px 16px", boxShadow: "var(--nm-elev)" }}>
           <span style={{ width: 40, height: 40, flex: "none", borderRadius: 13, background: "var(--nm-coral-soft)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-coral)" }}>
             <ModuleIcon name="deals" size={20} />
           </span>
           <span style={{ flex: 1 }}>
             <span style={{ display: "block", fontSize: 14.5, fontWeight: 600 }}>{d.name}</span>
-            <span style={{ display: "block", fontSize: 12, color: "var(--nm-muted)", marginTop: 2 }}>{d.note}</span>
+            {d.description && <span style={{ display: "block", fontSize: 12, color: "var(--nm-muted)", marginTop: 2 }}>{d.description}</span>}
           </span>
-          <span style={{ font: "600 14px Inter, sans-serif", color: "var(--nm-coral)" }}>{d.off}</span>
+          <span style={{ font: "600 14px Inter, sans-serif", color: "var(--nm-coral)" }}>{d.discount}</span>
         </div>
       ))}
-      <p style={{ fontSize: 11.5, color: "var(--nm-muted)", marginTop: 6, textAlign: "center" }}>Preview · unlocked by verified student status.</p>
     </div>
   );
 }

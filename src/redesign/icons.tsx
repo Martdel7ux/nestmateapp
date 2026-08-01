@@ -91,6 +91,24 @@ export const IconArrowLeft = (p: { size?: number }) => (
   </Base>
 );
 
+export const IconHeart = (p: { size?: number }) => (
+  <Base size={p.size ?? 24} strokeWidth={1.8}>
+    <path d="M12 20s-6.8-4.2-9-8.2C1.6 9 3 5.6 6.2 5.6c1.9 0 3.1 1.1 3.8 2.2.7-1.1 1.9-2.2 3.8-2.2 3.2 0 4.6 3.4 3.2 6.2-2.2 4-9 8.2-9 8.2z" />
+  </Base>
+);
+
+export const IconClose = (p: { size?: number }) => (
+  <Base size={p.size ?? 24} strokeWidth={2}>
+    <path d="M6 6l12 12M18 6 6 18" />
+  </Base>
+);
+
+export const IconCheck = (p: { size?: number }) => (
+  <Base size={p.size ?? 18} strokeWidth={2.4}>
+    <path d="M4.5 12.5 9.5 17.5 19.5 7" />
+  </Base>
+);
+
 export const IconSend = (p: { size?: number }) => (
   <Base size={p.size ?? 18} strokeWidth={1.9}>
     <path d="M4.5 12h13M12 5.5 18.5 12 12 18.5" />

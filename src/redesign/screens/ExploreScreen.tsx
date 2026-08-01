@@ -3,8 +3,9 @@ import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { useUpcomingRentPayment } from "@/hooks/use-rent";
 import { useOpportunities } from "@/hooks/use-opportunities";
-import { ModuleIcon, IconArrowLeft, IconChevron, type ModuleIconName } from "../icons";
-import { rentDueLabel } from "../util";
+import { useMatchScore } from "@/hooks/use-match-score";
+import { ModuleIcon, IconArrowLeft, IconChevron, IconHeart, IconClose, IconCheck, type ModuleIconName } from "../icons";
+import { initialsOf, rentDueLabel } from "../util";
 
 type ModuleId = ModuleIconName;
 
@@ -113,15 +114,149 @@ function BillsBody() {
   );
 }
 
+/** Roommates — real flatmate swipe deck with compatibility score. */
+function RoommatesBody() {
+  const { filteredFlatmates, swipeFlatmate } = useData();
+  const [idx, setIdx] = useState(0);
+  const [matched, setMatched] = useState<string | null>(null);
+  const current = filteredFlatmates[idx];
+  const match = useMatchScore(current);
+
+  if (!current) return <EmptyNote text="No more roommates to show right now — check back as more students join. (Create your own flatmate profile first if you haven't.)" />;
+
+  const name = current.profile?.full_name ?? "Student";
+  const photo = current.profile_image_url ?? current.apartment_images?.[0] ?? current.profile?.avatar_url ?? null;
+  const tags = [current.country_of_origin, current.language, current.student_type === "erasmus" ? "Erasmus" : "Full-time"].filter(Boolean) as string[];
+  const budget = current.housing_status === "has_flat" && current.flat_price
+    ? `€${current.flat_price}/mo`
+    : current.min_budget && current.max_budget ? `€${current.min_budget}–${current.max_budget}` : null;
+
+  const doSwipe = (dir: "left" | "right") => {
+    const m = swipeFlatmate(current.id, dir);
+    if (m) setMatched(name);
+    setIdx((i) => i + 1);
+  };
+
+  return (
+    <div style={{ marginTop: 18 }}>
+      {matched && (
+        <div className="nm-card" style={{ padding: "12px 15px", marginBottom: 12, background: "var(--nm-mint-soft)", display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ color: "var(--nm-mint)" }}><IconCheck /></span>
+          <span style={{ fontSize: 13.5, fontWeight: 600 }}>It's a match with {matched}! Say hello in Messages.</span>
+        </div>
+      )}
+      <div className="nm-card" style={{ overflow: "hidden" }}>
+        <div style={{ height: 380, position: "relative", background: "var(--nm-surface2)" }}>
+          {photo
+            ? <img src={photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-muted)", font: "600 48px Inter, sans-serif" }}>{initialsOf(name)}</div>}
+          {match && match.dimensions.length > 0 && (
+            <span style={{ position: "absolute", top: 12, left: 12, padding: "5px 11px", borderRadius: 99, background: "rgba(17,24,39,.62)", color: "#fff", font: "700 12px Inter, sans-serif", backdropFilter: "blur(6px)" }}>{match.overall}% match</span>
+          )}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,.1) 45%, transparent)" }} />
+          <div style={{ position: "absolute", left: 16, right: 16, bottom: 16, color: "#fff" }}>
+            <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-.02em" }}>{name}</div>
+            <div style={{ fontSize: 13, opacity: 0.85, marginTop: 2 }}>{[current.preferred_city, budget].filter(Boolean).join(" · ")}</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+              {tags.map((t) => <span key={t} style={{ padding: "5px 10px", borderRadius: 99, background: "rgba(255,255,255,.18)", font: "500 11.5px Inter, sans-serif" }}>{t}</span>)}
+            </div>
+          </div>
+        </div>
+      </div>
+      {current.bio && <p style={{ fontSize: 13.5, color: "var(--nm-muted)", lineHeight: 1.5, marginTop: 14 }}>{current.bio}</p>}
+      <div style={{ display: "flex", justifyContent: "center", gap: 22, marginTop: 18 }}>
+        <button type="button" onClick={() => doSwipe("left")} aria-label="Pass" className="nm-press" style={{ all: "unset", cursor: "pointer", width: 60, height: 60, borderRadius: 99, background: "var(--nm-surface)", boxShadow: "var(--nm-elev)", color: "var(--nm-coral)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <IconClose size={26} />
+        </button>
+        <button type="button" onClick={() => doSwipe("right")} aria-label="Like" className="nm-press" style={{ all: "unset", cursor: "pointer", width: 60, height: 60, borderRadius: 99, background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <IconHeart size={26} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const CAMPUS: { icon: ModuleIconName; name: string; note: string }[] = [
+  { icon: "campus", name: "Library", note: "Opening hours, study rooms & printing" },
+  { icon: "community", name: "Sports & gym", note: "Membership, classes & teams" },
+  { icon: "matches", name: "Health centre", note: "GP, counselling & pharmacy" },
+  { icon: "jobs", name: "Careers service", note: "CV help, fairs & placements" },
+  { icon: "ai", name: "IT & WiFi support", note: "Email, eduroam & software" },
+];
+
+function CampusBody() {
+  return (
+    <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 11 }}>
+      {CAMPUS.map((c) => (
+        <div key={c.name} style={{ display: "flex", alignItems: "center", gap: 13, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", padding: "15px 16px", boxShadow: "var(--nm-elev)" }}>
+          <span style={{ width: 38, height: 38, flex: "none", borderRadius: 13, background: "var(--nm-soft)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-accent)" }}>
+            <ModuleIcon name={c.icon} size={19} />
+          </span>
+          <span style={{ flex: 1 }}>
+            <span style={{ display: "block", fontSize: 14.5, fontWeight: 600 }}>{c.name}</span>
+            <span style={{ display: "block", fontSize: 12, color: "var(--nm-muted)", marginTop: 2 }}>{c.note}</span>
+          </span>
+          <span style={{ color: "var(--nm-muted)" }}><IconChevron /></span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const MOVE_TASKS = [
+  "Confirm your accommodation",
+  "Arrange airport pickup",
+  "Register with Migration (within 7 days)",
+  "Open a Cyprus bank account",
+  "Get a local SIM card",
+  "Enrol at your university",
+  "Set up rent & shared bills",
+];
+
+function MoveBody() {
+  const [done, setDone] = useState<boolean[]>(() => MOVE_TASKS.map((_, i) => i < 2));
+  const count = done.filter(Boolean).length;
+  const pct = Math.round((count / MOVE_TASKS.length) * 100);
+  return (
+    <div style={{ marginTop: 18 }}>
+      <div className="nm-card nm-card-lg" style={{ padding: 18 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <div style={{ fontSize: 15, fontWeight: 600 }}>Your arrival plan</div>
+          <div style={{ fontSize: 12.5, color: "var(--nm-muted)" }}>{count} of {MOVE_TASKS.length} done</div>
+        </div>
+        <div style={{ height: 8, borderRadius: 99, background: "var(--nm-surface2)", marginTop: 14, overflow: "hidden" }}>
+          <div style={{ height: "100%", borderRadius: 99, background: "var(--nm-accent)", width: `${pct}%`, transition: "width .4s" }} />
+        </div>
+      </div>
+      <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+        {MOVE_TASKS.map((t, i) => {
+          const on = done[i];
+          return (
+            <button key={t} type="button" onClick={() => setDone((d) => d.map((v, j) => (j === i ? !v : v)))} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", padding: "14px 16px", boxShadow: "var(--nm-elev)" }}>
+              <span style={{ width: 24, height: 24, flex: "none", borderRadius: 99, border: `1.5px solid ${on ? "var(--nm-mint)" : "var(--nm-line)"}`, background: on ? "var(--nm-mint)" : "transparent", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {on && <IconCheck size={14} />}
+              </span>
+              <span style={{ flex: 1, fontSize: 14.5, fontWeight: 500, color: on ? "var(--nm-muted)" : "var(--nm-text)", textDecoration: on ? "line-through" : "none" }}>{t}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function SubBody({ id }: { id: ModuleId }) {
   if (id === "discover") return <DiscoverBody />;
+  if (id === "matches") return <RoommatesBody />;
   if (id === "jobs") return <JobsBody />;
   if (id === "bills") return <BillsBody />;
+  if (id === "campus") return <CampusBody />;
+  if (id === "move") return <MoveBody />;
   return (
     <div className="nm-card nm-card-lg" style={{ marginTop: 20, padding: 26, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 10 }}>
-      <span className="nm-pill">Building this next</span>
+      <span className="nm-pill">Over in Community</span>
       <p style={{ fontSize: 13.5, color: "var(--nm-muted)", lineHeight: 1.5, maxWidth: 260 }}>
-        This section is part of the redesign in progress — the full experience is on its way.
+        Events, communities, marketplace and perks live in the Community tab.
       </p>
     </div>
   );
