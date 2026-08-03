@@ -5,7 +5,6 @@ import { HomeScreen } from "./screens/HomeScreen";
 import { ExploreScreen } from "./screens/ExploreScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { MessagesScreen } from "./screens/MessagesScreen";
-import { CommunityScreen } from "./screens/CommunityScreen";
 import "./nm-theme.css";
 
 /**
@@ -32,7 +31,6 @@ export function RedesignShell() {
         {tab === "home" && <HomeScreen onNavigate={setTab} />}
         {tab === "explore" && <ExploreScreen />}
         {tab === "messages" && <MessagesScreen />}
-        {tab === "community" && <CommunityScreen />}
         {tab === "profile" && <ProfileScreen />}
       </main>
 

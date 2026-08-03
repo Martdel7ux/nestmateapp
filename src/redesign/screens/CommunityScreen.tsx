@@ -14,7 +14,7 @@ const SEGMENTS: { key: Seg; label: string }[] = [
   { key: "perks", label: "Perks" },
 ];
 
-function SocietiesBody() {
+export function SocietiesBody() {
   const { data: groups, isLoading } = useDiscoverGroups();
   const join = useJoinStudyGroup();
   const list = groups ?? [];
@@ -63,7 +63,7 @@ const formInput: React.CSSProperties = {
   border: "1px solid var(--nm-line)", outline: "none", background: "var(--nm-surface2)", fontSize: 16, color: "var(--nm-text)",
 };
 
-function MarketBody() {
+export function MarketBody() {
   const { data, isLoading } = useMarketplaceListings();
   const create = useCreateMarketplaceListing();
   const [open, setOpen] = useState(false);
@@ -132,7 +132,7 @@ function MarketBody() {
   );
 }
 
-function PerksBody() {
+export function PerksBody() {
   const { data, isLoading } = usePerks();
   const perks = data ?? [];
   if (isLoading) return <div style={{ marginTop: 22, textAlign: "center", color: "var(--nm-muted)", fontSize: 13 }}>Loading…</div>;

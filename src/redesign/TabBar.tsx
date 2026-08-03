@@ -1,12 +1,11 @@
-import { IconHome, IconExplore, IconMessages, IconCommunity, IconProfile } from "./icons";
+import { IconHome, IconExplore, IconMessages, IconProfile } from "./icons";
 
-export type NmTab = "home" | "explore" | "messages" | "community" | "profile";
+export type NmTab = "home" | "explore" | "messages" | "profile";
 
 const TABS: { key: NmTab; label: string; Icon: (p: { size?: number }) => JSX.Element }[] = [
   { key: "home", label: "Home", Icon: IconHome },
   { key: "explore", label: "Explore", Icon: IconExplore },
   { key: "messages", label: "Messages", Icon: IconMessages },
-  { key: "community", label: "Community", Icon: IconCommunity },
   { key: "profile", label: "Profile", Icon: IconProfile },
 ];
 

@@ -154,10 +154,10 @@ export function HomeScreen({ onNavigate }: { onNavigate: (t: NmTab) => void }) {
       {/* This week events */}
       {eventList.length > 0 && (
         <>
-          <SectionHeader label="This week" action="All events" onAction={() => onNavigate("community")} />
+          <SectionHeader label="This week" action="All events" onAction={() => onNavigate("explore")} />
           <div className="nm-hscroll" style={{ marginTop: 11 }}>
             {eventList.map((e) => (
-              <button key={e.id} type="button" className="nm-press" onClick={() => onNavigate("community")} style={{ all: "unset", cursor: "pointer", width: 186, flex: "none", background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", boxShadow: "var(--nm-elev)", overflow: "hidden" }}>
+              <button key={e.id} type="button" className="nm-press" onClick={() => onNavigate("explore")} style={{ all: "unset", cursor: "pointer", width: 186, flex: "none", background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", boxShadow: "var(--nm-elev)", overflow: "hidden" }}>
                 <ImageSlot h={96} src={e.image_url} tint="var(--nm-coral)" badge={whenLabel(e.starts_at)} />
                 <span style={{ display: "block", padding: "12px 13px 14px" }}>
                   <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, lineHeight: 1.35 }}>{e.title}</span>
@@ -171,7 +171,7 @@ export function HomeScreen({ onNavigate }: { onNavigate: (t: NmTab) => void }) {
 
       {/* Societies + Perks */}
       <div style={{ marginTop: 22, display: "flex", gap: 12 }}>
-        <button type="button" onClick={() => onNavigate("community")} className="nm-press" style={{ all: "unset", cursor: "pointer", flex: 1, background: "var(--nm-mint-soft)", borderRadius: "var(--nm-r-md)", padding: "15px 16px" }}>
+        <button type="button" onClick={() => onNavigate("explore")} className="nm-press" style={{ all: "unset", cursor: "pointer", flex: 1, background: "var(--nm-mint-soft)", borderRadius: "var(--nm-r-md)", padding: "15px 16px" }}>
           <span className="nm-section-label" style={{ fontSize: 11 }}>Community</span>
           <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, marginTop: 6, lineHeight: 1.35 }}>Societies & events</span>
           <span style={{ display: "block", fontSize: 11.5, color: "var(--nm-muted)", marginTop: 4 }}>Find your people</span>
