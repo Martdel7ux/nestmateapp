@@ -4,24 +4,35 @@ import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { useTheme } from "@/contexts/theme-context";
 import { IconGear, IconShield, IconChevron, IconArrowLeft } from "../icons";
+import { StickyBar, stickyControl } from "../StickyBar";
 import { initialsOf } from "../util";
+import { AccountSettings } from "./AccountSettings";
+import { NotificationsSettings, PrivacySettings, HelpSettings } from "./SettingsScreens";
+
+type SettingsSub = "account" | "notifications" | "privacy" | "help";
 
 function SettingsView({ onBack }: { onBack: () => void }) {
   const { signOut } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
   const dark = resolvedTheme === "dark";
+  const [sub, setSub] = useState<null | SettingsSub>(null);
 
-  const rows = [
-    { k: "Account", v: "Email & password" },
-    { k: "Notifications", v: "" },
-    { k: "Privacy & documents", v: "Encrypted" },
-    { k: "Help & support", v: "" },
+  if (sub === "account") return <AccountSettings onBack={() => setSub(null)} />;
+  if (sub === "notifications") return <NotificationsSettings onBack={() => setSub(null)} />;
+  if (sub === "privacy") return <PrivacySettings onBack={() => setSub(null)} />;
+  if (sub === "help") return <HelpSettings onBack={() => setSub(null)} />;
+
+  const rows: { k: string; v: string; onClick?: () => void }[] = [
+    { k: "Account", v: "Email & password", onClick: () => setSub("account") },
+    { k: "Notifications", v: "", onClick: () => setSub("notifications") },
+    { k: "Privacy & documents", v: "Encrypted", onClick: () => setSub("privacy") },
+    { k: "Help & support", v: "", onClick: () => setSub("help") },
   ];
 
   return (
     <div style={{ padding: "calc(20px + env(safe-area-inset-top)) 20px 20px", animation: "nmFade .3s ease-out" }}>
-      <button type="button" className="nm-icon-btn nm-press" onClick={onBack} aria-label="Back" style={{ marginBottom: 16 }}>
+      <button type="button" className="nm-icon-btn nm-press" onClick={onBack} aria-label="Back" style={{ ...stickyControl, marginBottom: 16 }}>
         <IconArrowLeft />
       </button>
       <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Settings</div>
@@ -34,11 +45,17 @@ function SettingsView({ onBack }: { onBack: () => void }) {
           </span>
         </button>
         {rows.map((r) => (
-          <div key={r.k} style={{ display: "flex", alignItems: "center", gap: 12, padding: 16, borderTop: "1px solid var(--nm-line)" }}>
+          <button
+            key={r.k}
+            type="button"
+            onClick={r.onClick}
+            disabled={!r.onClick}
+            style={{ all: "unset", cursor: r.onClick ? "pointer" : "default", display: "flex", boxSizing: "border-box", width: "100%", alignItems: "center", gap: 12, padding: 16, borderTop: "1px solid var(--nm-line)", opacity: r.onClick ? 1 : 0.6 }}
+          >
             <span style={{ flex: 1, fontSize: 14.5 }}>{r.k}</span>
             {r.v && <span style={{ fontSize: 13, color: "var(--nm-muted)" }}>{r.v}</span>}
             <span style={{ color: "var(--nm-muted)" }}><IconChevron size={14} /></span>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -94,8 +111,13 @@ export function ProfileScreen() {
 
   return (
     <div style={{ padding: "calc(20px + env(safe-area-inset-top)) 20px 20px", animation: "nmFade .35s ease-out" }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+      {/* Header — settings gear stays pinned while the page scrolls beneath it */}
+      <StickyBar pullUp={38}>
+        <button type="button" className="nm-icon-btn nm-press" onClick={() => setView("settings")} aria-label="Settings" style={{ width: 38, height: 38 }}>
+          <IconGear size={18} />
+        </button>
+      </StickyBar>
+      <div style={{ display: "flex", alignItems: "center", gap: 15, paddingRight: 46 }}>
         <div style={{ width: 66, height: 66, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 22px Inter, sans-serif" }}>
           {profile?.avatar_url ? <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initialsOf(name)}
         </div>
@@ -105,9 +127,6 @@ export function ProfileScreen() {
             {[profile?.university, profile?.city].filter(Boolean).join(" · ") || "Complete your profile"}
           </div>
         </div>
-        <button type="button" className="nm-icon-btn nm-press" onClick={() => setView("settings")} aria-label="Settings" style={{ width: 38, height: 38 }}>
-          <IconGear size={18} />
-        </button>
       </div>
 
       {/* Trust / verification */}

@@ -1,4 +1,5 @@
 import { IconArrowLeft, IconHeart, IconClose } from "../icons";
+import { stickyControl } from "../StickyBar";
 import { initialsOf } from "../util";
 import type { MatchResult } from "@/lib/match-score";
 import {
@@ -50,7 +51,7 @@ export function RoommateDetail({
 
   return (
     <div style={{ paddingBottom: 96, animation: "nmFade .3s ease-out" }}>
-      <button type="button" onClick={onBack} aria-label="Back" className="nm-icon-btn nm-press" style={{ marginBottom: 14 }}>
+      <button type="button" onClick={onBack} aria-label="Back" className="nm-icon-btn nm-press" style={{ ...stickyControl, marginBottom: 14 }}>
         <IconArrowLeft />
       </button>
 

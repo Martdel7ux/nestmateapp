@@ -41,6 +41,7 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
+  updateEmail: (newEmail: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   updateConsent: (acceptAll: boolean) => Promise<void>;
 }
@@ -173,6 +174,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async updatePassword(newPassword) {
         if (!supabase) return;
         const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+      },
+      async updateEmail(newEmail) {
+        if (!supabase) return;
+        // Supabase emails a confirmation link to the new address (and, when
+        // "secure email change" is on, the old one too). The change only takes
+        // effect once the user clicks through — so the UI tells them to check.
+        const { error } = await supabase.auth.updateUser(
+          { email: newEmail },
+          { emailRedirectTo: authRedirectUrl }
+        );
         if (error) throw error;
       },
       async deleteAccount() {

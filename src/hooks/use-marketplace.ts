@@ -21,7 +21,7 @@ export function useCreateMarketplaceListing() {
   const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { title: string; price: number; category: string; description?: string; city?: string }) =>
+    mutationFn: (input: { title: string; price: number; category: string; description?: string; city?: string; imageFile?: File | null }) =>
       createMarketplaceListing({ ...input, sellerId: user!.id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["marketplace-listings"] }),
   });

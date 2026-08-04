@@ -1,4 +1,5 @@
 import { IconArrowLeft, IconHeart } from "../icons";
+import { stickyControl } from "../StickyBar";
 import { useToggleSave } from "@/hooks/use-saved-opportunities";
 import type { Opportunity, OppEmploymentType } from "@/types/discover";
 
@@ -40,7 +41,7 @@ export function JobDetail({ job, onBack }: { job: Opportunity; onBack: () => voi
 
   return (
     <div style={{ paddingBottom: 96, animation: "nmFade .3s ease-out" }}>
-      <button type="button" onClick={onBack} aria-label="Back" className="nm-icon-btn nm-press" style={{ marginBottom: 14 }}>
+      <button type="button" onClick={onBack} aria-label="Back" className="nm-icon-btn nm-press" style={{ ...stickyControl, marginBottom: 14 }}>
         <IconArrowLeft />
       </button>
 

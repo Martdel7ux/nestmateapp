@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useData } from "@/contexts/data-context";
 import { ModuleIcon, IconArrowLeft, IconChevron, IconCheck, type ModuleIconName } from "../icons";
+import { stickyControl } from "../StickyBar";
 
 interface CampusService {
   id: string;
@@ -189,7 +190,7 @@ function CampusServiceDetail({ service, university, onBack }: { service: CampusS
 
   return (
     <div style={{ paddingBottom: 96, animation: "nmFade .3s ease-out" }}>
-      <button type="button" onClick={onBack} aria-label="Back" className="nm-icon-btn nm-press" style={{ marginBottom: 16 }}>
+      <button type="button" onClick={onBack} aria-label="Back" className="nm-icon-btn nm-press" style={{ ...stickyControl, marginBottom: 16 }}>
         <IconArrowLeft />
       </button>
 

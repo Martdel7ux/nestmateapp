@@ -44,14 +44,30 @@ export async function createMarketplaceListing(input: {
   category: string;
   description?: string;
   city?: string;
+  imageFile?: File | null;
 }): Promise<void> {
-  const { error } = await requireSupabase().from("marketplace_listings").insert({
+  const client = requireSupabase();
+
+  // Optional photo of the item → public property-images bucket.
+  let image_url: string | null = null;
+  if (input.imageFile) {
+    const ext = input.imageFile.name.split(".").pop() ?? "jpg";
+    const path = `marketplace/${input.sellerId}/${crypto.randomUUID()}.${ext}`;
+    const { error: uploadError } = await client.storage
+      .from("property-images")
+      .upload(path, input.imageFile, { upsert: false });
+    if (uploadError) throw uploadError;
+    image_url = client.storage.from("property-images").getPublicUrl(path).data.publicUrl;
+  }
+
+  const { error } = await client.from("marketplace_listings").insert({
     seller_id: input.sellerId,
     title: input.title,
     price: input.price,
     category: input.category,
     description: input.description ?? null,
     city: input.city ?? null,
+    image_url,
   });
   if (error) throw error;
 }

@@ -21,13 +21,14 @@ export function RedesignShell() {
     <div
       data-nm={isDark ? "dark" : "light"}
       style={{
-        minHeight: "100dvh",
+        height: "100dvh",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
         background: "var(--nm-bg)",
       }}
     >
-      <main style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }} className="nm-hscroll-none">
+      <main style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" }} className="nm-hscroll-none">
         {tab === "home" && <HomeScreen onNavigate={setTab} />}
         {tab === "explore" && <ExploreScreen />}
         {tab === "messages" && <MessagesScreen />}

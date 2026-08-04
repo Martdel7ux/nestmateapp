@@ -70,14 +70,28 @@ export function MarketBody() {
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const listings = data ?? [];
+
+  const pickImage = (file: File | null) => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(file);
+    setImagePreview(file ? URL.createObjectURL(file) : null);
+  };
+
+  const resetForm = () => {
+    setOpen(false); setTitle(""); setPrice("");
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null); setImagePreview(null);
+  };
 
   const submit = () => {
     if (!title.trim() || !price) { toast.error("Add a title and a price."); return; }
     create.mutate(
-      { title: title.trim(), price: Number(price), category },
+      { title: title.trim(), price: Number(price), category, imageFile },
       {
-        onSuccess: () => { toast.success("Listed!"); setOpen(false); setTitle(""); setPrice(""); },
+        onSuccess: () => { toast.success("Listed!"); resetForm(); },
         onError: (e) => toast.error(e instanceof Error ? e.message : "Could not list — is the marketplace table set up?"),
       },
     );
@@ -87,6 +101,26 @@ export function MarketBody() {
     <>
       {open && (
         <div className="nm-card nm-card-lg" style={{ marginTop: 16, padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+          {/* Photo picker */}
+          <label style={{ display: "block", cursor: "pointer", position: "relative", height: 150, borderRadius: "var(--nm-r-sm)", overflow: "hidden", background: "var(--nm-surface2)", border: imagePreview ? "none" : "1.5px dashed var(--nm-line)" }}>
+            <input type="file" accept="image/*" onChange={(e) => pickImage(e.target.files?.[0] ?? null)} style={{ display: "none" }} />
+            {imagePreview ? (
+              <>
+                <img src={imagePreview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <span
+                  role="button"
+                  onClick={(e) => { e.preventDefault(); pickImage(null); }}
+                  style={{ position: "absolute", top: 8, right: 8, width: 28, height: 28, borderRadius: 99, background: "rgba(17,24,39,.6)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, backdropFilter: "blur(6px)" }}
+                >✕</span>
+              </>
+            ) : (
+              <span style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, color: "var(--nm-muted)" }}>
+                <ModuleIcon name="market" size={26} />
+                <span style={{ fontSize: 12.5, fontWeight: 500 }}>Add a photo</span>
+              </span>
+            )}
+          </label>
+
           <input style={formInput} placeholder="What are you selling?" value={title} onChange={(e) => setTitle(e.target.value)} />
           <div style={{ display: "flex", gap: 10 }}>
             <input style={{ ...formInput, flex: 1 }} type="number" placeholder="Price €" value={price} onChange={(e) => setPrice(e.target.value)} />
@@ -95,8 +129,8 @@ export function MarketBody() {
             </select>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button type="button" onClick={() => setOpen(false)} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 12, borderRadius: "var(--nm-r-sm)", background: "var(--nm-surface2)", font: "600 14px Inter, sans-serif", color: "var(--nm-muted)" }}>Cancel</button>
-            <button type="button" disabled={create.isPending} onClick={submit} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 12, borderRadius: "var(--nm-r-sm)", background: "var(--nm-accent)", color: "#fff", font: "600 14px Inter, sans-serif", opacity: create.isPending ? 0.7 : 1 }}>Post</button>
+            <button type="button" onClick={resetForm} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 12, borderRadius: "var(--nm-r-sm)", background: "var(--nm-surface2)", font: "600 14px Inter, sans-serif", color: "var(--nm-muted)" }}>Cancel</button>
+            <button type="button" disabled={create.isPending} onClick={submit} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 12, borderRadius: "var(--nm-r-sm)", background: "var(--nm-accent)", color: "#fff", font: "600 14px Inter, sans-serif", opacity: create.isPending ? 0.7 : 1 }}>{create.isPending ? "Posting…" : "Post"}</button>
           </div>
         </div>
       )}

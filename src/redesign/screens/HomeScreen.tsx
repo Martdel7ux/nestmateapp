@@ -2,7 +2,10 @@ import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { useUpcomingRentPayment } from "@/hooks/use-rent";
 import { useUpcomingEvents } from "@/hooks/use-upcoming-events";
+import { useState } from "react";
 import { IconBell, IconChevron, IconKey, IconDoc } from "../icons";
+import { StickyBar } from "../StickyBar";
+import { NotificationsScreen } from "./NotificationsScreen";
 import { initialsOf, whenLabel, rentDueLabel } from "../util";
 import type { NmTab } from "../TabBar";
 
@@ -37,6 +40,9 @@ const AVATAR_COLORS: [string, string][] = [
 export function HomeScreen({ onNavigate }: { onNavigate: (t: NmTab) => void }) {
   const { profile, user } = useAuth();
   const { snapshot } = useData();
+  const [showNotifs, setShowNotifs] = useState(false);
+
+  if (showNotifs) return <NotificationsScreen onBack={() => setShowNotifs(false)} onNavigate={onNavigate} />;
   const { data: rent } = useUpcomingRentPayment(user?.id);
   const { data: events } = useUpcomingEvents();
 
@@ -57,27 +63,27 @@ export function HomeScreen({ onNavigate }: { onNavigate: (t: NmTab) => void }) {
 
   return (
     <div style={{ padding: "calc(20px + env(safe-area-inset-top)) 20px 20px", animation: "nmFade .35s ease-out" }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-        <div>
-          <div style={{ fontSize: 13.5, color: "var(--nm-muted)" }}>Welcome back</div>
-          <div style={{ fontSize: 27, fontWeight: 600, letterSpacing: "-.03em", marginTop: 2 }}>{firstName}</div>
-          <span className="nm-pill" style={{ marginTop: 9 }}>
-            <span style={{ width: 6, height: 6, borderRadius: 99, background: "var(--nm-accent)" }} />
-            {profile?.city ? `Student in ${profile.city}` : "Student"}
-          </span>
-        </div>
-        <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
-          <button type="button" className="nm-icon-btn" onClick={() => onNavigate("profile")} aria-label="Notifications">
-            <IconBell size={18} />
-            {snapshot.notifications?.length > 0 && (
-              <span style={{ position: "absolute", top: 9, right: 10, width: 7, height: 7, borderRadius: 99, background: "var(--nm-coral)" }} />
-            )}
-          </button>
-          <button type="button" onClick={() => onNavigate("profile")} style={{ all: "unset", cursor: "pointer", width: 40, height: 40, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 14px Inter, sans-serif" }}>
-            {profile?.avatar_url ? <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
-          </button>
-        </div>
+      {/* Header — icon cluster stays pinned while the page scrolls beneath it */}
+      <StickyBar pullUp={40}>
+        <button type="button" className="nm-icon-btn" onClick={() => setShowNotifs(true)} aria-label="Notifications">
+          <IconBell size={18} />
+          {snapshot.notifications?.length > 0 && (
+            <span style={{ position: "absolute", top: 9, right: 10, width: 7, height: 7, borderRadius: 99, background: "var(--nm-coral)" }} />
+          )}
+        </button>
+        <button type="button" onClick={() => onNavigate("profile")} style={{ all: "unset", cursor: "pointer", width: 40, height: 40, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 14px Inter, sans-serif" }}>
+          {profile?.avatar_url ? <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
+        </button>
+      </StickyBar>
+
+      {/* Greeting — sits beside the pinned icons, then scrolls away normally */}
+      <div style={{ paddingRight: 96 }}>
+        <div style={{ fontSize: 13.5, color: "var(--nm-muted)" }}>Welcome back</div>
+        <div style={{ fontSize: 27, fontWeight: 600, letterSpacing: "-.03em", marginTop: 2 }}>{firstName}</div>
+        <span className="nm-pill" style={{ marginTop: 9 }}>
+          <span style={{ width: 6, height: 6, borderRadius: 99, background: "var(--nm-accent)" }} />
+          {profile?.city ? `Student in ${profile.city}` : "Student"}
+        </span>
       </div>
 
       {/* Next for you */}

@@ -7,11 +7,14 @@ import { initialsOf } from "../util";
 import { SocietiesBody, MarketBody, PerksBody } from "./CommunityScreen";
 import { BillsBody } from "./BillsScreen";
 import { CampusBody } from "./CampusScreen";
+import { EventsBody } from "./EventsScreen";
+import { MoveBody } from "./RelocationScreen";
 import { RoommateProfileForm } from "./RoommateProfileForm";
 import { RoommateDetail } from "./RoommateDetail";
 import { PropertyDetail } from "./PropertyDetail";
 import { JobDetail, salaryLabel } from "./JobDetail";
 import { RangeSlider } from "../RangeSlider";
+import { stickyControl } from "../StickyBar";
 import { cities } from "@/lib/constants";
 import { CITY_AREAS } from "@/lib/cyprus-areas";
 import type { Property } from "@/types/supabase";
@@ -40,13 +43,13 @@ const FOR_YOU = [
 
 function SubHeader({ title, subtitle, onBack }: { title: string; subtitle?: string; onBack: () => void }) {
   return (
-    <div>
-      <button type="button" className="nm-icon-btn nm-press" onClick={onBack} aria-label="Back" style={{ marginBottom: 16 }}>
+    <>
+      <button type="button" className="nm-icon-btn nm-press" onClick={onBack} aria-label="Back" style={{ ...stickyControl, marginBottom: 16 }}>
         <IconArrowLeft />
       </button>
       <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>{title}</div>
       {subtitle && <div style={{ fontSize: 13.5, color: "var(--nm-muted)", marginTop: 8 }}>{subtitle}</div>}
-    </div>
+    </>
   );
 }
 
@@ -390,47 +393,6 @@ function RoommatesBody() {
   );
 }
 
-const MOVE_TASKS = [
-  "Confirm your accommodation",
-  "Arrange airport pickup",
-  "Register with Migration (within 7 days)",
-  "Open a Cyprus bank account",
-  "Get a local SIM card",
-  "Enrol at your university",
-  "Set up rent & shared bills",
-];
-
-function MoveBody() {
-  const [done, setDone] = useState<boolean[]>(() => MOVE_TASKS.map((_, i) => i < 2));
-  const count = done.filter(Boolean).length;
-  const pct = Math.round((count / MOVE_TASKS.length) * 100);
-  return (
-    <div style={{ marginTop: 18 }}>
-      <div className="nm-card nm-card-lg" style={{ padding: 18 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-          <div style={{ fontSize: 15, fontWeight: 600 }}>Your arrival plan</div>
-          <div style={{ fontSize: 12.5, color: "var(--nm-muted)" }}>{count} of {MOVE_TASKS.length} done</div>
-        </div>
-        <div style={{ height: 8, borderRadius: 99, background: "var(--nm-surface2)", marginTop: 14, overflow: "hidden" }}>
-          <div style={{ height: "100%", borderRadius: 99, background: "var(--nm-accent)", width: `${pct}%`, transition: "width .4s" }} />
-        </div>
-      </div>
-      <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-        {MOVE_TASKS.map((t, i) => {
-          const on = done[i];
-          return (
-            <button key={t} type="button" onClick={() => setDone((d) => d.map((v, j) => (j === i ? !v : v)))} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", padding: "14px 16px", boxShadow: "var(--nm-elev)" }}>
-              <span style={{ width: 24, height: 24, flex: "none", borderRadius: 99, border: `1.5px solid ${on ? "var(--nm-mint)" : "var(--nm-line)"}`, background: on ? "var(--nm-mint)" : "transparent", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {on && <IconCheck size={14} />}
-              </span>
-              <span style={{ flex: 1, fontSize: 14.5, fontWeight: 500, color: on ? "var(--nm-muted)" : "var(--nm-text)", textDecoration: on ? "line-through" : "none" }}>{t}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 function SubBody({ id }: { id: ModuleId }) {
   if (id === "discover") return <DiscoverBody />;
@@ -438,6 +400,7 @@ function SubBody({ id }: { id: ModuleId }) {
   if (id === "jobs") return <JobsBody />;
   if (id === "bills") return <BillsBody />;
   if (id === "campus") return <CampusBody />;
+  if (id === "events") return <EventsBody />;
   if (id === "move") return <MoveBody />;
   if (id === "community") return <SocietiesBody />;
   if (id === "market") return <MarketBody />;
