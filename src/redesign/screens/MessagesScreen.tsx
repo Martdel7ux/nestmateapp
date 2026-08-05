@@ -48,10 +48,10 @@ function ChatView({ matchId, thread, onBack }: { matchId: string; thread: Thread
   };
 
   return (
-    <div style={{ animation: "nmFade .3s ease-out" }}>
+    <div style={{ animation: "nmFade .3s ease-out", height: "100%", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div style={{ position: "sticky", top: 0, zIndex: 5, padding: "calc(14px + env(safe-area-inset-top)) 16px 12px", display: "flex", alignItems: "center", gap: 12, background: "var(--nm-surface)", borderBottom: "1px solid var(--nm-line)" }}>
-        <button type="button" onClick={onBack} aria-label="Back" style={{ all: "unset", cursor: "pointer", width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ flex: "none", padding: "calc(14px + env(safe-area-inset-top)) 16px 12px", display: "flex", alignItems: "center", gap: 12, background: "var(--nm-surface)", borderBottom: "1px solid var(--nm-line)" }}>
+        <button type="button" onClick={onBack} aria-label="Back to messages" className="nm-icon-btn nm-press" style={{ width: 36, height: 36, flex: "none" }}>
           <IconArrowLeft size={18} />
         </button>
         <div style={{ width: 38, height: 38, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 13px Inter, sans-serif" }}>
@@ -64,7 +64,7 @@ function ChatView({ matchId, thread, onBack }: { matchId: string; thread: Thread
       </div>
 
       {/* Messages */}
-      <div style={{ padding: "18px 16px 8px", display: "flex", flexDirection: "column", gap: 10, minHeight: "50dvh", justifyContent: "flex-end" }}>
+      <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "18px 16px 8px", display: "flex", flexDirection: "column", gap: 10, justifyContent: "flex-end" }}>
         {msgs.length === 0 && (
           <div style={{ textAlign: "center", color: "var(--nm-muted)", fontSize: 13, padding: "20px 0" }}>Say hello 👋</div>
         )}
@@ -82,7 +82,7 @@ function ChatView({ matchId, thread, onBack }: { matchId: string; thread: Thread
       </div>
 
       {/* Composer */}
-      <div style={{ position: "sticky", bottom: 0, padding: "12px 16px calc(14px + env(safe-area-inset-bottom))", display: "flex", gap: 10, alignItems: "center", borderTop: "1px solid var(--nm-line)", background: "var(--nm-surface)" }}>
+      <div style={{ flex: "none", padding: "12px 16px calc(14px + env(safe-area-inset-bottom))", display: "flex", gap: 10, alignItems: "center", borderTop: "1px solid var(--nm-line)", background: "var(--nm-surface)" }}>
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -98,10 +98,16 @@ function ChatView({ matchId, thread, onBack }: { matchId: string; thread: Thread
   );
 }
 
-export function MessagesScreen() {
+export function MessagesScreen({ onChatOpenChange }: { onChatOpenChange?: (open: boolean) => void }) {
   const { snapshot } = useData();
   const [openMatch, setOpenMatch] = useState<string | null>(null);
   const myId = snapshot.profile.id;
+
+  // Tell the shell to hide the bottom nav while a conversation is open.
+  useEffect(() => {
+    onChatOpenChange?.(!!openMatch);
+  }, [openMatch, onChatOpenChange]);
+  useEffect(() => () => onChatOpenChange?.(false), [onChatOpenChange]);
 
   const threads: Thread[] = useMemo(() => {
     return snapshot.matches

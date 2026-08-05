@@ -5,6 +5,7 @@ import { HomeScreen } from "./screens/HomeScreen";
 import { ExploreScreen } from "./screens/ExploreScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { MessagesScreen } from "./screens/MessagesScreen";
+import type { ModuleIconName } from "./icons";
 import "./nm-theme.css";
 
 /**
@@ -14,8 +15,19 @@ import "./nm-theme.css";
  */
 export function RedesignShell() {
   const [tab, setTab] = useState<NmTab>("home");
+  const [exploreTarget, setExploreTarget] = useState<{ module: ModuleIconName; token: number } | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
+
+  // Navigate to a tab, optionally deep-linking Explore straight to a module.
+  // A plain Explore visit (no module) clears any target so it opens the hub.
+  const navigate = (next: NmTab, exploreModule?: ModuleIconName) => {
+    if (next === "explore") {
+      setExploreTarget((prev) => (exploreModule ? { module: exploreModule, token: (prev?.token ?? 0) + 1 } : null));
+    }
+    setTab(next);
+  };
 
   return (
     <div
@@ -29,13 +41,13 @@ export function RedesignShell() {
       }}
     >
       <main style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" }} className="nm-hscroll-none">
-        {tab === "home" && <HomeScreen onNavigate={setTab} />}
-        {tab === "explore" && <ExploreScreen />}
-        {tab === "messages" && <MessagesScreen />}
+        {tab === "home" && <HomeScreen onNavigate={navigate} />}
+        {tab === "explore" && <ExploreScreen target={exploreTarget} />}
+        {tab === "messages" && <MessagesScreen onChatOpenChange={setChatOpen} />}
         {tab === "profile" && <ProfileScreen />}
       </main>
 
-      <TabBar active={tab} onChange={setTab} />
+      {!chatOpen && <TabBar active={tab} onChange={navigate} />}
     </div>
   );
 }

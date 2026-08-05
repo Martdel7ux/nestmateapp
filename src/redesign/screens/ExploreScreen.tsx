@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useData } from "@/contexts/data-context";
 import { useOpportunities } from "@/hooks/use-opportunities";
 import { useMatchScore } from "@/hooks/use-match-score";
@@ -429,8 +429,13 @@ const SUB_META: Record<ModuleId, { title: string; subtitle: string }> = {
   ai: { title: "AI assistant", subtitle: "Knows your timetable, flat and societies." },
 };
 
-export function ExploreScreen() {
-  const [view, setView] = useState<"hub" | ModuleId>("hub");
+export function ExploreScreen({ target }: { target?: { module: ModuleId; token: number } | null }) {
+  const [view, setView] = useState<"hub" | ModuleId>(target?.module ?? "hub");
+
+  // Deep-link from Home: open the requested module whenever a new target arrives.
+  useEffect(() => {
+    if (target?.module) setView(target.module);
+  }, [target?.token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (view !== "hub") {
     const meta = SUB_META[view];
