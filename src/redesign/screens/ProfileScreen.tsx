@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { useTheme } from "@/contexts/theme-context";
-import { IconGear, IconShield, IconChevron, IconArrowLeft } from "../icons";
+import { IconGear, IconShield, IconChevron, IconArrowLeft, IconCheck } from "../icons";
 import { StickyBar, stickyControl } from "../StickyBar";
+import { loadVerification } from "./StudentEmailVerification";
 import { initialsOf } from "../util";
 import { AccountSettings } from "./AccountSettings";
 import { NotificationsSettings, PrivacySettings, HelpSettings } from "./SettingsScreens";
@@ -83,13 +84,15 @@ export function ProfileScreen() {
   if (view === "settings") return <SettingsView onBack={() => setView("profile")} />;
 
   const name = profile?.full_name ?? "Your profile";
+  // Server badge (once the migration is applied) or the local fallback record.
+  const studentVerified = !!profile?.student_verified_at || !!loadVerification(profile?.id);
 
   const checks = [
     { ok: !!profile?.avatar_url, badge: "Photo added" },
     { ok: !!profile?.bio, badge: "Bio written" },
     { ok: !!profile?.university, badge: "University set" },
     { ok: !!profile?.city, badge: "City set" },
-    { ok: !!profile?.accepted_terms_at, badge: "Verified" },
+    { ok: studentVerified, badge: "Student verified" },
   ];
   const filled = checks.filter((c) => c.ok).length;
   const score = Math.round((filled / checks.length) * 100);
@@ -122,10 +125,22 @@ export function ProfileScreen() {
           {profile?.avatar_url ? <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initialsOf(name)}
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 21, fontWeight: 600, letterSpacing: "-.02em" }}>{name}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <div style={{ fontSize: 21, fontWeight: 600, letterSpacing: "-.02em" }}>{name}</div>
+            {studentVerified && (
+              <span aria-label="Verified student" style={{ width: 19, height: 19, flex: "none", borderRadius: 99, background: "var(--nm-mint)", color: "#08281f", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <IconCheck size={12} />
+              </span>
+            )}
+          </div>
           <div style={{ fontSize: 12.5, color: "var(--nm-muted)", marginTop: 3 }}>
             {[profile?.university, profile?.city].filter(Boolean).join(" · ") || "Complete your profile"}
           </div>
+          {studentVerified && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 8, padding: "4px 10px", borderRadius: 99, background: "var(--nm-mint-soft)", color: "#0b7a5a", font: "600 11px var(--nm-font-text)" }}>
+              <IconShield size={11} /> Verified student
+            </span>
+          )}
         </div>
       </div>
 

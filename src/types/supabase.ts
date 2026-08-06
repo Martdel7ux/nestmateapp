@@ -18,6 +18,7 @@ export interface Profile {
   university?: string | null;
   user_type: UserType;
   is_verified_landlord: boolean;
+  student_verified_at?: string | null;
   accepted_terms_at?: string | null;
   accepted_privacy_at?: string | null;
   accepted_cookies_at?: string | null;
