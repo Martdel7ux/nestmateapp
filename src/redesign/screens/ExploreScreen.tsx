@@ -31,7 +31,7 @@ const MODULES: { id: ModuleId; label: string; note: string }[] = [
   { id: "community", label: "Communities", note: "Societies & countries" },
   { id: "campus", label: "Campus services", note: "Library, gym, health" },
   { id: "market", label: "Marketplace", note: "Buy & sell on campus" },
-  { id: "deals", label: "Discounts", note: "14 near you" },
+  { id: "deals", label: "Discounts", note: "Student offers" },
   { id: "move", label: "Relocation plan", note: "Arrival checklist" },
   { id: "ai", label: "AI assistant", note: "Ask anything" },
 ];
@@ -50,11 +50,6 @@ const MODULE_THEME: Record<ModuleId, { gradient: string; shadow: string }> = {
   move:      { gradient: "linear-gradient(145deg,#0D9488,#16B8A6)", shadow: "0 12px 26px -10px rgba(13,148,136,.5)" },
   ai:        { gradient: "linear-gradient(145deg,#4F46E5,#7C3AED)", shadow: "0 12px 26px -10px rgba(124,58,237,.5)" },
 };
-
-const FOR_YOU = [
-  { label: "Airport pickup, 9 Oct", note: "Shared ride from Larnaca · €12", go: "move" as ModuleId },
-  { label: "Ghanaian Students Nicosia", note: "412 members · 6 arriving with you", go: "community" as ModuleId },
-];
 
 function SubHeader({ title, subtitle, onBack }: { title: string; subtitle?: string; onBack: () => void }) {
   return (
@@ -505,24 +500,6 @@ export function ExploreScreen({ target }: { target?: { module: ModuleId; token: 
         })}
       </div>
 
-      <div className="nm-section-label" style={{ marginTop: 22 }}>Because you're arriving</div>
-      <div style={{ marginTop: 11, display: "flex", flexDirection: "column", gap: 10 }}>
-        {FOR_YOU.map((f) => (
-          <button
-            key={f.label}
-            type="button"
-            className="nm-card nm-press"
-            onClick={() => openModule(f.go)}
-            style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", padding: "15px 16px", boxShadow: "var(--nm-elev)" }}
-          >
-            <span style={{ flex: 1 }}>
-              <span style={{ display: "block", fontSize: 14, fontWeight: 500 }}>{f.label}</span>
-              <span style={{ display: "block", fontSize: 11.5, color: "var(--nm-muted)", marginTop: 2 }}>{f.note}</span>
-            </span>
-            <span style={{ color: "var(--nm-muted)" }}><IconChevron /></span>
-          </button>
-        ))}
-      </div>
       <div style={{ height: 12 }} />
     </div>
   );
