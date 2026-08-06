@@ -20,7 +20,7 @@ function Shell({ title, subtitle, onBack, children }: { title: string; subtitle?
       <button type="button" className="nm-icon-btn nm-press" onClick={onBack} aria-label="Back" style={{ ...stickyControl, marginBottom: 16 }}>
         <IconArrowLeft />
       </button>
-      <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>{title}</div>
+      <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>{title}</div>
       {subtitle && <div style={{ fontSize: 13.5, color: "var(--nm-muted)", marginTop: 6 }}>{subtitle}</div>}
       <div style={{ marginTop: 22 }}>{children}</div>
     </div>
@@ -221,7 +221,7 @@ export function HelpSettings({ onBack }: { onBack: () => void }) {
           <div style={{ fontSize: 30, marginBottom: 8 }}>✅</div>
           <div style={{ fontSize: 15, fontWeight: 600 }}>Message sent</div>
           <div style={{ fontSize: 13, color: "var(--nm-muted)", marginTop: 6, lineHeight: 1.5 }}>Thanks — we'll reply by email. You can send another any time.</div>
-          <button type="button" onClick={() => setStatus("idle")} className="nm-press" style={{ all: "unset", cursor: "pointer", marginTop: 16, padding: "10px 20px", borderRadius: "var(--nm-r-md)", background: "var(--nm-surface2)", color: "var(--nm-text)", font: "600 13.5px Inter, sans-serif" }}>Send another</button>
+          <button type="button" onClick={() => setStatus("idle")} className="nm-press" style={{ all: "unset", cursor: "pointer", marginTop: 16, padding: "10px 20px", borderRadius: "var(--nm-r-md)", background: "var(--nm-surface2)", color: "var(--nm-text)", font: "600 13.5px var(--nm-font-text)" }}>Send another</button>
         </div>
       ) : (
         <div className="nm-card nm-card-lg" style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
@@ -229,9 +229,9 @@ export function HelpSettings({ onBack }: { onBack: () => void }) {
           <select value={category} onChange={(e) => setCategory(e.target.value as SupportCategory)} style={inputStyle}>
             {SUPPORT_CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
-          <textarea placeholder="How can we help?" value={body} onChange={(e) => { setBody(e.target.value); setStatus("idle"); }} rows={5} style={{ ...inputStyle, resize: "vertical", minHeight: 110, font: "400 15px Inter, sans-serif" }} />
+          <textarea placeholder="How can we help?" value={body} onChange={(e) => { setBody(e.target.value); setStatus("idle"); }} rows={5} style={{ ...inputStyle, resize: "vertical", minHeight: 110, font: "400 15px var(--nm-font-text)" }} />
           {status === "error" && <div style={{ fontSize: 12.5, color: "var(--nm-coral)" }}>Couldn't send — please try again.</div>}
-          <button type="button" onClick={send} disabled={!canSend} className="nm-press" style={{ all: "unset", cursor: canSend ? "pointer" : "not-allowed", textAlign: "center", padding: "13px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 14.5px Inter, sans-serif", opacity: canSend ? 1 : 0.5 }}>
+          <button type="button" onClick={send} disabled={!canSend} className="nm-press" style={{ all: "unset", cursor: canSend ? "pointer" : "not-allowed", textAlign: "center", padding: "13px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 14.5px var(--nm-font-text)", opacity: canSend ? 1 : 0.5 }}>
             {status === "sending" ? "Sending…" : "Send message"}
           </button>
         </div>

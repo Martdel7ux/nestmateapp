@@ -9,7 +9,7 @@ export function PlaceholderScreen({ title, blurb }: { title: string; blurb: stri
         animation: "nmFade .35s ease-out",
       }}
     >
-      <div style={{ fontSize: 27, fontWeight: 600, letterSpacing: "-.03em" }}>{title}</div>
+      <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 27, fontWeight: 600, letterSpacing: "-.03em" }}>{title}</div>
       <div
         className="nm-card nm-card-lg"
         style={{

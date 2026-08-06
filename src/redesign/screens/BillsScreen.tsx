@@ -20,7 +20,7 @@ const STATUS_STYLE: Record<RentPaymentStatus, { bg: string; fg: string; label: s
 
 function StatusPill({ status }: { status: RentPaymentStatus }) {
   const s = STATUS_STYLE[status];
-  return <span style={{ padding: "4px 10px", borderRadius: 99, background: s.bg, color: s.fg, font: "600 11px Inter, sans-serif" }}>{s.label}</span>;
+  return <span style={{ padding: "4px 10px", borderRadius: 99, background: s.bg, color: s.fg, font: "600 11px var(--nm-font-text)" }}>{s.label}</span>;
 }
 
 function monthLabel(iso: string): string {
@@ -89,7 +89,7 @@ function NextPaymentCard({ payment, userId }: { payment: RentPayment; userId: st
         <StatusPill status={payment.status} />
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 9, marginTop: 12 }}>
-        <span style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-.03em" }}>{formatCurrency(Number(payment.amount), payment.currency)}</span>
+        <span style={{ fontFamily: "var(--nm-font-display)", fontSize: 32, fontWeight: 700, letterSpacing: "-.03em" }}>{formatCurrency(Number(payment.amount), payment.currency)}</span>
         <span style={{ fontSize: 13, color: overdue ? "#b23b32" : "var(--nm-muted)" }}>{rentDueLabel(payment.due_date)} · {monthLabel(payment.due_date)}</span>
       </div>
       <button
@@ -97,7 +97,7 @@ function NextPaymentCard({ payment, userId }: { payment: RentPayment; userId: st
         onClick={() => markPaid.mutate({ payment, form: { paid_at: new Date().toISOString().slice(0, 10) } })}
         disabled={markPaid.isPending}
         className="nm-press"
-        style={{ all: "unset", cursor: "pointer", marginTop: 16, width: "100%", boxSizing: "border-box", height: 48, borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, font: "600 14.5px Inter, sans-serif", opacity: markPaid.isPending ? 0.6 : 1 }}
+        style={{ all: "unset", cursor: "pointer", marginTop: 16, width: "100%", boxSizing: "border-box", height: 48, borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, font: "600 14.5px var(--nm-font-text)", opacity: markPaid.isPending ? 0.6 : 1 }}
       >
         <IconCheck size={17} /> {markPaid.isPending ? "Saving…" : "Mark as paid"}
       </button>
@@ -119,7 +119,7 @@ function LandlordCard({ name, phone, email, whatsapp }: { name?: string | null; 
       {actions.length > 0 && (
         <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
           {actions.map((a) => (
-            <a key={a.label} href={a.href} target="_blank" rel="noopener noreferrer" className="nm-press" style={{ flex: 1, textAlign: "center", textDecoration: "none", padding: "10px 0", borderRadius: "var(--nm-r-sm)", background: "var(--nm-surface2)", color: "var(--nm-text)", font: "600 12.5px Inter, sans-serif" }}>{a.label}</a>
+            <a key={a.label} href={a.href} target="_blank" rel="noopener noreferrer" className="nm-press" style={{ flex: 1, textAlign: "center", textDecoration: "none", padding: "10px 0", borderRadius: "var(--nm-r-sm)", background: "var(--nm-surface2)", color: "var(--nm-text)", font: "600 12.5px var(--nm-font-text)" }}>{a.label}</a>
           ))}
         </div>
       )}
@@ -153,7 +153,7 @@ function BillSplitter() {
         </div>
         <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--nm-line)", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <span style={{ fontSize: 13.5, color: "var(--nm-muted)" }}>Each person pays</span>
-          <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.02em", color: "var(--nm-accent)" }}>{formatCurrency(per, "EUR")}</span>
+          <span style={{ fontFamily: "var(--nm-font-display)", fontSize: 22, fontWeight: 700, letterSpacing: "-.02em", color: "var(--nm-accent)" }}>{formatCurrency(per, "EUR")}</span>
         </div>
       </div>
     </div>
@@ -200,7 +200,7 @@ function RentSetup() {
         <p style={{ fontSize: 13.5, color: "var(--nm-muted)", lineHeight: 1.5, maxWidth: 280 }}>
           Add your rent agreement to see when payments are due, mark them paid, and keep your landlord's details handy.
         </p>
-        <button type="button" onClick={() => setShowForm(true)} className="nm-press" style={{ all: "unset", cursor: "pointer", marginTop: 4, padding: "12px 22px", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 14px Inter, sans-serif" }}>Set up rent</button>
+        <button type="button" onClick={() => setShowForm(true)} className="nm-press" style={{ all: "unset", cursor: "pointer", marginTop: 4, padding: "12px 22px", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 14px var(--nm-font-text)" }}>Set up rent</button>
       </div>
     );
   }
@@ -235,8 +235,8 @@ function RentSetup() {
         {create.isError && <div style={{ fontSize: 12.5, color: "var(--nm-coral)" }}>Couldn't save — please try again.</div>}
 
         <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-          <button type="button" onClick={() => setShowForm(false)} style={{ all: "unset", cursor: "pointer", padding: "12px 18px", borderRadius: "var(--nm-r-md)", color: "var(--nm-muted)", font: "600 14px Inter, sans-serif" }}>Cancel</button>
-          <button type="button" onClick={submit} disabled={!canSubmit} className="nm-press" style={{ all: "unset", cursor: canSubmit ? "pointer" : "not-allowed", flex: 1, textAlign: "center", padding: "12px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 14px Inter, sans-serif", opacity: canSubmit ? 1 : 0.5 }}>{create.isPending ? "Saving…" : "Save agreement"}</button>
+          <button type="button" onClick={() => setShowForm(false)} style={{ all: "unset", cursor: "pointer", padding: "12px 18px", borderRadius: "var(--nm-r-md)", color: "var(--nm-muted)", font: "600 14px var(--nm-font-text)" }}>Cancel</button>
+          <button type="button" onClick={submit} disabled={!canSubmit} className="nm-press" style={{ all: "unset", cursor: canSubmit ? "pointer" : "not-allowed", flex: 1, textAlign: "center", padding: "12px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 14px var(--nm-font-text)", opacity: canSubmit ? 1 : 0.5 }}>{create.isPending ? "Saving…" : "Save agreement"}</button>
         </div>
       </div>
     </div>

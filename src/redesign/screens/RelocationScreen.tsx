@@ -257,7 +257,7 @@ function RelocationTaskDetail({ task, done, onToggle, onBack }: { task: MoveTask
       </button>
 
       <span className="nm-pill">{phaseLabel}</span>
-      <div style={{ fontSize: 23, fontWeight: 700, letterSpacing: "-.02em", marginTop: 12, lineHeight: 1.2 }}>{task.title}</div>
+      <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 23, fontWeight: 700, letterSpacing: "-.02em", marginTop: 12, lineHeight: 1.2 }}>{task.title}</div>
       <p style={{ marginTop: 12, fontSize: 14, color: "var(--nm-text)", lineHeight: 1.6 }}>{task.about}</p>
 
       {/* Steps */}
@@ -266,7 +266,7 @@ function RelocationTaskDetail({ task, done, onToggle, onBack }: { task: MoveTask
         <div className="nm-card nm-card-lg" style={{ padding: "6px 4px" }}>
           {task.steps.map((s, i) => (
             <div key={s} style={{ display: "flex", alignItems: "flex-start", gap: 11, padding: "11px 14px", borderTop: i === 0 ? "none" : "1px solid var(--nm-line)" }}>
-              <span style={{ width: 22, height: 22, flex: "none", borderRadius: 99, background: "var(--nm-soft)", color: "var(--nm-accent)", display: "flex", alignItems: "center", justifyContent: "center", font: "700 11px Inter, sans-serif" }}>{i + 1}</span>
+              <span style={{ width: 22, height: 22, flex: "none", borderRadius: 99, background: "var(--nm-soft)", color: "var(--nm-accent)", display: "flex", alignItems: "center", justifyContent: "center", font: "700 11px var(--nm-font-text)" }}>{i + 1}</span>
               <span style={{ fontSize: 13.5, lineHeight: 1.45 }}>{s}</span>
             </div>
           ))}
@@ -281,13 +281,13 @@ function RelocationTaskDetail({ task, done, onToggle, onBack }: { task: MoveTask
       )}
 
       {searchUrl && (
-        <a href={searchUrl} target="_blank" rel="noopener noreferrer" className="nm-press" style={{ display: "block", textAlign: "center", marginTop: 16, textDecoration: "none", color: "var(--nm-accent)", font: "600 13.5px Inter, sans-serif" }}>Look up official info →</a>
+        <a href={searchUrl} target="_blank" rel="noopener noreferrer" className="nm-press" style={{ display: "block", textAlign: "center", marginTop: 16, textDecoration: "none", color: "var(--nm-accent)", font: "600 13.5px var(--nm-font-text)" }}>Look up official info →</a>
       )}
 
       {/* Mark done */}
       <button
         type="button" onClick={onToggle} className="nm-press"
-        style={{ all: "unset", cursor: "pointer", marginTop: 22, width: "100%", boxSizing: "border-box", height: 52, borderRadius: "var(--nm-r-md)", background: done ? "var(--nm-mint-soft)" : "var(--nm-accent)", color: done ? "#0b7a5a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, font: "600 14.5px Inter, sans-serif" }}
+        style={{ all: "unset", cursor: "pointer", marginTop: 22, width: "100%", boxSizing: "border-box", height: 52, borderRadius: "var(--nm-r-md)", background: done ? "var(--nm-mint-soft)" : "var(--nm-accent)", color: done ? "#0b7a5a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, font: "600 14.5px var(--nm-font-text)" }}
       >
         <IconCheck size={17} /> {done ? "Completed — tap to undo" : "Mark as done"}
       </button>

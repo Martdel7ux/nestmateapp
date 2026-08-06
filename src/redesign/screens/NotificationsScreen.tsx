@@ -44,7 +44,7 @@ export function NotificationsScreen({ onBack, onNavigate }: { onBack: () => void
       <button type="button" className="nm-icon-btn nm-press" onClick={onBack} aria-label="Back" style={{ ...stickyControl, marginBottom: 16 }}>
         <IconArrowLeft />
       </button>
-      <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Notifications</div>
+      <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Notifications</div>
 
       {notifs.length === 0 ? (
         <div className="nm-card nm-card-lg" style={{ marginTop: 22, padding: 30, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 12 }}>

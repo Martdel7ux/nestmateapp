@@ -64,14 +64,14 @@ export function RoommateDetail({
             ))}
           </div>
         ) : (
-          <div style={{ height: 300, background: "var(--nm-surface2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-muted)", font: "600 48px Inter, sans-serif" }}>{initialsOf(name)}</div>
+          <div style={{ height: 300, background: "var(--nm-surface2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-muted)", font: "600 48px var(--nm-font-text)" }}>{initialsOf(name)}</div>
         )}
       </div>
 
       {/* Header */}
       <div style={{ marginTop: 16, display: "flex", alignItems: "flex-start", gap: 10 }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-.02em" }}>{name}</div>
+          <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 24, fontWeight: 700, letterSpacing: "-.02em" }}>{name}</div>
           <div style={{ fontSize: 13, color: "var(--nm-muted)", marginTop: 3 }}>{[flatmate.preferred_city, budget].filter(Boolean).join(" · ")}</div>
         </div>
         {match && match.dimensions.length > 0 && (
@@ -106,7 +106,7 @@ export function RoommateDetail({
           <div className="nm-section-label" style={{ marginBottom: 8 }}>Lifestyle</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {chips.map(({ value, label, icon: Icon }) => (
-              <span key={value} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 99, background: "var(--nm-soft)", color: "var(--nm-accent)", font: "600 12px Inter, sans-serif" }}>
+              <span key={value} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 99, background: "var(--nm-soft)", color: "var(--nm-accent)", font: "600 12px var(--nm-font-text)" }}>
                 <Icon size={13} />{label}
               </span>
             ))}
@@ -122,7 +122,7 @@ export function RoommateDetail({
       {/* Tags */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
         {tags.map((t) => (
-          <span key={t} style={{ padding: "6px 12px", borderRadius: 99, background: "var(--nm-surface2)", color: "var(--nm-muted)", font: "500 12px Inter, sans-serif" }}>{t}</span>
+          <span key={t} style={{ padding: "6px 12px", borderRadius: 99, background: "var(--nm-surface2)", color: "var(--nm-muted)", font: "500 12px var(--nm-font-text)" }}>{t}</span>
         ))}
       </div>
 

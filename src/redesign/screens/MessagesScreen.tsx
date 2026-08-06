@@ -54,7 +54,7 @@ function ChatView({ matchId, thread, onBack }: { matchId: string; thread: Thread
         <button type="button" onClick={onBack} aria-label="Back to messages" className="nm-icon-btn nm-press" style={{ width: 36, height: 36, flex: "none" }}>
           <IconArrowLeft size={18} />
         </button>
-        <div style={{ width: 38, height: 38, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 13px Inter, sans-serif" }}>
+        <div style={{ width: 38, height: 38, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 13px var(--nm-font-text)" }}>
           {thread.avatar ? <img src={thread.avatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initialsOf(thread.name)}
         </div>
         <div style={{ flex: 1 }}>
@@ -139,7 +139,7 @@ export function MessagesScreen({ onChatOpenChange }: { onChatOpenChange?: (open:
 
   return (
     <div style={{ padding: "calc(20px + env(safe-area-inset-top)) 0 20px", animation: "nmFade .35s ease-out" }}>
-      <div style={{ padding: "0 20px", fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Messages</div>
+      <div style={{ padding: "0 20px", fontFamily: "var(--nm-font-display)", fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Messages</div>
 
       {threads.length === 0 ? (
         <div style={{ padding: "0 20px" }}>
@@ -152,7 +152,7 @@ export function MessagesScreen({ onChatOpenChange }: { onChatOpenChange?: (open:
         <div style={{ marginTop: 16 }}>
           {threads.map((c, i) => (
             <button key={c.matchId} type="button" onClick={() => setOpenMatch(c.matchId)} className="nm-press" style={{ all: "unset", cursor: "pointer", display: "flex", width: "100%", boxSizing: "border-box", gap: 13, alignItems: "center", padding: "14px 20px" }}>
-              <span style={{ width: 46, height: 46, flex: "none", borderRadius: 99, overflow: "hidden", background: AVATAR_COLORS[i % 3], color: AVATAR_FG[i % 3], display: "flex", alignItems: "center", justifyContent: "center", font: "600 15px Inter, sans-serif" }}>
+              <span style={{ width: 46, height: 46, flex: "none", borderRadius: 99, overflow: "hidden", background: AVATAR_COLORS[i % 3], color: AVATAR_FG[i % 3], display: "flex", alignItems: "center", justifyContent: "center", font: "600 15px var(--nm-font-text)" }}>
                 {c.avatar ? <img src={c.avatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initialsOf(c.name)}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>

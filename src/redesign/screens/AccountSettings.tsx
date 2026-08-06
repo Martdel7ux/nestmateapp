@@ -89,7 +89,7 @@ export function AccountSettings({ onBack }: { onBack: () => void }) {
       <button type="button" className="nm-icon-btn nm-press" onClick={onBack} aria-label="Back" style={{ ...stickyControl, marginBottom: 16 }}>
         <IconArrowLeft />
       </button>
-      <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Account</div>
+      <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Account</div>
       <div style={{ fontSize: 13.5, color: "var(--nm-muted)", marginTop: 6 }}>Signed in as {user?.email ?? "—"}</div>
 
       <div style={{ marginTop: 22, display: "flex", flexDirection: "column", gap: 16 }}>
@@ -97,7 +97,7 @@ export function AccountSettings({ onBack }: { onBack: () => void }) {
         <SectionCard title="Change email">
           <input type="email" inputMode="email" autoComplete="email" placeholder="New email address" value={email} onChange={(e) => { setEmail(e.target.value); setEmailStatus({ kind: "idle" }); }} style={inputStyle} />
           <Note status={emailStatus} />
-          <button type="button" onClick={submitEmail} disabled={!emailValid || emailStatus.kind === "saving"} className="nm-press" style={{ all: "unset", cursor: emailValid ? "pointer" : "not-allowed", textAlign: "center", padding: "12px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 14px Inter, sans-serif", opacity: emailValid && emailStatus.kind !== "saving" ? 1 : 0.5 }}>
+          <button type="button" onClick={submitEmail} disabled={!emailValid || emailStatus.kind === "saving"} className="nm-press" style={{ all: "unset", cursor: emailValid ? "pointer" : "not-allowed", textAlign: "center", padding: "12px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 14px var(--nm-font-text)", opacity: emailValid && emailStatus.kind !== "saving" ? 1 : 0.5 }}>
             {emailStatus.kind === "saving" ? "Sending…" : "Update email"}
           </button>
         </SectionCard>
@@ -107,7 +107,7 @@ export function AccountSettings({ onBack }: { onBack: () => void }) {
           <input type="password" autoComplete="new-password" placeholder="New password (min 8 characters)" value={pw} onChange={(e) => { setPw(e.target.value); setPwStatus({ kind: "idle" }); }} style={inputStyle} />
           <input type="password" autoComplete="new-password" placeholder="Confirm new password" value={pw2} onChange={(e) => { setPw2(e.target.value); setPwStatus({ kind: "idle" }); }} style={inputStyle} />
           <Note status={pwStatus} />
-          <button type="button" onClick={submitPassword} disabled={!pwValid || pwStatus.kind === "saving"} className="nm-press" style={{ all: "unset", cursor: pwValid ? "pointer" : "not-allowed", textAlign: "center", padding: "12px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 14px Inter, sans-serif", opacity: pwValid && pwStatus.kind !== "saving" ? 1 : 0.5 }}>
+          <button type="button" onClick={submitPassword} disabled={!pwValid || pwStatus.kind === "saving"} className="nm-press" style={{ all: "unset", cursor: pwValid ? "pointer" : "not-allowed", textAlign: "center", padding: "12px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 14px var(--nm-font-text)", opacity: pwValid && pwStatus.kind !== "saving" ? 1 : 0.5 }}>
             {pwStatus.kind === "saving" ? "Saving…" : "Update password"}
           </button>
         </SectionCard>
@@ -120,7 +120,7 @@ export function AccountSettings({ onBack }: { onBack: () => void }) {
           </p>
 
           {!confirming ? (
-            <button type="button" onClick={() => setConfirming(true)} className="nm-press" style={{ all: "unset", cursor: "pointer", textAlign: "center", padding: "12px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-coral-soft)", color: "var(--nm-coral)", font: "600 14px Inter, sans-serif" }}>
+            <button type="button" onClick={() => setConfirming(true)} className="nm-press" style={{ all: "unset", cursor: "pointer", textAlign: "center", padding: "12px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-coral-soft)", color: "var(--nm-coral)", font: "600 14px var(--nm-font-text)" }}>
               Delete my account
             </button>
           ) : (
@@ -129,8 +129,8 @@ export function AccountSettings({ onBack }: { onBack: () => void }) {
               <input type="text" placeholder="DELETE" value={confirmText} onChange={(e) => { setConfirmText(e.target.value); setDelStatus({ kind: "idle" }); }} style={inputStyle} />
               <Note status={delStatus} />
               <div style={{ display: "flex", gap: 10 }}>
-                <button type="button" onClick={() => { setConfirming(false); setConfirmText(""); setDelStatus({ kind: "idle" }); }} style={{ all: "unset", cursor: "pointer", padding: "12px 18px", borderRadius: "var(--nm-r-md)", color: "var(--nm-muted)", font: "600 14px Inter, sans-serif" }}>Cancel</button>
-                <button type="button" onClick={submitDelete} disabled={!canDelete || delStatus.kind === "saving"} className="nm-press" style={{ all: "unset", cursor: canDelete ? "pointer" : "not-allowed", flex: 1, textAlign: "center", padding: "12px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-coral)", color: "#fff", font: "600 14px Inter, sans-serif", opacity: canDelete && delStatus.kind !== "saving" ? 1 : 0.5 }}>
+                <button type="button" onClick={() => { setConfirming(false); setConfirmText(""); setDelStatus({ kind: "idle" }); }} style={{ all: "unset", cursor: "pointer", padding: "12px 18px", borderRadius: "var(--nm-r-md)", color: "var(--nm-muted)", font: "600 14px var(--nm-font-text)" }}>Cancel</button>
+                <button type="button" onClick={submitDelete} disabled={!canDelete || delStatus.kind === "saving"} className="nm-press" style={{ all: "unset", cursor: canDelete ? "pointer" : "not-allowed", flex: 1, textAlign: "center", padding: "12px 0", borderRadius: "var(--nm-r-md)", background: "var(--nm-coral)", color: "#fff", font: "600 14px var(--nm-font-text)", opacity: canDelete && delStatus.kind !== "saving" ? 1 : 0.5 }}>
                   {delStatus.kind === "saving" ? "Deleting…" : "Permanently delete"}
                 </button>
               </div>

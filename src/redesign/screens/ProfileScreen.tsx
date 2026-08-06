@@ -35,7 +35,7 @@ function SettingsView({ onBack }: { onBack: () => void }) {
       <button type="button" className="nm-icon-btn nm-press" onClick={onBack} aria-label="Back" style={{ ...stickyControl, marginBottom: 16 }}>
         <IconArrowLeft />
       </button>
-      <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Settings</div>
+      <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Settings</div>
 
       <div className="nm-card" style={{ marginTop: 20, overflow: "hidden" }}>
         <button type="button" onClick={() => setTheme(dark ? "light" : "dark")} style={{ all: "unset", cursor: "pointer", display: "flex", boxSizing: "border-box", width: "100%", alignItems: "center", gap: 12, padding: 16 }}>
@@ -63,7 +63,7 @@ function SettingsView({ onBack }: { onBack: () => void }) {
         type="button"
         className="nm-card nm-press"
         onClick={async () => { await signOut(); navigate("/welcome"); }}
-        style={{ all: "unset", cursor: "pointer", display: "block", boxSizing: "border-box", textAlign: "center", width: "100%", marginTop: 16, padding: 16, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", boxShadow: "var(--nm-elev)", color: "var(--nm-coral)", font: "600 14.5px Inter, sans-serif" }}
+        style={{ all: "unset", cursor: "pointer", display: "block", boxSizing: "border-box", textAlign: "center", width: "100%", marginTop: 16, padding: 16, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", boxShadow: "var(--nm-elev)", color: "var(--nm-coral)", font: "600 14.5px var(--nm-font-text)" }}
       >
         Sign out
       </button>
@@ -118,7 +118,7 @@ export function ProfileScreen() {
         </button>
       </StickyBar>
       <div style={{ display: "flex", alignItems: "center", gap: 15, paddingRight: 46 }}>
-        <div style={{ width: 66, height: 66, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 22px Inter, sans-serif" }}>
+        <div style={{ width: 66, height: 66, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 22px var(--nm-font-text)" }}>
           {profile?.avatar_url ? <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initialsOf(name)}
         </div>
         <div style={{ flex: 1 }}>
@@ -135,11 +135,11 @@ export function ProfileScreen() {
           <span style={{ color: verified ? "var(--nm-mint)" : "var(--nm-muted)" }}><IconShield size={19} /></span>
           <div style={{ fontSize: 14.5, fontWeight: 600 }}>{verified ? "Verified profile" : "Getting verified"}</div>
           <div style={{ flex: 1 }} />
-          <div style={{ font: "600 14px Inter, sans-serif", color: verified ? "var(--nm-mint)" : "var(--nm-accent)" }}>{score}</div>
+          <div style={{ font: "600 14px var(--nm-font-text)", color: verified ? "var(--nm-mint)" : "var(--nm-accent)" }}>{score}</div>
         </div>
         <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 13 }}>
           {badges.length > 0 ? badges.map((b) => (
-            <span key={b} style={{ padding: "6px 11px", borderRadius: 99, background: "var(--nm-mint-soft)", font: "500 11.5px Inter, sans-serif" }}>{b}</span>
+            <span key={b} style={{ padding: "6px 11px", borderRadius: 99, background: "var(--nm-mint-soft)", font: "500 11.5px var(--nm-font-text)" }}>{b}</span>
           )) : (
             <span style={{ fontSize: 12.5, color: "var(--nm-muted)" }}>Add a photo, bio and university to build trust.</span>
           )}

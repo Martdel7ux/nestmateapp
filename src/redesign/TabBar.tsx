@@ -58,7 +58,7 @@ export function TabBar({ active, onChange }: { active: NmTab; onChange: (t: NmTa
               }}
             >
               <Icon size={23} />
-              <span style={{ font: "500 10px Inter, sans-serif" }}>{label}</span>
+              <span style={{ font: "500 10px var(--nm-font-text)" }}>{label}</span>
             </button>
           );
         })}

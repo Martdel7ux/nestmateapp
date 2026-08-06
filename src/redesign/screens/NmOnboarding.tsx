@@ -26,7 +26,7 @@ const INTERESTS: { id: string; icon: ModuleIconName; label: string }[] = [
 
 const btn: React.CSSProperties = {
   all: "unset", cursor: "pointer", textAlign: "center", padding: 17, borderRadius: "var(--nm-r-md)",
-  background: "var(--nm-accent)", color: "#fff", font: "600 16px Inter, sans-serif",
+  background: "var(--nm-accent)", color: "#fff", font: "600 16px var(--nm-font-text)",
 };
 const input: React.CSSProperties = {
   width: "100%", boxSizing: "border-box", padding: "14px 16px", borderRadius: "var(--nm-r-md)",
@@ -106,7 +106,7 @@ export function NmOnboarding() {
       {/* Step 1 — goal */}
       {step === 1 && (
         <div style={{ flex: 1, animation: "nmFade .3s ease-out" }}>
-          <div style={{ fontSize: 27, fontWeight: 600, letterSpacing: "-.03em", lineHeight: 1.18 }}>What brings you to NestMate?</div>
+          <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 27, fontWeight: 600, letterSpacing: "-.03em", lineHeight: 1.18 }}>What brings you to NestMate?</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 24 }}>
             {GOALS.map((g) => {
               const on = goal === g.id;
@@ -129,7 +129,7 @@ export function NmOnboarding() {
       {/* Step 2 — details */}
       {step === 2 && (
         <div style={{ flex: 1, animation: "nmFade .3s ease-out" }}>
-          <div style={{ fontSize: 27, fontWeight: 600, letterSpacing: "-.03em" }}>{isLandlord ? "Your properties" : "A few details"}</div>
+          <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 27, fontWeight: 600, letterSpacing: "-.03em" }}>{isLandlord ? "Your properties" : "A few details"}</div>
           <div style={{ fontSize: 14.5, color: "var(--nm-muted)", marginTop: 10 }}>You can change these any time.</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 24 }}>
             {!isLandlord && (
@@ -150,7 +150,7 @@ export function NmOnboarding() {
       {/* Step 3 — interests */}
       {step === 3 && (
         <div style={{ flex: 1, animation: "nmFade .3s ease-out" }}>
-          <div style={{ fontSize: 27, fontWeight: 600, letterSpacing: "-.03em" }}>What matters most?</div>
+          <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 27, fontWeight: 600, letterSpacing: "-.03em" }}>What matters most?</div>
           <div style={{ fontSize: 14.5, color: "var(--nm-muted)", marginTop: 10 }}>Pick a few. We'll tailor your home screen.</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 24 }}>
             {INTERESTS.map((p) => {

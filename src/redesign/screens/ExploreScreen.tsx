@@ -36,6 +36,21 @@ const MODULES: { id: ModuleId; label: string; note: string }[] = [
   { id: "ai", label: "AI assistant", note: "Ask anything" },
 ];
 
+// Cohesive jewel-tone gradient per module, tuned so white text stays legible.
+const MODULE_THEME: Record<ModuleId, { gradient: string; shadow: string }> = {
+  discover:  { gradient: "linear-gradient(145deg,#5B54E6,#7B6FF0)", shadow: "0 12px 26px -10px rgba(79,70,229,.5)" },
+  matches:   { gradient: "linear-gradient(145deg,#FB6F63,#FF8A6B)", shadow: "0 12px 26px -10px rgba(251,111,99,.5)" },
+  bills:     { gradient: "linear-gradient(145deg,#059669,#10B981)", shadow: "0 12px 26px -10px rgba(5,150,105,.5)" },
+  jobs:      { gradient: "linear-gradient(145deg,#2563EB,#3B82F6)", shadow: "0 12px 26px -10px rgba(37,99,235,.5)" },
+  events:    { gradient: "linear-gradient(145deg,#9333EA,#B15CF7)", shadow: "0 12px 26px -10px rgba(147,51,234,.5)" },
+  community: { gradient: "linear-gradient(145deg,#4F46E5,#6D63F0)", shadow: "0 12px 26px -10px rgba(79,70,229,.5)" },
+  campus:    { gradient: "linear-gradient(145deg,#0E7490,#0EA5C4)", shadow: "0 12px 26px -10px rgba(14,116,144,.5)" },
+  market:    { gradient: "linear-gradient(145deg,#EA8C0A,#F97316)", shadow: "0 12px 26px -10px rgba(234,140,10,.5)" },
+  deals:     { gradient: "linear-gradient(145deg,#DB2777,#EC4899)", shadow: "0 12px 26px -10px rgba(219,39,119,.5)" },
+  move:      { gradient: "linear-gradient(145deg,#0D9488,#16B8A6)", shadow: "0 12px 26px -10px rgba(13,148,136,.5)" },
+  ai:        { gradient: "linear-gradient(145deg,#4F46E5,#7C3AED)", shadow: "0 12px 26px -10px rgba(124,58,237,.5)" },
+};
+
 const FOR_YOU = [
   { label: "Airport pickup, 9 Oct", note: "Shared ride from Larnaca · €12", go: "move" as ModuleId },
   { label: "Ghanaian Students Nicosia", note: "412 members · 6 arriving with you", go: "community" as ModuleId },
@@ -47,7 +62,7 @@ function SubHeader({ title, subtitle, onBack }: { title: string; subtitle?: stri
       <button type="button" className="nm-icon-btn nm-press" onClick={onBack} aria-label="Back" style={{ ...stickyControl, marginBottom: 16 }}>
         <IconArrowLeft />
       </button>
-      <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>{title}</div>
+      <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>{title}</div>
       {subtitle && <div style={{ fontSize: 13.5, color: "var(--nm-muted)", marginTop: 8 }}>{subtitle}</div>}
     </>
   );
@@ -88,11 +103,11 @@ function DiscoverBody() {
 
       {/* Filter bar */}
       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <button type="button" onClick={() => setShowFilters((v) => !v)} style={{ all: "unset", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 99, background: activeCount > 0 || showFilters ? "var(--nm-soft)" : "var(--nm-surface)", boxShadow: "var(--nm-elev)", color: activeCount > 0 || showFilters ? "var(--nm-accent)" : "var(--nm-text)", font: "600 12.5px Inter, sans-serif" }}>
+        <button type="button" onClick={() => setShowFilters((v) => !v)} style={{ all: "unset", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 99, background: activeCount > 0 || showFilters ? "var(--nm-soft)" : "var(--nm-surface)", boxShadow: "var(--nm-elev)", color: activeCount > 0 || showFilters ? "var(--nm-accent)" : "var(--nm-text)", font: "600 12.5px var(--nm-font-text)" }}>
           Filters{activeCount > 0 ? ` · ${activeCount}` : ""}
         </button>
         {activeCount > 0 && (
-          <button type="button" onClick={() => { setPropertyFilters({}); setAreas([]); }} style={{ all: "unset", cursor: "pointer", padding: "8px 14px", borderRadius: 99, color: "var(--nm-muted)", font: "600 12.5px Inter, sans-serif" }}>Clear</button>
+          <button type="button" onClick={() => { setPropertyFilters({}); setAreas([]); }} style={{ all: "unset", cursor: "pointer", padding: "8px 14px", borderRadius: 99, color: "var(--nm-muted)", font: "600 12.5px var(--nm-font-text)" }}>Clear</button>
         )}
       </div>
 
@@ -116,7 +131,7 @@ function DiscoverBody() {
                 {CITY_AREAS[propertyFilters.city].map((a) => {
                   const on = areas.includes(a);
                   return (
-                    <button key={a} type="button" onClick={() => setAreas((cur) => on ? cur.filter((x) => x !== a) : [...cur, a])} style={{ all: "unset", cursor: "pointer", padding: "6px 12px", borderRadius: 99, font: "500 12px Inter, sans-serif", background: on ? "var(--nm-accent)" : "var(--nm-surface2)", color: on ? "#fff" : "var(--nm-muted)" }}>{a}</button>
+                    <button key={a} type="button" onClick={() => setAreas((cur) => on ? cur.filter((x) => x !== a) : [...cur, a])} style={{ all: "unset", cursor: "pointer", padding: "6px 12px", borderRadius: 99, font: "500 12px var(--nm-font-text)", background: on ? "var(--nm-accent)" : "var(--nm-surface2)", color: on ? "#fff" : "var(--nm-muted)" }}>{a}</button>
                   );
                 })}
               </div>
@@ -147,8 +162,8 @@ function DiscoverBody() {
                 <span style={{ display: "block", height: 186, position: "relative", background: "var(--nm-surface2)" }}>
                   {h.image_urls?.[0] && <img src={h.image_urls[0]} alt="" loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                   <span style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 6 }}>
-                    {h.average_rating != null && <span style={{ padding: "5px 9px", borderRadius: 99, background: "rgba(17,24,39,.62)", color: "#fff", font: "600 10.5px Inter, sans-serif", backdropFilter: "blur(6px)" }}>★ {h.average_rating.toFixed(1)}</span>}
-                    {h.is_approved && <span style={{ padding: "5px 9px", borderRadius: 99, background: "rgba(52,211,153,.92)", color: "#08281f", font: "600 10.5px Inter, sans-serif" }}>Verified</span>}
+                    {h.average_rating != null && <span style={{ padding: "5px 9px", borderRadius: 99, background: "rgba(17,24,39,.62)", color: "#fff", font: "600 10.5px var(--nm-font-text)", backdropFilter: "blur(6px)" }}>★ {h.average_rating.toFixed(1)}</span>}
+                    {h.is_approved && <span style={{ padding: "5px 9px", borderRadius: 99, background: "rgba(52,211,153,.92)", color: "#08281f", font: "600 10.5px var(--nm-font-text)" }}>Verified</span>}
                   </span>
                   <span
                     role="button"
@@ -166,7 +181,7 @@ function DiscoverBody() {
                   </span>
                   <span style={{ display: "block", fontSize: 13.5, color: "var(--nm-muted)", marginTop: 4 }}>{h.city} · {h.title}</span>
                   <span style={{ display: "flex", gap: 7, marginTop: 13, flexWrap: "wrap" }}>
-                    {[`${h.bedrooms} bed`, `${h.bathrooms} bath`].map((s) => <span key={s} style={{ padding: "6px 10px", borderRadius: 10, background: "var(--nm-surface2)", font: "500 11.5px Inter, sans-serif", color: "var(--nm-muted)" }}>{s}</span>)}
+                    {[`${h.bedrooms} bed`, `${h.bathrooms} bath`].map((s) => <span key={s} style={{ padding: "6px 10px", borderRadius: 10, background: "var(--nm-surface2)", font: "500 11.5px var(--nm-font-text)", color: "var(--nm-muted)" }}>{s}</span>)}
                   </span>
                 </span>
               </button>
@@ -202,17 +217,17 @@ function JobsBody() {
       {/* Kind toggle */}
       <div style={{ display: "flex", gap: 8, padding: 4, borderRadius: 99, background: "var(--nm-surface2)" }}>
         {([["job", "Jobs"], ["internship", "Internships"]] as const).map(([k, label]) => (
-          <button key={k} type="button" onClick={() => setKind(k)} className="nm-press" style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: "9px 0", borderRadius: 99, font: "600 13px Inter, sans-serif", background: kind === k ? "var(--nm-surface)" : "transparent", color: kind === k ? "var(--nm-text)" : "var(--nm-muted)", boxShadow: kind === k ? "var(--nm-elev)" : "none" }}>{label}</button>
+          <button key={k} type="button" onClick={() => setKind(k)} className="nm-press" style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: "9px 0", borderRadius: 99, font: "600 13px var(--nm-font-text)", background: kind === k ? "var(--nm-surface)" : "transparent", color: kind === k ? "var(--nm-text)" : "var(--nm-muted)", boxShadow: kind === k ? "var(--nm-elev)" : "none" }}>{label}</button>
         ))}
       </div>
 
       {/* Filter bar */}
       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <button type="button" onClick={() => setShowFilters((v) => !v)} style={{ all: "unset", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 99, background: activeCount > 0 || showFilters ? "var(--nm-soft)" : "var(--nm-surface)", boxShadow: "var(--nm-elev)", color: activeCount > 0 || showFilters ? "var(--nm-accent)" : "var(--nm-text)", font: "600 12.5px Inter, sans-serif" }}>
+        <button type="button" onClick={() => setShowFilters((v) => !v)} style={{ all: "unset", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 99, background: activeCount > 0 || showFilters ? "var(--nm-soft)" : "var(--nm-surface)", boxShadow: "var(--nm-elev)", color: activeCount > 0 || showFilters ? "var(--nm-accent)" : "var(--nm-text)", font: "600 12.5px var(--nm-font-text)" }}>
           Filters{activeCount > 0 ? ` · ${activeCount}` : ""}
         </button>
         {activeCount > 0 && (
-          <button type="button" onClick={() => { setLocType(""); setQuery(""); }} style={{ all: "unset", cursor: "pointer", padding: "8px 14px", borderRadius: 99, color: "var(--nm-muted)", font: "600 12.5px Inter, sans-serif" }}>Clear</button>
+          <button type="button" onClick={() => { setLocType(""); setQuery(""); }} style={{ all: "unset", cursor: "pointer", padding: "8px 14px", borderRadius: 99, color: "var(--nm-muted)", font: "600 12.5px var(--nm-font-text)" }}>Clear</button>
         )}
       </div>
 
@@ -225,7 +240,7 @@ function JobsBody() {
               {([["", "Any"], ["in_person", "On-site"], ["remote", "Remote"], ["hybrid", "Hybrid"]] as const).map(([v, label]) => {
                 const on = locType === v;
                 return (
-                  <button key={v || "any"} type="button" onClick={() => setLocType(v)} style={{ all: "unset", cursor: "pointer", padding: "6px 12px", borderRadius: 99, font: "500 12px Inter, sans-serif", background: on ? "var(--nm-accent)" : "var(--nm-surface2)", color: on ? "#fff" : "var(--nm-muted)" }}>{label}</button>
+                  <button key={v || "any"} type="button" onClick={() => setLocType(v)} style={{ all: "unset", cursor: "pointer", padding: "6px 12px", borderRadius: 99, font: "500 12px var(--nm-font-text)", background: on ? "var(--nm-accent)" : "var(--nm-surface2)", color: on ? "#fff" : "var(--nm-muted)" }}>{label}</button>
                 );
               })}
             </div>
@@ -241,7 +256,7 @@ function JobsBody() {
             const salary = salaryLabel(j);
             return (
               <button key={j.id} type="button" onClick={() => setDetail(j)} className="nm-card nm-press" style={{ all: "unset", cursor: "pointer", display: "flex", boxSizing: "border-box", width: "100%", gap: 13, alignItems: "center", padding: "15px 16px", background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", boxShadow: "var(--nm-elev)" }}>
-                <span style={{ width: 44, height: 44, flex: "none", borderRadius: 12, overflow: "hidden", background: "var(--nm-surface2)", display: "flex", alignItems: "center", justifyContent: "center", font: "600 13px Inter, sans-serif", color: "var(--nm-muted)" }}>
+                <span style={{ width: 44, height: 44, flex: "none", borderRadius: 12, overflow: "hidden", background: "var(--nm-surface2)", display: "flex", alignItems: "center", justifyContent: "center", font: "600 13px var(--nm-font-text)", color: "var(--nm-muted)" }}>
                   {j.image_url ? <img src={j.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (j.organization ?? "?").slice(0, 2).toUpperCase()}
                 </span>
                 <span style={{ flex: 1, minWidth: 0 }}>
@@ -309,11 +324,11 @@ function RoommatesBody() {
     <div style={{ marginTop: 16 }}>
       {/* Filter bar */}
       <div style={{ display: "flex", gap: 8 }}>
-        <button type="button" onClick={() => setShowFilters((v) => !v)} style={{ all: "unset", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 99, background: activeCount > 0 || showFilters ? "var(--nm-soft)" : "var(--nm-surface)", boxShadow: "var(--nm-elev)", color: activeCount > 0 || showFilters ? "var(--nm-accent)" : "var(--nm-text)", font: "600 12.5px Inter, sans-serif" }}>
+        <button type="button" onClick={() => setShowFilters((v) => !v)} style={{ all: "unset", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 99, background: activeCount > 0 || showFilters ? "var(--nm-soft)" : "var(--nm-surface)", boxShadow: "var(--nm-elev)", color: activeCount > 0 || showFilters ? "var(--nm-accent)" : "var(--nm-text)", font: "600 12.5px var(--nm-font-text)" }}>
           Filters{activeCount > 0 ? ` · ${activeCount}` : ""}
         </button>
         {activeCount > 0 && (
-          <button type="button" onClick={() => { setFlatmateFilters({}); setRmAreas([]); }} style={{ all: "unset", cursor: "pointer", padding: "8px 14px", borderRadius: 99, color: "var(--nm-muted)", font: "600 12.5px Inter, sans-serif" }}>Clear</button>
+          <button type="button" onClick={() => { setFlatmateFilters({}); setRmAreas([]); }} style={{ all: "unset", cursor: "pointer", padding: "8px 14px", borderRadius: 99, color: "var(--nm-muted)", font: "600 12.5px var(--nm-font-text)" }}>Clear</button>
         )}
       </div>
 
@@ -338,7 +353,7 @@ function RoommatesBody() {
                 {CITY_AREAS[flatmateFilters.city].map((a) => {
                   const on = rmAreas.includes(a);
                   return (
-                    <button key={a} type="button" onClick={() => setRmAreas((cur) => on ? cur.filter((x) => x !== a) : [...cur, a])} style={{ all: "unset", cursor: "pointer", padding: "6px 12px", borderRadius: 99, font: "500 12px Inter, sans-serif", background: on ? "var(--nm-accent)" : "var(--nm-surface2)", color: on ? "#fff" : "var(--nm-muted)" }}>{a}</button>
+                    <button key={a} type="button" onClick={() => setRmAreas((cur) => on ? cur.filter((x) => x !== a) : [...cur, a])} style={{ all: "unset", cursor: "pointer", padding: "6px 12px", borderRadius: 99, font: "500 12px var(--nm-font-text)", background: on ? "var(--nm-accent)" : "var(--nm-surface2)", color: on ? "#fff" : "var(--nm-muted)" }}>{a}</button>
                   );
                 })}
               </div>
@@ -364,17 +379,17 @@ function RoommatesBody() {
             <span style={{ display: "block", height: 380, position: "relative", background: "var(--nm-surface2)" }}>
               {photo
                 ? <img src={photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-muted)", font: "600 48px Inter, sans-serif" }}>{initialsOf(name)}</span>}
+                : <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-muted)", font: "600 48px var(--nm-font-text)" }}>{initialsOf(name)}</span>}
               {match && match.dimensions.length > 0 && (
-                <span style={{ position: "absolute", top: 12, left: 12, padding: "5px 11px", borderRadius: 99, background: "rgba(17,24,39,.62)", color: "#fff", font: "700 12px Inter, sans-serif", backdropFilter: "blur(6px)" }}>{match.overall}% match</span>
+                <span style={{ position: "absolute", top: 12, left: 12, padding: "5px 11px", borderRadius: 99, background: "rgba(17,24,39,.62)", color: "#fff", font: "700 12px var(--nm-font-text)", backdropFilter: "blur(6px)" }}>{match.overall}% match</span>
               )}
-              <span style={{ position: "absolute", top: 12, right: 12, padding: "5px 11px", borderRadius: 99, background: "rgba(17,24,39,.5)", color: "#fff", font: "500 11px Inter, sans-serif", backdropFilter: "blur(6px)" }}>Tap for details</span>
+              <span style={{ position: "absolute", top: 12, right: 12, padding: "5px 11px", borderRadius: 99, background: "rgba(17,24,39,.5)", color: "#fff", font: "500 11px var(--nm-font-text)", backdropFilter: "blur(6px)" }}>Tap for details</span>
               <span style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,.1) 45%, transparent)" }} />
               <span style={{ position: "absolute", left: 16, right: 16, bottom: 16, color: "#fff" }}>
-                <span style={{ display: "block", fontSize: 24, fontWeight: 700, letterSpacing: "-.02em" }}>{name}</span>
+                <span style={{ display: "block", fontFamily: "var(--nm-font-display)", fontSize: 24, fontWeight: 700, letterSpacing: "-.02em" }}>{name}</span>
                 <span style={{ display: "block", fontSize: 13, opacity: 0.85, marginTop: 2 }}>{[current.preferred_city, budget].filter(Boolean).join(" · ")}</span>
                 <span style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-                  {tags.map((t) => <span key={t} style={{ padding: "5px 10px", borderRadius: 99, background: "rgba(255,255,255,.18)", font: "500 11.5px Inter, sans-serif" }}>{t}</span>)}
+                  {tags.map((t) => <span key={t} style={{ padding: "5px 10px", borderRadius: 99, background: "rgba(255,255,255,.18)", font: "500 11.5px var(--nm-font-text)" }}>{t}</span>)}
                 </span>
               </span>
             </span>
@@ -450,25 +465,31 @@ export function ExploreScreen({ target }: { target?: { module: ModuleId; token: 
 
   return (
     <div style={{ padding: "calc(20px + env(safe-area-inset-top)) 20px 20px", animation: "nmFade .35s ease-out" }}>
-      <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Explore</div>
+      <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Explore</div>
       <div style={{ fontSize: 13.5, color: "var(--nm-muted)", marginTop: 8 }}>Everything NestMate does, in one place.</div>
 
       <div style={{ marginTop: 18, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {MODULES.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            className="nm-card nm-press"
-            onClick={() => setView(m.id)}
-            style={{ all: "unset", cursor: "pointer", background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", padding: 16, boxShadow: "var(--nm-elev)" }}
-          >
-            <span style={{ display: "flex", width: 38, height: 38, borderRadius: 13, background: "var(--nm-soft)", alignItems: "center", justifyContent: "center", color: "var(--nm-accent)" }}>
-              <ModuleIcon name={m.id} size={20} />
-            </span>
-            <span style={{ display: "block", fontSize: 14.5, fontWeight: 600, marginTop: 12 }}>{m.label}</span>
-            <span style={{ display: "block", fontSize: 11.5, color: "var(--nm-muted)", marginTop: 3, lineHeight: 1.4 }}>{m.note}</span>
-          </button>
-        ))}
+        {MODULES.map((m) => {
+          const t = MODULE_THEME[m.id];
+          return (
+            <button
+              key={m.id}
+              type="button"
+              className="nm-press"
+              onClick={() => setView(m.id)}
+              style={{ all: "unset", cursor: "pointer", position: "relative", overflow: "hidden", background: t.gradient, borderRadius: 20, padding: 15, minHeight: 128, boxSizing: "border-box", display: "flex", flexDirection: "column", boxShadow: t.shadow }}
+            >
+              <span aria-hidden style={{ position: "absolute", top: -40, right: -30, width: 112, height: 112, borderRadius: 99, background: "radial-gradient(circle, rgba(255,255,255,.32), rgba(255,255,255,0) 70%)" }} />
+              <span aria-hidden style={{ position: "absolute", inset: 0, borderRadius: 20, boxShadow: "inset 0 1px 0 rgba(255,255,255,.28)" }} />
+              <span style={{ position: "relative", width: 40, height: 40, borderRadius: 13, background: "rgba(255,255,255,.22)", border: "1px solid rgba(255,255,255,.28)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                <ModuleIcon name={m.id} size={20} />
+              </span>
+              <span style={{ flex: 1 }} />
+              <span style={{ position: "relative", display: "block", fontSize: 15, fontWeight: 700, letterSpacing: "-.01em", color: "#fff", marginTop: 12, lineHeight: 1.2 }}>{m.label}</span>
+              <span style={{ position: "relative", display: "block", fontSize: 11.5, color: "rgba(255,255,255,.82)", marginTop: 4, lineHeight: 1.35 }}>{m.note}</span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="nm-section-label" style={{ marginTop: 22 }}>Because you're arriving</div>

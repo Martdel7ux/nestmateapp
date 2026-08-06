@@ -50,7 +50,7 @@ export function JobDetail({ job, onBack }: { job: Opportunity; onBack: () => voi
         {job.image_url ? (
           <img src={job.image_url} alt="" style={{ width: "100%", height: 190, objectFit: "cover", display: "block" }} />
         ) : (
-          <div style={{ height: 130, background: "linear-gradient(120deg, var(--nm-soft), var(--nm-surface2))", display: "flex", alignItems: "center", justifyContent: "center", font: "700 40px Inter, sans-serif", color: "var(--nm-accent)" }}>
+          <div style={{ height: 130, background: "linear-gradient(120deg, var(--nm-soft), var(--nm-surface2))", display: "flex", alignItems: "center", justifyContent: "center", font: "700 40px var(--nm-font-text)", color: "var(--nm-accent)" }}>
             {org.slice(0, 2).toUpperCase()}
           </div>
         )}
@@ -58,7 +58,7 @@ export function JobDetail({ job, onBack }: { job: Opportunity; onBack: () => voi
 
       {/* Header */}
       <div style={{ marginTop: 16 }}>
-        <div style={{ fontSize: 23, fontWeight: 700, letterSpacing: "-.02em", lineHeight: 1.2 }}>{job.title}</div>
+        <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 23, fontWeight: 700, letterSpacing: "-.02em", lineHeight: 1.2 }}>{job.title}</div>
         <div style={{ fontSize: 14, color: "var(--nm-muted)", marginTop: 6 }}>{org}</div>
       </div>
 
@@ -66,7 +66,7 @@ export function JobDetail({ job, onBack }: { job: Opportunity; onBack: () => voi
       {facts.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
           {facts.map((f, i) => (
-            <span key={i} style={{ padding: "7px 12px", borderRadius: 99, background: i === facts.length - 1 && salary ? "var(--nm-mint-soft)" : "var(--nm-surface2)", color: i === facts.length - 1 && salary ? "#0b7a5a" : "var(--nm-muted)", font: "600 12px Inter, sans-serif" }}>{f}</span>
+            <span key={i} style={{ padding: "7px 12px", borderRadius: 99, background: i === facts.length - 1 && salary ? "var(--nm-mint-soft)" : "var(--nm-surface2)", color: i === facts.length - 1 && salary ? "#0b7a5a" : "var(--nm-muted)", font: "600 12px var(--nm-font-text)" }}>{f}</span>
           ))}
         </div>
       )}
@@ -106,12 +106,12 @@ export function JobDetail({ job, onBack }: { job: Opportunity; onBack: () => voi
             target="_blank"
             rel="noopener noreferrer"
             className="nm-press"
-            style={{ flex: 1, textDecoration: "none", height: 54, boxSizing: "border-box", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 15px Inter, sans-serif" }}
+            style={{ flex: 1, textDecoration: "none", height: 54, boxSizing: "border-box", borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 15px var(--nm-font-text)" }}
           >
             Apply now
           </a>
         ) : (
-          <div style={{ flex: 1, height: 54, boxSizing: "border-box", borderRadius: "var(--nm-r-md)", background: "var(--nm-surface2)", color: "var(--nm-muted)", display: "flex", alignItems: "center", justifyContent: "center", font: "500 13.5px Inter, sans-serif" }}>
+          <div style={{ flex: 1, height: 54, boxSizing: "border-box", borderRadius: "var(--nm-r-md)", background: "var(--nm-surface2)", color: "var(--nm-muted)", display: "flex", alignItems: "center", justifyContent: "center", font: "500 13.5px var(--nm-font-text)" }}>
             No application link
           </div>
         )}

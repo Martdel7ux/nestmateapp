@@ -59,7 +59,7 @@ export function WelcomeScreen() {
           <IconHome size={44} />
         </div>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 30, fontWeight: 600, letterSpacing: "-.03em" }}>NestMate</div>
+          <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 30, fontWeight: 600, letterSpacing: "-.03em" }}>NestMate</div>
           <div style={{ fontSize: 14.5, color: "var(--nm-muted)", marginTop: 8 }}>Your whole student life, in one place.</div>
         </div>
       </div>
@@ -67,7 +67,7 @@ export function WelcomeScreen() {
       {/* Mode toggle */}
       <div style={{ display: "flex", gap: 6, background: "var(--nm-surface2)", borderRadius: 99, padding: 4, marginTop: 40 }}>
         {(["signin", "signup"] as Mode[]).map((m) => (
-          <button key={m} type="button" onClick={() => setMode(m)} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: "10px 0", borderRadius: 99, font: "600 13.5px Inter, sans-serif", background: mode === m ? "var(--nm-surface)" : "transparent", color: mode === m ? "var(--nm-text)" : "var(--nm-muted)", boxShadow: mode === m ? "var(--nm-elev)" : "none" }}>
+          <button key={m} type="button" onClick={() => setMode(m)} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: "10px 0", borderRadius: 99, font: "600 13.5px var(--nm-font-text)", background: mode === m ? "var(--nm-surface)" : "transparent", color: mode === m ? "var(--nm-text)" : "var(--nm-muted)", boxShadow: mode === m ? "var(--nm-elev)" : "none" }}>
             {m === "signin" ? "Sign in" : "Create account"}
           </button>
         ))}
@@ -82,7 +82,7 @@ export function WelcomeScreen() {
         <input style={inputStyle} type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void submit(); }} autoComplete={mode === "signin" ? "current-password" : "new-password"} />
       </div>
 
-      <button type="button" onClick={() => void submit()} disabled={busy} style={{ all: "unset", cursor: "pointer", textAlign: "center", padding: 16, borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 16px Inter, sans-serif", marginTop: 18, opacity: busy ? 0.7 : 1 }}>
+      <button type="button" onClick={() => void submit()} disabled={busy} style={{ all: "unset", cursor: "pointer", textAlign: "center", padding: 16, borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 16px var(--nm-font-text)", marginTop: 18, opacity: busy ? 0.7 : 1 }}>
         {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
       </button>
 
@@ -92,7 +92,7 @@ export function WelcomeScreen() {
         <span style={{ flex: 1, height: 1, background: "var(--nm-line)" }} />
       </div>
 
-      <button type="button" onClick={() => void signInWithGoogle().catch((e) => toast.error(e instanceof Error ? e.message : "Google sign-in failed"))} style={{ all: "unset", cursor: "pointer", textAlign: "center", padding: 15, borderRadius: "var(--nm-r-md)", background: "var(--nm-surface)", boxShadow: "var(--nm-elev)", font: "600 15px Inter, sans-serif", color: "var(--nm-text)" }}>
+      <button type="button" onClick={() => void signInWithGoogle().catch((e) => toast.error(e instanceof Error ? e.message : "Google sign-in failed"))} style={{ all: "unset", cursor: "pointer", textAlign: "center", padding: 15, borderRadius: "var(--nm-r-md)", background: "var(--nm-surface)", boxShadow: "var(--nm-elev)", font: "600 15px var(--nm-font-text)", color: "var(--nm-text)" }}>
         Continue with Google
       </button>
 

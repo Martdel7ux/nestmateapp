@@ -3,7 +3,7 @@ import { useData } from "@/contexts/data-context";
 import { useUpcomingRentPayment } from "@/hooks/use-rent";
 import { useUpcomingEvents } from "@/hooks/use-upcoming-events";
 import { useState } from "react";
-import { IconBell, IconChevron, IconKey, IconDoc, type ModuleIconName } from "../icons";
+import { IconBell, IconChevron, IconKey, IconDoc, ModuleIcon, type ModuleIconName } from "../icons";
 import { StickyBar } from "../StickyBar";
 import { NotificationsScreen } from "./NotificationsScreen";
 import { initialsOf, whenLabel, rentDueLabel } from "../util";
@@ -27,7 +27,7 @@ function ImageSlot({ h, src, tint = "var(--nm-accent)", badge }: { h: number; sr
         <img src={src} alt="" loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
       )}
       {badge && (
-        <span style={{ position: "absolute", top: 9, left: 9, padding: "4px 8px", borderRadius: 99, background: "rgba(17,24,39,.62)", color: "#fff", font: "600 10px Inter, sans-serif", backdropFilter: "blur(6px)" }}>{badge}</span>
+        <span style={{ position: "absolute", top: 9, left: 9, padding: "4px 8px", borderRadius: 99, background: "rgba(17,24,39,.62)", color: "#fff", font: "600 10px var(--nm-font-text)", backdropFilter: "blur(6px)" }}>{badge}</span>
       )}
     </span>
   );
@@ -38,6 +38,46 @@ const AVATAR_COLORS: [string, string][] = [
   ["var(--nm-mint)", "#08281f"],
   ["var(--nm-coral)", "#41120e"],
 ];
+
+/** Premium gradient feature tile used for the Community / Perks shortcuts. */
+function FeatureCard({
+  icon, kicker, title, sub, gradient, glow, shadow, onClick,
+}: {
+  icon: ModuleIconName;
+  kicker: string;
+  title: string;
+  sub: string;
+  gradient: string;
+  glow: string;
+  shadow: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="nm-press"
+      style={{ all: "unset", cursor: "pointer", flex: 1, position: "relative", overflow: "hidden", background: gradient, borderRadius: 22, padding: "16px 16px 17px", minHeight: 150, boxSizing: "border-box", display: "flex", flexDirection: "column", boxShadow: shadow }}
+    >
+      {/* soft corner highlight for depth */}
+      <span aria-hidden style={{ position: "absolute", top: -44, right: -34, width: 128, height: 128, borderRadius: 99, background: glow, filter: "blur(2px)" }} />
+      <span aria-hidden style={{ position: "absolute", inset: 0, borderRadius: 22, boxShadow: "inset 0 1px 0 rgba(255,255,255,.28)" }} />
+
+      {/* frosted icon chip */}
+      <span style={{ position: "relative", width: 40, height: 40, borderRadius: 13, background: "rgba(255,255,255,.22)", border: "1px solid rgba(255,255,255,.28)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+        <ModuleIcon name={icon} size={21} />
+      </span>
+
+      <span style={{ flex: 1 }} />
+
+      <span style={{ position: "relative", display: "block", fontSize: 10, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.72)" }}>{kicker}</span>
+      <span style={{ position: "relative", display: "block", fontSize: 16.5, fontWeight: 700, letterSpacing: "-.015em", color: "#fff", marginTop: 5, lineHeight: 1.2 }}>{title}</span>
+      <span style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,.82)", marginTop: 6 }}>
+        {sub}<IconChevron size={13} />
+      </span>
+    </button>
+  );
+}
 
 export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
   const { profile, user } = useAuth();
@@ -74,7 +114,7 @@ export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
             <span style={{ position: "absolute", top: 9, right: 10, width: 7, height: 7, borderRadius: 99, background: "var(--nm-coral)" }} />
           )}
         </button>
-        <button type="button" onClick={() => onNavigate("profile")} style={{ all: "unset", cursor: "pointer", width: 40, height: 40, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 14px Inter, sans-serif" }}>
+        <button type="button" onClick={() => onNavigate("profile")} style={{ all: "unset", cursor: "pointer", width: 40, height: 40, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 14px var(--nm-font-text)" }}>
           {profile?.avatar_url ? <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
         </button>
       </StickyBar>
@@ -82,7 +122,7 @@ export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
       {/* Greeting — sits beside the pinned icons, then scrolls away normally */}
       <div style={{ paddingRight: 96 }}>
         <div style={{ fontSize: 13.5, color: "var(--nm-muted)" }}>Welcome back</div>
-        <div style={{ fontSize: 27, fontWeight: 600, letterSpacing: "-.03em", marginTop: 2 }}>{firstName}</div>
+        <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 27, fontWeight: 600, letterSpacing: "-.03em", marginTop: 2 }}>{firstName}</div>
         <span className="nm-pill" style={{ marginTop: 9 }}>
           <span style={{ width: 6, height: 6, borderRadius: 99, background: "var(--nm-accent)" }} />
           {profile?.city ? `Student in ${profile.city}` : "Student"}
@@ -109,7 +149,7 @@ export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
       {/* Homes that match you */}
       {homes.length > 0 && (
         <>
-          <SectionHeader label="Homes for you" action="See all" onAction={() => onNavigate("explore", "discover")} />
+          <SectionHeader label="Homes suggested for you" action="See all" onAction={() => onNavigate("explore", "discover")} />
           <div className="nm-hscroll" style={{ marginTop: 11 }}>
             {homes.map((h) => (
               <button key={h.id} type="button" className="nm-press" onClick={() => onNavigate("explore", "discover")} style={{ all: "unset", cursor: "pointer", width: 196, flex: "none", background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", boxShadow: "var(--nm-elev)", overflow: "hidden" }}>
@@ -130,7 +170,7 @@ export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
           <>
             <span style={{ display: "flex" }}>
               {matches.slice(0, 3).map((m, i) => (
-                <span key={m.id} style={{ width: 28, height: 28, borderRadius: 99, background: AVATAR_COLORS[i][0], color: AVATAR_COLORS[i][1], display: "flex", alignItems: "center", justifyContent: "center", font: "600 11px Inter, sans-serif", marginLeft: i ? -8 : 0 }}>
+                <span key={m.id} style={{ width: 28, height: 28, borderRadius: 99, background: AVATAR_COLORS[i][0], color: AVATAR_COLORS[i][1], display: "flex", alignItems: "center", justifyContent: "center", font: "600 11px var(--nm-font-text)", marginLeft: i ? -8 : 0 }}>
                   {initialsOf(m.other_profile?.profile?.full_name)}
                 </span>
               ))}
@@ -154,7 +194,7 @@ export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
             <button type="button" className="nm-link" onClick={() => onNavigate("explore", "bills")}>Details</button>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 9, marginTop: 12 }}>
-            <span style={{ fontSize: 28, fontWeight: 600, letterSpacing: "-.03em" }}>€{Math.round(Number(rent.amount))}</span>
+            <span style={{ fontFamily: "var(--nm-font-display)", fontSize: 28, fontWeight: 600, letterSpacing: "-.03em" }}>€{Math.round(Number(rent.amount))}</span>
             <span style={{ fontSize: 13, color: "var(--nm-muted)" }}>rent {rentDays}</span>
           </div>
         </div>
@@ -178,18 +218,28 @@ export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
         </>
       )}
 
-      {/* Societies + Perks */}
+      {/* Community + Perks feature cards */}
       <div style={{ marginTop: 22, display: "flex", gap: 12 }}>
-        <button type="button" onClick={() => onNavigate("explore", "community")} className="nm-press" style={{ all: "unset", cursor: "pointer", flex: 1, background: "var(--nm-mint-soft)", borderRadius: "var(--nm-r-md)", padding: "15px 16px" }}>
-          <span className="nm-section-label" style={{ fontSize: 11 }}>Community</span>
-          <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, marginTop: 6, lineHeight: 1.35 }}>Societies & events</span>
-          <span style={{ display: "block", fontSize: 11.5, color: "var(--nm-muted)", marginTop: 4 }}>Find your people</span>
-        </button>
-        <button type="button" onClick={() => onNavigate("explore", "deals")} className="nm-press" style={{ all: "unset", cursor: "pointer", width: 118, flex: "none", background: "var(--nm-coral-soft)", borderRadius: "var(--nm-r-md)", padding: "15px 16px" }}>
-          <span className="nm-section-label" style={{ fontSize: 11 }}>Perks</span>
-          <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, marginTop: 6, lineHeight: 1.35 }}>Student discounts</span>
-          <span style={{ display: "block", fontSize: 11.5, color: "var(--nm-muted)", marginTop: 4 }}>Near you</span>
-        </button>
+        <FeatureCard
+          icon="community"
+          kicker="Community"
+          title="Societies & events"
+          sub="Find your people"
+          gradient="linear-gradient(145deg, #5B54E6 0%, #8B7CF3 100%)"
+          glow="radial-gradient(circle, rgba(255,255,255,.34), rgba(255,255,255,0) 70%)"
+          shadow="0 14px 30px -8px rgba(79,70,229,.45)"
+          onClick={() => onNavigate("explore", "community")}
+        />
+        <FeatureCard
+          icon="deals"
+          kicker="Perks"
+          title="Student discounts"
+          sub="Near you"
+          gradient="linear-gradient(145deg, #FF6F63 0%, #FFA271 100%)"
+          glow="radial-gradient(circle, rgba(255,255,255,.38), rgba(255,255,255,0) 70%)"
+          shadow="0 14px 30px -8px rgba(255,111,99,.45)"
+          onClick={() => onNavigate("explore", "deals")}
+        />
       </div>
 
       <div style={{ height: 12 }} />

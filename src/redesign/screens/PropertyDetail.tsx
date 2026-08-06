@@ -57,11 +57,11 @@ export function PropertyDetail({
       <div style={{ marginTop: -26, position: "relative", background: "var(--nm-bg)", borderRadius: "26px 26px 0 0", padding: "24px 20px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 14 }}>
           <div>
-            <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-.03em" }}>€{property.rent_price} <span style={{ fontSize: 14, fontWeight: 500, color: "var(--nm-muted)" }}>/ mo</span></div>
+            <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 22, fontWeight: 600, letterSpacing: "-.03em" }}>€{property.rent_price} <span style={{ fontSize: 14, fontWeight: 500, color: "var(--nm-muted)" }}>/ mo</span></div>
             <div style={{ fontSize: 13.5, color: "var(--nm-muted)", marginTop: 4 }}>{property.title} · {property.address || property.city}</div>
           </div>
           {property.average_rating != null && (
-            <div style={{ padding: "7px 12px", borderRadius: 99, background: "var(--nm-soft)", color: "var(--nm-accent)", font: "600 12px Inter, sans-serif", whiteSpace: "nowrap" }}>★ {property.average_rating.toFixed(1)}</div>
+            <div style={{ padding: "7px 12px", borderRadius: 99, background: "var(--nm-soft)", color: "var(--nm-accent)", font: "600 12px var(--nm-font-text)", whiteSpace: "nowrap" }}>★ {property.average_rating.toFixed(1)}</div>
           )}
         </div>
 
@@ -69,7 +69,7 @@ export function PropertyDetail({
         <div style={{ marginTop: 18, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           {facts.map(([k, v]) => (
             <div key={k} className="nm-card" style={{ borderRadius: "var(--nm-r-sm)", padding: "13px 14px" }}>
-              <div style={{ font: "500 11px Inter, sans-serif", color: "var(--nm-muted)" }}>{k}</div>
+              <div style={{ font: "500 11px var(--nm-font-text)", color: "var(--nm-muted)" }}>{k}</div>
               <div style={{ fontSize: 14.5, fontWeight: 600, marginTop: 4 }}>{v}</div>
             </div>
           ))}
@@ -82,7 +82,7 @@ export function PropertyDetail({
 
         {/* Landlord */}
         <div className="nm-card" style={{ marginTop: 18, padding: 16, display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 15px Inter, sans-serif" }}>
+          <div style={{ width: 44, height: 44, borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 15px var(--nm-font-text)" }}>
             {property.owner?.avatar_url ? <img src={property.owner.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initialsOf(ownerName)}
           </div>
           <div style={{ flex: 1 }}>
@@ -97,7 +97,7 @@ export function PropertyDetail({
           <button type="button" onClick={onToggleSave} aria-label="Save" style={{ all: "unset", cursor: "pointer", flex: "none", width: 56, height: 54, borderRadius: "var(--nm-r-md)", background: "var(--nm-surface)", boxShadow: "var(--nm-elev)", color: saved ? "var(--nm-coral)" : "var(--nm-text)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <IconHeart size={20} />
           </button>
-          <button type="button" onClick={contact} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 17, borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 15.5px Inter, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <button type="button" onClick={contact} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 17, borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 15.5px var(--nm-font-text)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             <IconMessages size={18} /> Contact landlord
           </button>
         </div>

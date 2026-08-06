@@ -125,7 +125,7 @@ export function RoommateProfileForm() {
 
       {/* Profile photo — reused on your roommate card */}
       <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
-        <div style={{ width: 56, height: 56, flex: "none", borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 18px Inter, sans-serif" }}>
+        <div style={{ width: 56, height: 56, flex: "none", borderRadius: 99, overflow: "hidden", background: "var(--nm-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", font: "600 18px var(--nm-font-text)" }}>
           {profile?.avatar_url ? <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initialsOf(profile?.full_name)}
         </div>
         <div style={{ flex: 1 }}>
@@ -157,7 +157,7 @@ export function RoommateProfileForm() {
         {[["Looking for a place", false], ["I have a place", true]].map(([label, val]) => {
           const on = hasFlat === val;
           return (
-            <button key={String(val)} type="button" onClick={() => setHasFlat(val as boolean)} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: "10px 0", borderRadius: 99, font: "600 13px Inter, sans-serif", background: on ? "var(--nm-surface)" : "transparent", color: on ? "var(--nm-text)" : "var(--nm-muted)", boxShadow: on ? "var(--nm-elev)" : "none" }}>
+            <button key={String(val)} type="button" onClick={() => setHasFlat(val as boolean)} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: "10px 0", borderRadius: 99, font: "600 13px var(--nm-font-text)", background: on ? "var(--nm-surface)" : "transparent", color: on ? "var(--nm-text)" : "var(--nm-muted)", boxShadow: on ? "var(--nm-elev)" : "none" }}>
               {label as string}
             </button>
           );
@@ -205,7 +205,7 @@ export function RoommateProfileForm() {
         <Field label="Study"><select style={inputStyle} value={study} onChange={(e) => setStudy(e.target.value as StudyHabits)}>{STUDY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></Field>
       </div>
 
-      <button type="button" disabled={busy} onClick={() => void submit()} style={{ all: "unset", cursor: "pointer", textAlign: "center", padding: 16, borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 16px Inter, sans-serif", opacity: busy ? 0.7 : 1, marginTop: 4 }}>
+      <button type="button" disabled={busy} onClick={() => void submit()} style={{ all: "unset", cursor: "pointer", textAlign: "center", padding: 16, borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", font: "600 16px var(--nm-font-text)", opacity: busy ? 0.7 : 1, marginTop: 4 }}>
         {busy ? "Creating…" : "Create profile & start matching"}
       </button>
     </div>

@@ -47,7 +47,7 @@ export function SocietiesBody() {
               type="button"
               disabled={joined || join.isPending}
               onClick={() => !joined && join.mutate(g.id)}
-              style={{ all: "unset", cursor: joined ? "default" : "pointer", padding: "7px 14px", borderRadius: 99, border: `1px solid ${joined ? "var(--nm-soft)" : "var(--nm-accent)"}`, color: joined ? "var(--nm-muted)" : "var(--nm-accent)", background: joined ? "var(--nm-soft)" : "transparent", font: "600 11.5px Inter, sans-serif" }}
+              style={{ all: "unset", cursor: joined ? "default" : "pointer", padding: "7px 14px", borderRadius: 99, border: `1px solid ${joined ? "var(--nm-soft)" : "var(--nm-accent)"}`, color: joined ? "var(--nm-muted)" : "var(--nm-accent)", background: joined ? "var(--nm-soft)" : "transparent", font: "600 11.5px var(--nm-font-text)" }}
             >
               {joined ? "Joined" : "Join"}
             </button>
@@ -129,8 +129,8 @@ export function MarketBody() {
             </select>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button type="button" onClick={resetForm} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 12, borderRadius: "var(--nm-r-sm)", background: "var(--nm-surface2)", font: "600 14px Inter, sans-serif", color: "var(--nm-muted)" }}>Cancel</button>
-            <button type="button" disabled={create.isPending} onClick={submit} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 12, borderRadius: "var(--nm-r-sm)", background: "var(--nm-accent)", color: "#fff", font: "600 14px Inter, sans-serif", opacity: create.isPending ? 0.7 : 1 }}>{create.isPending ? "Posting…" : "Post"}</button>
+            <button type="button" onClick={resetForm} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 12, borderRadius: "var(--nm-r-sm)", background: "var(--nm-surface2)", font: "600 14px var(--nm-font-text)", color: "var(--nm-muted)" }}>Cancel</button>
+            <button type="button" disabled={create.isPending} onClick={submit} style={{ all: "unset", cursor: "pointer", flex: 1, textAlign: "center", padding: 12, borderRadius: "var(--nm-r-sm)", background: "var(--nm-accent)", color: "#fff", font: "600 14px var(--nm-font-text)", opacity: create.isPending ? 0.7 : 1 }}>{create.isPending ? "Posting…" : "Post"}</button>
           </div>
         </div>
       )}
@@ -159,7 +159,7 @@ export function MarketBody() {
         </div>
       )}
 
-      <button type="button" onClick={() => setOpen((o) => !o)} style={{ all: "unset", cursor: "pointer", display: "block", boxSizing: "border-box", width: "100%", textAlign: "center", marginTop: 18, padding: 16, borderRadius: "var(--nm-r-md)", border: "1px solid var(--nm-accent)", color: "var(--nm-accent)", font: "600 15px Inter, sans-serif" }}>
+      <button type="button" onClick={() => setOpen((o) => !o)} style={{ all: "unset", cursor: "pointer", display: "block", boxSizing: "border-box", width: "100%", textAlign: "center", marginTop: 18, padding: 16, borderRadius: "var(--nm-r-md)", border: "1px solid var(--nm-accent)", color: "var(--nm-accent)", font: "600 15px var(--nm-font-text)" }}>
         {open ? "Close" : "List something"}
       </button>
     </>
@@ -189,7 +189,7 @@ export function PerksBody() {
             <span style={{ display: "block", fontSize: 14.5, fontWeight: 600 }}>{d.name}</span>
             {d.description && <span style={{ display: "block", fontSize: 12, color: "var(--nm-muted)", marginTop: 2 }}>{d.description}</span>}
           </span>
-          <span style={{ font: "600 14px Inter, sans-serif", color: "var(--nm-coral)" }}>{d.discount}</span>
+          <span style={{ font: "600 14px var(--nm-font-text)", color: "var(--nm-coral)" }}>{d.discount}</span>
         </div>
       ))}
     </div>
@@ -201,7 +201,7 @@ export function CommunityScreen() {
 
   return (
     <div style={{ padding: "calc(20px + env(safe-area-inset-top)) 20px 20px", animation: "nmFade .35s ease-out" }}>
-      <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Community</div>
+      <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 26, fontWeight: 600, letterSpacing: "-.03em" }}>Community</div>
       <div style={{ fontSize: 13.5, color: "var(--nm-muted)", marginTop: 8 }}>Societies, marketplace and perks — your people on campus.</div>
 
       {/* Segmented control */}
@@ -213,7 +213,7 @@ export function CommunityScreen() {
               key={s.key}
               type="button"
               onClick={() => setSeg(s.key)}
-              style={{ all: "unset", cursor: "pointer", padding: "8px 14px", borderRadius: 99, font: "600 12.5px Inter, sans-serif", background: on ? "var(--nm-accent)" : "var(--nm-surface2)", color: on ? "#fff" : "var(--nm-muted)" }}
+              style={{ all: "unset", cursor: "pointer", padding: "8px 14px", borderRadius: 99, font: "600 12.5px var(--nm-font-text)", background: on ? "var(--nm-accent)" : "var(--nm-surface2)", color: on ? "#fff" : "var(--nm-muted)" }}
             >
               {s.label}
             </button>

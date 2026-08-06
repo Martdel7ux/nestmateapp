@@ -199,7 +199,7 @@ function CampusServiceDetail({ service, university, onBack }: { service: CampusS
           <ModuleIcon name={service.icon} size={26} />
         </span>
         <div>
-          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.02em" }}>{service.name}</div>
+          <div style={{ fontFamily: "var(--nm-font-display)", fontSize: 22, fontWeight: 700, letterSpacing: "-.02em" }}>{service.name}</div>
           <div style={{ fontSize: 13, color: "var(--nm-muted)", marginTop: 2 }}>{service.tagline}</div>
         </div>
       </div>
@@ -234,7 +234,7 @@ function CampusServiceDetail({ service, university, onBack }: { service: CampusS
       )}
 
       {/* Action */}
-      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="nm-press" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 22, height: 52, borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", textDecoration: "none", font: "600 14.5px Inter, sans-serif" }}>
+      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="nm-press" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 22, height: 52, borderRadius: "var(--nm-r-md)", background: "var(--nm-accent)", color: "#fff", textDecoration: "none", font: "600 14.5px var(--nm-font-text)" }}>
         📍 Find on the map
       </a>
       {!university && (
