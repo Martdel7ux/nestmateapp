@@ -15,16 +15,16 @@ import "./nm-theme.css";
  */
 export function RedesignShell() {
   const [tab, setTab] = useState<NmTab>("home");
-  const [exploreTarget, setExploreTarget] = useState<{ module: ModuleIconName; token: number } | null>(null);
+  const [exploreTarget, setExploreTarget] = useState<{ module: ModuleIconName; token: number; focus?: string } | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
   // Navigate to a tab, optionally deep-linking Explore straight to a module.
   // A plain Explore visit (no module) clears any target so it opens the hub.
-  const navigate = (next: NmTab, exploreModule?: ModuleIconName) => {
+  const navigate = (next: NmTab, exploreModule?: ModuleIconName, focus?: string) => {
     if (next === "explore") {
-      setExploreTarget((prev) => (exploreModule ? { module: exploreModule, token: (prev?.token ?? 0) + 1 } : null));
+      setExploreTarget((prev) => (exploreModule ? { module: exploreModule, token: (prev?.token ?? 0) + 1, focus } : null));
     }
     setTab(next);
   };

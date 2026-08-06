@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useData } from "@/contexts/data-context";
 import { useOpportunities } from "@/hooks/use-opportunities";
 import { useMatchScore } from "@/hooks/use-match-score";
@@ -78,12 +78,21 @@ function EmptyNote({ text }: { text: string }) {
 }
 
 /** Accommodation — real properties with filters, save & detail view. */
-function DiscoverBody() {
+function DiscoverBody({ focusId }: { focusId?: string }) {
   const { filteredProperties, propertyFilters, setPropertyFilters, toggleSavedProperty, snapshot } = useData();
   const [showFilters, setShowFilters] = useState(false);
   const [detail, setDetail] = useState<Property | null>(null);
   const [areas, setAreas] = useState<string[]>([]);
+  const focusedRef = useRef<string | null>(null);
   const savedIds = new Set((snapshot.savedProperties ?? []).map((p) => p.id));
+
+  // Deep-link from Home: open a specific property's detail (once) when it loads.
+  useEffect(() => {
+    if (!focusId || focusedRef.current === focusId) return;
+    const pool = [...(filteredProperties ?? []), ...(snapshot.featuredProperties ?? []), ...(snapshot.savedProperties ?? [])];
+    const found = pool.find((p) => p.id === focusId);
+    if (found) { focusedRef.current = focusId; setDetail(found); }
+  }, [focusId, filteredProperties, snapshot.featuredProperties, snapshot.savedProperties]);
 
   if (detail) {
     return <PropertyDetail property={detail} saved={savedIds.has(detail.id)} onBack={() => setDetail(null)} onToggleSave={() => toggleSavedProperty(detail)} />;
@@ -409,8 +418,8 @@ function RoommatesBody() {
 }
 
 
-function SubBody({ id }: { id: ModuleId }) {
-  if (id === "discover") return <DiscoverBody />;
+function SubBody({ id, focus }: { id: ModuleId; focus?: string }) {
+  if (id === "discover") return <DiscoverBody focusId={focus} />;
   if (id === "matches") return <RoommatesBody />;
   if (id === "jobs") return <JobsBody />;
   if (id === "bills") return <BillsBody />;
@@ -444,20 +453,24 @@ const SUB_META: Record<ModuleId, { title: string; subtitle: string }> = {
   ai: { title: "AI assistant", subtitle: "Knows your timetable, flat and societies." },
 };
 
-export function ExploreScreen({ target }: { target?: { module: ModuleId; token: number } | null }) {
+export function ExploreScreen({ target }: { target?: { module: ModuleId; token: number; focus?: string } | null }) {
   const [view, setView] = useState<"hub" | ModuleId>(target?.module ?? "hub");
+  const [focus, setFocus] = useState<string | undefined>(target?.focus);
 
-  // Deep-link from Home: open the requested module whenever a new target arrives.
+  // Deep-link from Home: open the requested module (and any focused item) on a new target.
   useEffect(() => {
-    if (target?.module) setView(target.module);
+    if (target?.module) { setView(target.module); setFocus(target.focus); }
   }, [target?.token]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Manual navigation within Explore clears any deep-link focus.
+  const openModule = (id: ModuleId) => { setFocus(undefined); setView(id); };
 
   if (view !== "hub") {
     const meta = SUB_META[view];
     return (
       <div style={{ padding: "calc(20px + env(safe-area-inset-top)) 20px 20px", animation: "nmFade .3s ease-out" }}>
-        <SubHeader title={meta.title} subtitle={meta.subtitle} onBack={() => setView("hub")} />
-        <SubBody id={view} />
+        <SubHeader title={meta.title} subtitle={meta.subtitle} onBack={() => { setFocus(undefined); setView("hub"); }} />
+        <SubBody id={view} focus={focus} />
         <div style={{ height: 12 }} />
       </div>
     );
@@ -476,7 +489,7 @@ export function ExploreScreen({ target }: { target?: { module: ModuleId; token: 
               key={m.id}
               type="button"
               className="nm-press"
-              onClick={() => setView(m.id)}
+              onClick={() => openModule(m.id)}
               style={{ all: "unset", cursor: "pointer", position: "relative", overflow: "hidden", background: t.gradient, borderRadius: 20, padding: 15, minHeight: 128, boxSizing: "border-box", display: "flex", flexDirection: "column", boxShadow: t.shadow }}
             >
               <span aria-hidden style={{ position: "absolute", top: -40, right: -30, width: 112, height: 112, borderRadius: 99, background: "radial-gradient(circle, rgba(255,255,255,.32), rgba(255,255,255,0) 70%)" }} />
@@ -499,7 +512,7 @@ export function ExploreScreen({ target }: { target?: { module: ModuleId; token: 
             key={f.label}
             type="button"
             className="nm-card nm-press"
-            onClick={() => setView(f.go)}
+            onClick={() => openModule(f.go)}
             style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", padding: "15px 16px", boxShadow: "var(--nm-elev)" }}
           >
             <span style={{ flex: 1 }}>

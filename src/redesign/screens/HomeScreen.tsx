@@ -9,7 +9,7 @@ import { NotificationsScreen } from "./NotificationsScreen";
 import { initialsOf, whenLabel, rentDueLabel } from "../util";
 import type { NmTab } from "../TabBar";
 
-type NavFn = (tab: NmTab, exploreModule?: ModuleIconName) => void;
+type NavFn = (tab: NmTab, exploreModule?: ModuleIconName, focus?: string) => void;
 
 function SectionHeader({ label, action, onAction }: { label: string; action?: string; onAction?: () => void }) {
   return (
@@ -152,7 +152,7 @@ export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
           <SectionHeader label="Homes suggested for you" action="See all" onAction={() => onNavigate("explore", "discover")} />
           <div className="nm-hscroll" style={{ marginTop: 11 }}>
             {homes.map((h) => (
-              <button key={h.id} type="button" className="nm-press" onClick={() => onNavigate("explore", "discover")} style={{ all: "unset", cursor: "pointer", width: 196, flex: "none", background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", boxShadow: "var(--nm-elev)", overflow: "hidden" }}>
+              <button key={h.id} type="button" className="nm-press" onClick={() => onNavigate("explore", "discover", h.id)} style={{ all: "unset", cursor: "pointer", width: 196, flex: "none", background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", boxShadow: "var(--nm-elev)", overflow: "hidden" }}>
                 <ImageSlot h={112} src={h.image_urls?.[0]} badge={h.average_rating ? `★ ${h.average_rating.toFixed(1)}` : undefined} />
                 <span style={{ display: "block", padding: "12px 13px 14px" }}>
                   <span style={{ display: "block", fontSize: 14, fontWeight: 600 }}>€{h.rent_price} / mo</span>
