@@ -6,6 +6,7 @@ import { useState } from "react";
 import { IconBell, IconChevron, IconKey, IconDoc, ModuleIcon, type ModuleIconName } from "../icons";
 import { StickyBar } from "../StickyBar";
 import { NotificationsScreen } from "./NotificationsScreen";
+import { StudentEmailVerification, loadVerification } from "./StudentEmailVerification";
 import { initialsOf, whenLabel, rentDueLabel } from "../util";
 import type { NmTab } from "../TabBar";
 
@@ -83,11 +84,15 @@ export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
   const { profile, user } = useAuth();
   const { snapshot } = useData();
   const [showNotifs, setShowNotifs] = useState(false);
+  const [showVerify, setShowVerify] = useState(false);
   const { data: rent } = useUpcomingRentPayment(user?.id);
   const { data: events } = useUpcomingEvents();
 
-  // Early return must come after all hooks so hook order stays stable.
+  // Early returns must come after all hooks so hook order stays stable.
   if (showNotifs) return <NotificationsScreen onBack={() => setShowNotifs(false)} onNavigate={onNavigate} />;
+  if (showVerify) return <StudentEmailVerification onBack={() => setShowVerify(false)} />;
+
+  const studentVerified = !!loadVerification(user?.id);
 
   const firstName = profile?.full_name?.split(" ")[0] ?? "there";
   const initials = initialsOf(profile?.full_name ?? "You");
@@ -98,7 +103,9 @@ export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
   const rentDays = rent ? rentDueLabel(rent.due_date) : "";
 
   const tasks = [
-    { label: "Verify your university email", note: "Unlocks student perks & trust", Icon: IconDoc, go: () => onNavigate("profile") },
+    ...(studentVerified
+      ? []
+      : [{ label: "Verify your university email", note: "Unlocks student perks & trust", Icon: IconDoc, go: () => setShowVerify(true) }]),
     ...(rent
       ? [{ label: `Pay rent — €${Math.round(Number(rent.amount))}`, note: `Rent ${rentDays}`, Icon: IconKey, go: () => onNavigate("explore", "bills") }]
       : []),
@@ -130,21 +137,25 @@ export function HomeScreen({ onNavigate }: { onNavigate: NavFn }) {
       </div>
 
       {/* Next for you */}
-      <div className="nm-section-label" style={{ marginTop: 22 }}>Next for you</div>
-      <div style={{ marginTop: 11, display: "flex", flexDirection: "column", gap: 10 }}>
-        {tasks.map((t) => (
-          <button key={t.label} type="button" className="nm-press" onClick={t.go} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", padding: "15px 16px", boxShadow: "var(--nm-elev)" }}>
-            <span style={{ width: 36, height: 36, flex: "none", borderRadius: 12, background: "var(--nm-soft)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-accent)" }}>
-              <t.Icon size={19} />
-            </span>
-            <span style={{ flex: 1 }}>
-              <span style={{ display: "block", fontSize: 14.5, fontWeight: 500 }}>{t.label}</span>
-              <span style={{ display: "block", fontSize: 12, color: "var(--nm-muted)", marginTop: 2 }}>{t.note}</span>
-            </span>
-            <span style={{ color: "var(--nm-muted)" }}><IconChevron /></span>
-          </button>
-        ))}
-      </div>
+      {tasks.length > 0 && (
+        <>
+          <div className="nm-section-label" style={{ marginTop: 22 }}>Next for you</div>
+          <div style={{ marginTop: 11, display: "flex", flexDirection: "column", gap: 10 }}>
+            {tasks.map((t) => (
+              <button key={t.label} type="button" className="nm-press" onClick={t.go} style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, background: "var(--nm-surface)", borderRadius: "var(--nm-r-md)", padding: "15px 16px", boxShadow: "var(--nm-elev)" }}>
+                <span style={{ width: 36, height: 36, flex: "none", borderRadius: 12, background: "var(--nm-soft)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--nm-accent)" }}>
+                  <t.Icon size={19} />
+                </span>
+                <span style={{ flex: 1 }}>
+                  <span style={{ display: "block", fontSize: 14.5, fontWeight: 500 }}>{t.label}</span>
+                  <span style={{ display: "block", fontSize: 12, color: "var(--nm-muted)", marginTop: 2 }}>{t.note}</span>
+                </span>
+                <span style={{ color: "var(--nm-muted)" }}><IconChevron /></span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Homes that match you */}
       {homes.length > 0 && (
