@@ -9,6 +9,7 @@ import { BillsBody } from "./BillsScreen";
 import { CampusBody } from "./CampusScreen";
 import { EventsBody } from "./EventsScreen";
 import { MoveBody } from "./RelocationScreen";
+import { AssistantBody } from "./AssistantScreen";
 import { RoommateProfileForm } from "./RoommateProfileForm";
 import { RoommateDetail } from "./RoommateDetail";
 import { PropertyDetail } from "./PropertyDetail";
@@ -424,6 +425,7 @@ function SubBody({ id, focus }: { id: ModuleId; focus?: string }) {
   if (id === "community") return <SocietiesBody />;
   if (id === "market") return <MarketBody />;
   if (id === "deals") return <PerksBody />;
+  if (id === "ai") return <AssistantBody />;
   return (
     <div className="nm-card nm-card-lg" style={{ marginTop: 20, padding: 26, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 10 }}>
       <span className="nm-pill">Coming soon</span>
@@ -448,7 +450,7 @@ const SUB_META: Record<ModuleId, { title: string; subtitle: string }> = {
   ai: { title: "AI assistant", subtitle: "Knows your timetable, flat and societies." },
 };
 
-export function ExploreScreen({ target }: { target?: { module: ModuleId; token: number; focus?: string } | null }) {
+export function ExploreScreen({ target, onImmersiveChange }: { target?: { module: ModuleId; token: number; focus?: string } | null; onImmersiveChange?: (v: boolean) => void }) {
   const [view, setView] = useState<"hub" | ModuleId>(target?.module ?? "hub");
   const [focus, setFocus] = useState<string | undefined>(target?.focus);
 
@@ -457,11 +459,25 @@ export function ExploreScreen({ target }: { target?: { module: ModuleId; token: 
     if (target?.module) { setView(target.module); setFocus(target.focus); }
   }, [target?.token]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The AI assistant is a focused, full-height chat → hide the bottom nav there.
+  useEffect(() => { onImmersiveChange?.(view === "ai"); }, [view, onImmersiveChange]);
+  useEffect(() => () => onImmersiveChange?.(false), [onImmersiveChange]);
+
   // Manual navigation within Explore clears any deep-link focus.
   const openModule = (id: ModuleId) => { setFocus(undefined); setView(id); };
 
   if (view !== "hub") {
     const meta = SUB_META[view];
+    // The AI assistant is a focused, full-height chat (header fixed, messages
+    // scroll internally, composer pinned) rather than a normal scrolling page.
+    if (view === "ai") {
+      return (
+        <div style={{ height: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column", padding: "calc(20px + env(safe-area-inset-top)) 20px 0", animation: "nmFade .3s ease-out" }}>
+          <SubHeader title={meta.title} subtitle={meta.subtitle} onBack={() => { setFocus(undefined); setView("hub"); }} />
+          <AssistantBody />
+        </div>
+      );
+    }
     return (
       <div style={{ padding: "calc(20px + env(safe-area-inset-top)) 20px 20px", animation: "nmFade .3s ease-out" }}>
         <SubHeader title={meta.title} subtitle={meta.subtitle} onBack={() => { setFocus(undefined); setView("hub"); }} />

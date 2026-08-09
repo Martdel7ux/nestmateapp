@@ -5,6 +5,7 @@ import { HomeScreen } from "./screens/HomeScreen";
 import { ExploreScreen } from "./screens/ExploreScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { MessagesScreen } from "./screens/MessagesScreen";
+import { ErrorBoundary } from "./ErrorBoundary";
 import type { ModuleIconName } from "./icons";
 import "./nm-theme.css";
 
@@ -16,7 +17,7 @@ import "./nm-theme.css";
 export function RedesignShell() {
   const [tab, setTab] = useState<NmTab>("home");
   const [exploreTarget, setExploreTarget] = useState<{ module: ModuleIconName; token: number; focus?: string } | null>(null);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [hideTabBar, setHideTabBar] = useState(false);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
@@ -41,13 +42,16 @@ export function RedesignShell() {
       }}
     >
       <main style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" }} className="nm-hscroll-none">
-        {tab === "home" && <HomeScreen onNavigate={navigate} />}
-        {tab === "explore" && <ExploreScreen target={exploreTarget} />}
-        {tab === "messages" && <MessagesScreen onChatOpenChange={setChatOpen} />}
-        {tab === "profile" && <ProfileScreen />}
+        {/* Keyed by tab so a crash on one screen is isolated and clears on switch. */}
+        <ErrorBoundary key={tab}>
+          {tab === "home" && <HomeScreen onNavigate={navigate} />}
+          {tab === "explore" && <ExploreScreen target={exploreTarget} onImmersiveChange={setHideTabBar} />}
+          {tab === "messages" && <MessagesScreen onChatOpenChange={setHideTabBar} />}
+          {tab === "profile" && <ProfileScreen />}
+        </ErrorBoundary>
       </main>
 
-      {!chatOpen && <TabBar active={tab} onChange={navigate} />}
+      {!hideTabBar && <TabBar active={tab} onChange={navigate} />}
     </div>
   );
 }

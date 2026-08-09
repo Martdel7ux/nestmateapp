@@ -153,3 +153,23 @@
 }
 .nm-range::-webkit-slider-runnable-track { background: transparent; height: 36px; }
 .nm-range::-moz-range-track { background: transparent; }
+
+/* ── Markdown rendering for the AI assistant replies ───────────────────────── */
+.nm-md { font-size: 14.5px; line-height: 1.55; color: var(--nm-text); }
+.nm-md > *:first-child { margin-top: 0; }
+.nm-md > *:last-child { margin-bottom: 0; }
+.nm-md p { margin: 0 0 10px; }
+.nm-md h1, .nm-md h2, .nm-md h3 { font-family: var(--nm-font-display); letter-spacing: -.01em; line-height: 1.25; margin: 14px 0 8px; }
+.nm-md h1 { font-size: 18px; font-weight: 700; }
+.nm-md h2 { font-size: 16px; font-weight: 700; }
+.nm-md h3 { font-size: 14.5px; font-weight: 600; }
+.nm-md strong { font-weight: 700; }
+.nm-md ul, .nm-md ol { margin: 0 0 10px; padding-left: 20px; }
+.nm-md li { margin: 3px 0; }
+.nm-md a { color: var(--nm-accent); text-decoration: underline; }
+.nm-md code { background: var(--nm-surface2); border-radius: 6px; padding: 1px 5px; font-size: 12.5px; }
+.nm-md pre { background: var(--nm-surface2); border-radius: 10px; padding: 12px; overflow-x: auto; margin: 0 0 10px; }
+.nm-md pre code { background: none; padding: 0; }
+.nm-md table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 0 0 10px; }
+.nm-md th, .nm-md td { border: 1px solid var(--nm-line); padding: 5px 8px; text-align: left; }
+.nm-md th { font-weight: 600; background: var(--nm-surface2); }
