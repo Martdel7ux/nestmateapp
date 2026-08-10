@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useTheme } from "@/contexts/theme-context";
-import { TabBar, type NmTab } from "./TabBar";
+import { useAuth } from "@/contexts/auth-context";
+import { TabBar, STUDENT_TABS, type NmTab } from "./TabBar";
 import { HomeScreen } from "./screens/HomeScreen";
 import { ExploreScreen } from "./screens/ExploreScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { MessagesScreen } from "./screens/MessagesScreen";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { LandlordShell } from "./LandlordShell";
 import type { ModuleIconName } from "./icons";
 import "./nm-theme.css";
 
@@ -15,11 +17,15 @@ import "./nm-theme.css";
  * rebuild is in progress. Mounted at /v2 on the redesign branch.
  */
 export function RedesignShell() {
+  const { profile } = useAuth();
   const [tab, setTab] = useState<NmTab>("home");
   const [exploreTarget, setExploreTarget] = useState<{ module: ModuleIconName; token: number; focus?: string } | null>(null);
   const [hideTabBar, setHideTabBar] = useState(false);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
+
+  // Landlord accounts get a dedicated shell (listings management, not browsing).
+  if (profile?.user_type === "landlord") return <LandlordShell />;
 
   // Navigate to a tab, optionally deep-linking Explore straight to a module.
   // A plain Explore visit (no module) clears any target so it opens the hub.
@@ -51,7 +57,7 @@ export function RedesignShell() {
         </ErrorBoundary>
       </main>
 
-      {!hideTabBar && <TabBar active={tab} onChange={navigate} />}
+      {!hideTabBar && <TabBar tabs={STUDENT_TABS} active={tab} onChange={(t) => navigate(t as NmTab)} />}
     </div>
   );
 }

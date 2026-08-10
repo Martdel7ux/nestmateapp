@@ -1,16 +1,26 @@
-import { IconHome, IconExplore, IconMessages, IconProfile } from "./icons";
+import { IconHome, IconExplore, IconMessages, IconProfile, IconKey } from "./icons";
 
 export type NmTab = "home" | "explore" | "messages" | "profile";
+export type LandlordTab = "home" | "listings" | "messages" | "profile";
 
-const TABS: { key: NmTab; label: string; Icon: (p: { size?: number }) => JSX.Element }[] = [
+export interface TabItem { key: string; label: string; Icon: (p: { size?: number }) => JSX.Element }
+
+export const STUDENT_TABS: TabItem[] = [
   { key: "home", label: "Home", Icon: IconHome },
   { key: "explore", label: "Explore", Icon: IconExplore },
   { key: "messages", label: "Messages", Icon: IconMessages },
   { key: "profile", label: "Profile", Icon: IconProfile },
 ];
 
+export const LANDLORD_TABS: TabItem[] = [
+  { key: "home", label: "Home", Icon: IconHome },
+  { key: "listings", label: "Listings", Icon: IconKey },
+  { key: "messages", label: "Messages", Icon: IconMessages },
+  { key: "profile", label: "Profile", Icon: IconProfile },
+];
+
 /** Floating frosted tab bar from the prototype. */
-export function TabBar({ active, onChange }: { active: NmTab; onChange: (t: NmTab) => void }) {
+export function TabBar({ active, onChange, tabs = STUDENT_TABS }: { active: string; onChange: (t: string) => void; tabs?: TabItem[] }) {
   return (
     <div
       style={{
@@ -38,7 +48,7 @@ export function TabBar({ active, onChange }: { active: NmTab; onChange: (t: NmTa
           WebkitBackdropFilter: "blur(20px) saturate(1.4)",
         }}
       >
-        {TABS.map(({ key, label, Icon }) => {
+        {tabs.map(({ key, label, Icon }) => {
           const on = active === key;
           return (
             <button

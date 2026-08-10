@@ -24,6 +24,7 @@ import { AuthPage } from "@/pages/auth-page";
 import { AuthCallbackPage } from "@/pages/auth-callback-page";
 import { ResetPasswordPage } from "@/pages/reset-password-page";
 import { RedesignShell } from "@/redesign/RedesignShell";
+import { LandlordShell } from "@/redesign/LandlordShell";
 import { WelcomeScreen } from "@/redesign/screens/WelcomeScreen";
 import { NmOnboarding } from "@/redesign/screens/NmOnboarding";
 import { NotFoundPage } from "@/pages/not-found-page";
